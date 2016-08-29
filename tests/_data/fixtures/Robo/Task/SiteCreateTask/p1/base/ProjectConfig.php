@@ -1,0 +1,35 @@
+<?php
+
+use Cheppers\Robo\Drupal\Config\DatabaseServerConfig;
+use Cheppers\Robo\Drupal\Config\PhpVariantConfig;
+use Cheppers\Robo\Drupal\Config\ProjectIncubatorConfig;
+use Cheppers\Robo\Drupal\Config\SiteConfig;
+
+if (!isset($GLOBALS['projectConfig'])) {
+  /** @var \Cheppers\Robo\Drupal\Config\ProjectIncubatorConfig $projectConfig */
+  global $projectConfig;
+
+  $projectConfig = new ProjectIncubatorConfig();
+  $projectConfig->name = 'test';
+  $projectConfig->gitExecutable = 'git';
+  $projectConfig->environment = 'dev';
+  $projectConfig->drupalRootDir = 'drupal_root';
+  $projectConfig->publicHtmlDir = 'public_html';
+  $projectConfig->phpVariants = [];
+
+  $projectConfig->phpVariants['709-dev'] = new PhpVariantConfig();
+  $projectConfig->phpVariants['709-dev']->name = '709-dev';
+  $projectConfig->phpVariants['709-dev']->version = '7.0.9';
+  $projectConfig->phpVariants['709-dev']->binDir = '/foo/php/709/bin';
+
+  $projectConfig->databaseServers = [];
+  $projectConfig->databaseServers['my56'] = new DatabaseServerConfig();
+
+  $projectConfig->sites = [];
+
+  if (file_exists(__DIR__ . '/ProjectConfig.local.php')) {
+    require_once __DIR__ . '/ProjectConfig.local.php';
+  }
+
+  $projectConfig->populateDefaultValues();
+}

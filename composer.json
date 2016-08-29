@@ -1,0 +1,65 @@
+{
+    "name": "cheppers/robo-drupal",
+    "description": "Drupal related Robo tasks",
+    "license": "GPL-2.0+",
+    "config": {
+        "bin-dir": "bin",
+        "sort-packages": true
+    },
+    "minimum-stability": "dev",
+    "prefer-stable": true,
+    "repositories": {
+        "local:cheppers/robo-drush": {
+            "type": "path",
+            "url": "../robo-drush"
+        },
+        "local:cheppers/robo-git": {
+            "type": "path",
+            "url": "../robo-git"
+        },
+        "local:cheppers/robo-serialize": {
+            "type": "path",
+            "url": "../robo-serialize"
+        }
+    },
+    "require": {
+        "php": ">=7.1",
+        "cheppers/asset-jar": "^0.0.1",
+        "cheppers/robo-drush": "dev-master",
+        "cheppers/robo-git": "dev-master",
+        "cheppers/robo-phpcs": "~0.0",
+        "cheppers/robo-serialize": "dev-master",
+        "consolidation/robo": "~1.0",
+        "danielstjules/stringy": "^2.3",
+        "drupal/coder": "~8.2",
+        "symfony/finder": "~2.8|~3.1",
+        "symfony/process": "~2.8|~3.1",
+        "symfony/yaml": "~2.8|~3.1",
+        "webmozart/path-util": "^2.3"
+    },
+    "require-dev": {
+        "cheppers/git-hooks": "~0.0.9",
+        "codeception/codeception": "^2.2"
+    },
+    "autoload": {
+        "psr-4": {
+            "Cheppers\\Robo\\Drupal\\": "src/"
+        }
+    },
+    "autoload-dev": {
+        "psr-4": {
+            "Cheppers\\Robo\\Drupal\\Tests\\Unit\\": "tests/unit/"
+        }
+    },
+    "scripts": {
+        "post-install-cmd": [
+            "@phpcs-set-installed-paths",
+            "@deploy-git-hooks"
+        ],
+        "post-update-cmd": [
+            "@deploy-git-hooks"
+        ],
+        "deploy-git-hooks": "\\Cheppers\\GitHooks\\Main::deploy",
+        "phpcs-set-installed-paths": "\\Cheppers\\Robo\\Drupal\\Composer\\Scripts::phpcsConfigSet"
+    }
+}

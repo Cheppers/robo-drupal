@@ -13,7 +13,7 @@ use Cheppers\Robo\Drupal\Robo\DrupalTaskLoader;
 use Cheppers\Robo\Drupal\Utils;
 use Cheppers\Robo\Drush\DrushTaskLoader;
 use Cheppers\Robo\Git\GitTaskLoader;
-use Cheppers\Robo\Phpcs\LoadPhpcsTasks;
+use Cheppers\Robo\Phpcs\PhpcsTaskLoader;
 use Cheppers\Robo\Serialize\SerializeTaskLoader;
 use League\Container\ContainerInterface;
 use Robo\Collection\CollectionBuilder;
@@ -38,7 +38,7 @@ class ProjectIncubatorRoboFile extends Tasks
     use DrupalTaskLoader;
     use DrupalCoreTestsTaskLoader;
     use DrushTaskLoader;
-    use LoadPhpcsTasks;
+    use PhpcsTaskLoader;
     use GitTaskLoader;
     use SerializeTaskLoader;
     use FilesystemShortcuts;

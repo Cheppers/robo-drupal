@@ -153,11 +153,14 @@ class ProjectIncubatorConfig
     public $compassEnvironment = 'production';
 
     /**
-     * Key is a module name, value is a boolean.
-     *
+     * @var bool
+     */
+    public $autodetectManagedDrupalExtensions = true;
+
+    /**
      * @var bool[]
      */
-    public $configSkipModules = [];
+    public $managedDrupalExtensions = [];
 
     public function getBaseHost(): string
     {

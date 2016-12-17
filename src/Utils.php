@@ -101,4 +101,22 @@ class Utils
 
         return $dirNames;
     }
+    
+    public static function itemProperty2ArrayKey(array $items, string $property): array
+    {
+        $result = [];
+        foreach ($items as $item) {
+            if (!array_key_exists($property, $item)) {
+                throw new \Exception("Property doesn't exists '$property'");
+            }
+
+            if (array_key_exists($item[$property], $result)) {
+                throw new \Exception("Unique key already exists '{$item[$property]}'");
+            }
+
+            $result[$item[$property]] = $item;
+        }
+        
+        return $result;
+    }
 }

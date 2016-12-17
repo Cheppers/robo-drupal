@@ -27,6 +27,8 @@ use Webmozart\PathUtil\Path;
 /**
  * Class ProjectIncubator.
  *
+ * @todo Support from Drupal extensions where the "vendor" name isn't "drupal".
+ *
  * @package Cheppers\Robo\Drupal\Robo\RoboClass
  */
 // @codingStandardsIgnoreStart
@@ -300,32 +302,29 @@ class ProjectIncubatorRoboFile extends Tasks
     //endregion
 
     //region Lint
-    public function lintPhpcs(string $extension): CollectionBuilder
+    public function lintPhpcs(array $extensions): CollectionBuilder
     {
+        if ($extensions) {
+            foreach (array_keys($extensions) as $i) {
+                $extensions[$i] = "drupal/{$extensions[$i]}";
+            }
+        } else {
+            $extensions = array_keys($this->getManagedDrupalExtensions());
+        }
+
+        $packagePaths = $this->getPackagePaths();
+        $non_exists_extensions = array_diff($extensions, array_keys($packagePaths));
+        if ($non_exists_extensions) {
+            throw new \InvalidArgumentException('Unknown extensions: ' . implode(', ', $non_exists_extensions));
+        }
+
         $cb = $this->collectionBuilder();
-
-        $ppResult = $this->taskComposerPackagePaths([
-            'composerExecutable' => $this->projectConfig->composerExecutable,
-        ])->run();
-
-        $packageName = "drupal/$extension";
-        if (isset($ppResult['packagePaths'][$packageName])) {
+        foreach ($extensions as $extension) {
             $cb->addTask($this->getTaskPhpcsLint(
                 'Drupal',
                 ['.'],
-                $ppResult['packagePaths'][$packageName]
+                $packagePaths[$extension]
             ));
-        } else {
-            $cb->addCode(function () use ($packageName) {
-                /** @var \Psr\Log\LoggerInterface $logger */
-                $logger = $this->getContainer()->get('logger');
-                $logger->error('Package name not exists: "{packageName}"', [
-                    'name' => 'lint:phpcs',
-                    'packageName' => $packageName,
-                ]);
-
-                return 1;
-            });
         }
 
         return $cb;
@@ -851,8 +850,81 @@ class ProjectIncubatorRoboFile extends Tasks
                 'packages' => [],
                 'packages-dev' => [],
             ];
+
+            foreach (['packages', 'packages-dev'] as $key) {
+                $this->composerLock += [$key => []];
+                $this->composerLock[$key] = Utils::itemProperty2ArrayKey(
+                    $this->composerLock[$key],
+                    'name'
+                );
+            }
         }
 
         return $this;
+    }
+
+    /**
+     * @var null|array
+     */
+    protected $packagePaths = null;
+
+    protected function getPackagePaths(): array
+    {
+        $this->packagePaths = null;
+
+        if ($this->packagePaths === null) {
+            $ppResult = $this
+                ->taskComposerPackagePaths([
+                    'composerExecutable' => $this->projectConfig->composerExecutable,
+                ])
+                ->run()
+                ->stopOnFail();
+
+            $this->packagePaths = $ppResult['packagePaths'];
+        }
+
+        return $this->packagePaths;
+    }
+
+    /**
+     * @return string[]
+     */
+    protected function getManagedDrupalExtensions(): array
+    {
+        return $this->projectConfig->autodetectManagedDrupalExtensions ?
+            array_keys($this->collectManagedDrupalExtensions())
+            : array_keys($this->projectConfig->managedDrupalExtensions, true, true);
+    }
+
+    /**
+     * Collect those Drupal extensions which are managed by this RoboFile.
+     *
+     * Composer uses symlinks on *nix systems to install local packages,
+     * Usually those packages are outside the project root and the
+     * `composer show -P` command resolves their real absolute path.
+     *
+     * @todo Cache.
+     *
+     * @return string[]
+     */
+    protected function collectManagedDrupalExtensions(): array
+    {
+        $this->initComposerLock();
+        $managedExtensions = [];
+        $packagePaths = $this->getPackagePaths();
+        
+        $currentDir = getcwd();
+        foreach ($packagePaths as $extensionName => $packagePath) {
+            foreach (['packages', 'packages-dev'] as $lockKey) {
+                if (isset($this->composerLock[$lockKey][$extensionName])
+                    && Utils::isDrupalPackage($this->composerLock[$lockKey][$extensionName])
+                    && strpos($packagePath, $currentDir) !== 0
+                ) {
+                    $managedExtensions[$extensionName] = $packagePath;
+                }
+            }
+        }
+
+        return $managedExtensions;
     }
 }

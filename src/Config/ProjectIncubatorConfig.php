@@ -15,18 +15,6 @@ use function Stringy\create as s;
 class ProjectIncubatorConfig extends BaseConfig
 {
     /**
-     * {@inheritdoc}
-     */
-    protected $idProperty = 'name';
-
-    /**
-     * Project machine-name.
-     *
-     * @var string
-     */
-    public $name = '';
-
-    /**
      * @var string
      */
     public $baseHostName = '';
@@ -179,7 +167,7 @@ class ProjectIncubatorConfig extends BaseConfig
 
     public function getBaseHostName(): string
     {
-        return $this->baseHostName ?: s($this->name)->dasherize() . '.localhost';
+        return $this->baseHostName ?: s($this->id)->dasherize() . '.localhost';
     }
 
     public function getProjectUrls(): array

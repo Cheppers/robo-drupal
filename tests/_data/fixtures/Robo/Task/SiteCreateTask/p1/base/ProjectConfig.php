@@ -10,7 +10,7 @@ if (!isset($GLOBALS['projectConfig'])) {
   global $projectConfig;
 
   $projectConfig = new ProjectIncubatorConfig();
-  $projectConfig->name = 'test';
+  $projectConfig->id = 'test';
   $projectConfig->gitExecutable = 'git';
   $projectConfig->environment = 'dev';
   $projectConfig->drupalRootDir = 'drupal_root';

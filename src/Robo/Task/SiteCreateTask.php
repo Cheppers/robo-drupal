@@ -773,7 +773,7 @@ PHP;
             $connection['database'] = "$dbDir/default__default.sqlite";
         } else {
             $connection['database'] = implode('__', [
-                s($pc->name)->underscored(),
+                s($pc->id)->underscored(),
                 s($siteBranch)->underscored(),
                 'dev',
             ]);

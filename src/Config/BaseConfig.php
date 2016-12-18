@@ -4,13 +4,14 @@ namespace Cheppers\Robo\Drupal\Config;
 
 class BaseConfig
 {
-    protected $idProperty = 'id';
+    /**
+     * @var string
+     */
+    public $id = '';
 
-    public function getId(): string
-    {
-        return $this->{$this->idProperty};
-    }
-
+    /**
+     * @var array
+     */
     protected $propertyMapping = [];
 
     /**
@@ -31,7 +32,7 @@ class BaseConfig
      */
     protected function initPropertyMapping()
     {
-        $this->propertyMapping[$this->idProperty] = $this->idProperty;
+        $this->propertyMapping['id'] = 'id';
 
         return $this;
     }
@@ -77,7 +78,7 @@ class BaseConfig
                 case 'subConfigs':
                     foreach ($this->data[$src] as $subConfigData) {
                         $subConfig = new $handler['class']($subConfigData);
-                        $this->{$handler['destination']}[$subConfig->getId()] = $subConfig;
+                        $this->{$handler['destination']}[$subConfig->id] = $subConfig;
                     }
                     break;
             }

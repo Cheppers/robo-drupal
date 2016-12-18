@@ -14,11 +14,6 @@ class PhpVariantConfig extends BaseConfig
     /**
      * @var string
      */
-    public $id = '';
-
-    /**
-     * @var string
-     */
     public $binDir = '';
 
     //region phpExecutable

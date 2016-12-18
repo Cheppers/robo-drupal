@@ -9,14 +9,6 @@ namespace Cheppers\Robo\Drupal\Config;
  */
 class SiteConfig extends BaseConfig
 {
-
-    /**
-     * Directory name.
-     *
-     * @var string
-     */
-    public $id = '';
-
     /**
      * URI of the Drupal site.
      *

@@ -78,12 +78,12 @@ class ProjectIncubatorConfigTest extends \Codeception\Test\Unit
      */
     public function testGetBaseHost(
         string $expected,
-        string $name,
+        string $id,
         string $baseHostName,
         int $baseHostPort
     ) {
         $pc = new ProjectIncubatorConfig();
-        $pc->name = $name;
+        $pc->id = $id;
         $pc->baseHostName = $baseHostName;
         $pc->baseHostPort = $baseHostPort;
 
@@ -107,7 +107,7 @@ class ProjectIncubatorConfigTest extends \Codeception\Test\Unit
     public function testGetBaseHostName(string $expected, string $name, string $baseHostName)
     {
         $pc = new ProjectIncubatorConfig();
-        $pc->name = $name;
+        $pc->id = $name;
         $pc->baseHostName = $baseHostName;
         $pc->baseHostPort = 8080;
 
@@ -218,7 +218,7 @@ class ProjectIncubatorConfigTest extends \Codeception\Test\Unit
     public function testGetSiteVariantUrl(string $expected, string $siteVariantUrlPattern, array $placeholders)
     {
         $pc = new ProjectIncubatorConfig();
-        $pc->name = 'my_name_01';
+        $pc->id = 'my_name_01';
         $pc->siteVariantUrlPattern = $siteVariantUrlPattern;
         $this->tester->assertEquals($expected, $pc->getSiteVariantUrl($placeholders));
     }
@@ -241,7 +241,7 @@ class ProjectIncubatorConfigTest extends \Codeception\Test\Unit
     public function testGetSiteVariantDir(string $expected, string $siteVariantDirPattern, array $placeholders)
     {
         $pc = new ProjectIncubatorConfig();
-        $pc->name = 'my_name_01';
+        $pc->id = 'my_name_01';
         $pc->siteVariantDirPattern = $siteVariantDirPattern;
         $this->tester->assertEquals($expected, $pc->getSiteVariantDir($placeholders));
     }
@@ -362,7 +362,7 @@ class ProjectIncubatorConfigTest extends \Codeception\Test\Unit
     {
         $method = static::getMethod('processPattern');
         $pc = new ProjectIncubatorConfig();
-        $pc->name = 'p1';
+        $pc->id = 'p1';
         $pc->baseHostName = 'p1.loc';
 
         $this->tester->assertEquals(

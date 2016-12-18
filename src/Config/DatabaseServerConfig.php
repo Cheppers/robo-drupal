@@ -41,11 +41,6 @@ class DatabaseServerConfig extends BaseConfig
     ];
 
     /**
-     * @var string
-     */
-    public $id = '';
-
-    /**
      * @var array
      */
     public $connection = [];

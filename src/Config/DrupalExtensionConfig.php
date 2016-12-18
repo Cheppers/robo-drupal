@@ -6,8 +6,6 @@ class DrupalExtensionConfig extends BaseConfig
 {
     public $enabled = true;
 
-    public $name = '';
-
     public $path = '';
 
     public $packageVendor = '';

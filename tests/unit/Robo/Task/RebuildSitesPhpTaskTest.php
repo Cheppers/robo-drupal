@@ -107,7 +107,7 @@ class RebuildSitesPhpTaskTest extends \Codeception\Test\Unit
         Robo::setContainer($container);
 
         $pc = new ProjectIncubatorConfig();
-        $pc->name = 'foo';
+        $pc->id = 'foo';
         $pc->drupalRootDir = $drupalRootDir;
         foreach ($phpVariants as $phpVariant) {
             $pc->phpVariants[$phpVariant] = new PhpVariantConfig();

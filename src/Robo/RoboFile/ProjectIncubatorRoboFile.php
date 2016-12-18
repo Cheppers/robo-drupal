@@ -6,6 +6,7 @@ use Cheppers\AssetJar\AssetJar;
 use Cheppers\LintReport\Reporter\BaseReporter;
 use Cheppers\LintReport\Reporter\CheckstyleReporter;
 use Cheppers\Robo\Drupal\Config\DatabaseServerConfig;
+use Cheppers\Robo\Drupal\Config\DrupalExtensionConfig;
 use Cheppers\Robo\Drupal\Config\PhpVariantConfig;
 use Cheppers\Robo\Drupal\Robo\ComposerTaskLoader;
 use Cheppers\Robo\Drupal\Robo\DrupalCoreTestsTaskLoader;
@@ -86,6 +87,8 @@ class ProjectIncubatorRoboFile extends Tasks
      * @var string
      */
     protected $environment = 'dev';
+
+    protected $areManagedDrupalExtensionsInitialized = false;
 
     public function __construct()
     {
@@ -304,27 +307,19 @@ class ProjectIncubatorRoboFile extends Tasks
     //region Lint
     public function lintPhpcs(array $extensions): CollectionBuilder
     {
-        if ($extensions) {
-            foreach (array_keys($extensions) as $i) {
-                $extensions[$i] = "drupal/{$extensions[$i]}";
-            }
-        } else {
-            $extensions = array_keys($this->getManagedDrupalExtensions());
-        }
+        // @todo Show a an error message in case of duplicated items.
+        $managedDrupalExtensions = $this->getManagedDrupalExtensions();
 
-        $packagePaths = $this->getPackagePaths();
-        $non_exists_extensions = array_diff($extensions, array_keys($packagePaths));
+        $non_exists_extensions = array_diff_key(array_flip($extensions), $managedDrupalExtensions);
         if ($non_exists_extensions) {
-            throw new \InvalidArgumentException('Unknown extensions: ' . implode(', ', $non_exists_extensions));
+            throw new \InvalidArgumentException(
+                'Unknown managed Drupal extensions: ' . implode(', ', array_keys($non_exists_extensions))
+            );
         }
 
         $cb = $this->collectionBuilder();
         foreach ($extensions as $extension) {
-            $cb->addTask($this->getTaskPhpcsLint(
-                'Drupal',
-                ['.'],
-                $packagePaths[$extension]
-            ));
+            $cb->addTask($this->getTaskPhpcsLintDrupalExtension($managedDrupalExtensions[$extension]));
         }
 
         return $cb;
@@ -495,10 +490,19 @@ class ProjectIncubatorRoboFile extends Tasks
         ]);
     }
 
+    protected function getTaskPhpcsLintDrupalExtension(DrupalExtensionConfig $extension): TaskInterface
+    {
+        return $this->getTaskPhpcsLint(
+            'Drupal',
+            $extension->phpcs->paths,
+            $extension->path
+        );
+    }
+
     protected function getTaskPhpcsLint(string $standard, array $files, string $workingDirectory = ''): TaskInterface
     {
         $standardLower = strtolower($standard);
-        $env = $this->getEnvironment();
+        $environment = $this->getEnvironment();
 
         $options = [
             'failOn' => 'warning',
@@ -528,17 +532,17 @@ class ProjectIncubatorRoboFile extends Tasks
 
         if ($workingDirectory) {
             $options['workingDirectory'] = $workingDirectory;
-            $options['phpcsExecutable'] = realpath("{$this->binDir}/phpcs");
+            $options['phpcsExecutable'] = Path::makeAbsolute("{$this->binDir}/phpcs", getcwd());
         }
 
-        if ($env === 'jenkins') {
+        if ($environment === 'jenkins') {
             $options['failOn'] = 'never';
 
             $options['lintReporters']['lintCheckstyleReporter'] = (new CheckstyleReporter())
                 ->setDestination("reports/checkstyle/phpcs.{$standardLower}.xml");
         }
 
-        if ($env !== 'git-hook') {
+        if ($environment !== 'git-hook') {
             return $this->taskPhpcsLintFiles($options + ['files' => $files]);
         }
 
@@ -887,13 +891,47 @@ class ProjectIncubatorRoboFile extends Tasks
     }
 
     /**
-     * @return string[]
+     * @return \Cheppers\Robo\Drupal\Config\DrupalExtensionConfig[]
      */
-    protected function getManagedDrupalExtensions(): array
+    protected function getManagedDrupalExtensions()
     {
-        return $this->projectConfig->autodetectManagedDrupalExtensions ?
-            array_keys($this->collectManagedDrupalExtensions())
-            : array_keys($this->projectConfig->managedDrupalExtensions, true, true);
+        $this->initManagedDrupalExtensions();
+
+        return Utils::filterDisabled($this->projectConfig->managedDrupalExtensions);
+    }
+
+    /**
+     * @return $this
+     */
+    protected function initManagedDrupalExtensions()
+    {
+        if (!$this->projectConfig->autodetectManagedDrupalExtensions
+            || $this->areManagedDrupalExtensionsInitialized
+        ) {
+            return $this;
+        }
+
+        $namesAndPaths = $this->collectManagedDrupalExtensions();
+        foreach ($namesAndPaths as $packageName => $path) {
+            list($vendor, $name) = explode('/', $packageName);
+            if (!isset($this->projectConfig->managedDrupalExtensions[$name])) {
+                $this->projectConfig->managedDrupalExtensions[$name] = new DrupalExtensionConfig();
+            }
+
+            $ec = $this->projectConfig->managedDrupalExtensions[$name];
+            $ec->name = $packageName;
+            $ec->path = $path;
+            $ec->packageVendor = $vendor;
+            $ec->packageName = $name;
+
+            if (!$ec->phpcs->paths) {
+                 $ec->phpcs->paths = ['.'];
+            }
+        }
+
+        $this->areManagedDrupalExtensionsInitialized = true;
+
+        return  $this;
     }
 
     /**
@@ -914,13 +952,13 @@ class ProjectIncubatorRoboFile extends Tasks
         $packagePaths = $this->getPackagePaths();
         
         $currentDir = getcwd();
-        foreach ($packagePaths as $extensionName => $packagePath) {
+        foreach ($packagePaths as $packageName => $packagePath) {
             foreach (['packages', 'packages-dev'] as $lockKey) {
-                if (isset($this->composerLock[$lockKey][$extensionName])
-                    && Utils::isDrupalPackage($this->composerLock[$lockKey][$extensionName])
+                if (isset($this->composerLock[$lockKey][$packageName])
+                    && Utils::isDrupalPackage($this->composerLock[$lockKey][$packageName])
                     && strpos($packagePath, $currentDir) !== 0
                 ) {
-                    $managedExtensions[$extensionName] = $packagePath;
+                    $managedExtensions[$packageName] = $packagePath;
                 }
             }
         }

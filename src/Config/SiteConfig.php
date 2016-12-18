@@ -7,7 +7,7 @@ namespace Cheppers\Robo\Drupal\Config;
  *
  * @package Cheppers\Drupal\Project\Config
  */
-class SiteConfig
+class SiteConfig extends BaseConfig
 {
 
     /**

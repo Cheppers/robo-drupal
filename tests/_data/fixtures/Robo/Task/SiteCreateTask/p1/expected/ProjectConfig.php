@@ -18,7 +18,7 @@ if (!isset($GLOBALS['projectConfig'])) {
   $projectConfig->phpVariants = [];
 
   $projectConfig->phpVariants['709-dev'] = new PhpVariantConfig();
-  $projectConfig->phpVariants['709-dev']->name = '709-dev';
+  $projectConfig->phpVariants['709-dev']->id = '709-dev';
   $projectConfig->phpVariants['709-dev']->version = '7.0.9';
   $projectConfig->phpVariants['709-dev']->binDir = '/foo/php/709/bin';
 

@@ -7,7 +7,7 @@ namespace Cheppers\Robo\Drupal\Config;
  *
  * @package Cheppers\Robo\Drupal\Config
  */
-class DatabaseServerConfig
+class DatabaseServerConfig extends BaseConfig
 {
     /**
      * @var array
@@ -60,11 +60,39 @@ class DatabaseServerConfig
      */
     public $authenticationMethod = 'user:pass';
 
-    public function __construct($driver = 'mysql')
+    /**
+     * {@inheritdoc}
+     */
+    protected function initPropertyMapping()
     {
-        $this->connection = static::$driverMap[$driver];
-        if ($driver === 'sqlite') {
-            $this->authenticationMethod = 'none';
-        }
+        parent::initPropertyMapping();
+
+        $this->propertyMapping['connection'] = 'connection';
+        $this->propertyMapping['connectionLocal'] = 'connectionLocal';
+        $this->propertyMapping['authenticationMethod'] = 'authenticationMethod';
+
+        $this->propertyMapping['driver'] = [
+            'type' => 'closure',
+            'closure' => function ($driver) {
+                $this->connection = static::$driverMap[$driver];
+                if ($driver === 'sqlite') {
+                    $this->authenticationMethod = 'none';
+                }
+            }
+        ];
+
+        return $this;
+    }
+
+    /**
+     * {@inheritdoc}
+     */
+    protected function populateProperties()
+    {
+        $this->data += ['driver' => 'mysql'];
+
+        parent::populateProperties();
+
+        return $this;
     }
 }

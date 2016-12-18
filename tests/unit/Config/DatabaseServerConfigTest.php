@@ -32,7 +32,7 @@ class DatabaseServerConfigTest extends \Codeception\Test\Unit
                     ],
                     'authenticationMethod' => 'user:pass',
                 ],
-                'mysql',
+                ['driver' => 'mysql'],
             ],
             'pgsql' => [
                 [
@@ -49,7 +49,7 @@ class DatabaseServerConfigTest extends \Codeception\Test\Unit
                     ],
                     'authenticationMethod' => 'user:pass',
                 ],
-                'pgsql',
+                ['driver' => 'pgsql'],
             ],
             'sqlite' => [
                 [
@@ -58,7 +58,7 @@ class DatabaseServerConfigTest extends \Codeception\Test\Unit
                     ],
                     'authenticationMethod' => 'none',
                 ],
-                'sqlite',
+                ['driver' => 'sqlite'],
             ],
         ];
     }
@@ -66,9 +66,9 @@ class DatabaseServerConfigTest extends \Codeception\Test\Unit
     /**
      * @dataProvider casesConstructor
      */
-    public function testConstructor($expected, $driver)
+    public function testConstructor(array $expected, array $data)
     {
-        $dbServerConfig = new DatabaseServerConfig($driver);
+        $dbServerConfig = new DatabaseServerConfig($data);
         $this->tester->assertEquals($expected['connection'], $dbServerConfig->connection);
         $this->tester->assertEquals($expected['authenticationMethod'], $dbServerConfig->authenticationMethod);
     }

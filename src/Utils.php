@@ -119,4 +119,19 @@ class Utils
         
         return $result;
     }
+
+    public static function filterDisabled(array $items, string $property = 'enabled'): array
+    {
+        $filtered = [];
+
+        foreach ($items as $key => $value) {
+            if ((is_scalar($value) || is_bool($value)) && $value) {
+                $filtered[$key] = $value;
+            } elseif (is_object($value) && property_exists($value, $property) && $value->$property) {
+                $filtered[$key] = $value;
+            }
+        }
+
+        return $filtered;
+    }
 }

@@ -12,8 +12,13 @@ use function Stringy\create as s;
  *
  * @package Cheppers\Robo\Drupal\Config
  */
-class ProjectIncubatorConfig
+class ProjectIncubatorConfig extends BaseConfig
 {
+    /**
+     * {@inheritdoc}
+     */
+    protected $idProperty = 'name';
+
     /**
      * Project machine-name.
      *
@@ -158,7 +163,7 @@ class ProjectIncubatorConfig
     public $autodetectManagedDrupalExtensions = true;
 
     /**
-     * @var bool[]
+     * @var \Cheppers\Robo\Drupal\Config\DrupalExtensionConfig[]
      */
     public $managedDrupalExtensions = [];
 

@@ -9,9 +9,8 @@ use Webmozart\PathUtil\Path;
  *
  * @package Cheppers\Robo\Drupal\Config
  */
-class PhpVariantConfig
+class PhpVariantConfig extends BaseConfig
 {
-
     /**
      * @var string
      */
@@ -22,6 +21,7 @@ class PhpVariantConfig
      */
     public $binDir = '';
 
+    //region phpExecutable
     /**
      * @var string
      */
@@ -35,7 +35,9 @@ class PhpVariantConfig
 
         return Path::join($this->binDir, ($this->phpExecutable ?: 'php'));
     }
+    //endregion
 
+    //region phpdbgExecutable
     /**
      * @var string
      */
@@ -49,6 +51,7 @@ class PhpVariantConfig
 
         return Path::join($this->binDir, ($this->phpdbgExecutable ?: 'phpdbg'));
     }
+    //endregion
 
     /**
      * @var string
@@ -69,4 +72,19 @@ class PhpVariantConfig
      * @var bool
      */
     public $ignoreTesting = false;
+
+    protected function initPropertyMapping()
+    {
+        parent::initPropertyMapping();
+
+        $this->propertyMapping['binDir'] = 'binDir';
+        $this->propertyMapping['phpExecutable'] = 'phpExecutable';
+        $this->propertyMapping['phpdbgExecutable'] = 'phpdbgExecutable';
+        $this->propertyMapping['version'] = 'version';
+        $this->propertyMapping['cliIniFile'] = 'cliIniFile';
+        $this->propertyMapping['fastCgiPass'] = 'fastCgiPass';
+        $this->propertyMapping['ignoreTesting'] = 'ignoreTesting';
+
+        return $this;
+    }
 }

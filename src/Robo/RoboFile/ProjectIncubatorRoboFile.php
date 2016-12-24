@@ -317,6 +317,10 @@ class ProjectIncubatorRoboFile extends Tasks
             );
         }
 
+        if (!$extensions) {
+            $extensions = array_keys($managedDrupalExtensions);
+        }
+
         $cb = $this->collectionBuilder();
         foreach ($extensions as $extension) {
             $cb->addTask($this->getTaskPhpcsLintDrupalExtension($managedDrupalExtensions[$extension]));

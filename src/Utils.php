@@ -128,6 +128,10 @@ class Utils
             if ((is_scalar($value) || is_bool($value)) && $value) {
                 $filtered[$key] = $value;
             } elseif (is_object($value) && property_exists($value, $property) && $value->$property) {
+                // @todo Handle if the $property not exists.
+                $filtered[$key] = $value;
+            } elseif (is_array($value) && !empty($value[$property])) {
+                // @todo Handle if the $property not exists.
                 $filtered[$key] = $value;
             }
         }

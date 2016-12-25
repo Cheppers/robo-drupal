@@ -30,7 +30,7 @@ class UtilsTest extends \Codeception\Test\Unit
     /**
      * @dataProvider casesIsDefaultHttpPort
      */
-    public function testIsDefaultHttpPort(int $port, bool $expected)
+    public function testIsDefaultHttpPort(int $port, bool $expected): void
     {
         $this->tester->assertEquals($expected, Utils::isDefaultHttpPort($port));
     }
@@ -52,7 +52,7 @@ class UtilsTest extends \Codeception\Test\Unit
     /**
      * @dataProvider casesIsNumericIndexedArray
      */
-    public function testIsNumericIndexedArray(bool $expected, array $array)
+    public function testIsNumericIndexedArray(bool $expected, array $array): void
     {
         $this->tester->assertEquals($expected, Utils::isNumericIndexedArray($array));
     }
@@ -99,7 +99,7 @@ class UtilsTest extends \Codeception\Test\Unit
     /**
      * @dataProvider casesIsDrupalPackage
      */
-    public function testIsDrupalPackage(bool $expected, array $package)
+    public function testIsDrupalPackage(bool $expected, array $package): void
     {
         $this->tester->assertEquals($expected, Utils::isDrupalPackage($package));
     }
@@ -140,12 +140,12 @@ class UtilsTest extends \Codeception\Test\Unit
         string $search,
         string $replace,
         string $method
-    ) {
+    ): void {
         Utils::manipulateString($text, $search, $replace, $method);
         $this->tester->assertEquals($expected, $text);
     }
 
-    public function testManipulateStringError()
+    public function testManipulateStringError(): void
     {
         $text = 'foo';
         $search = 'bar';
@@ -159,7 +159,7 @@ class UtilsTest extends \Codeception\Test\Unit
         }
     }
 
-    public function testManipulateStringFail()
+    public function testManipulateStringFail(): void
     {
         $text = 'a';
         $search = 'b';
@@ -210,8 +210,183 @@ class UtilsTest extends \Codeception\Test\Unit
     /**
      * @dataProvider casesDirNamesByDepth
      */
-    public function testDirNamesByDepth(array $expected, array $fileNames)
+    public function testDirNamesByDepth(array $expected, array $fileNames): void
     {
         $this->tester->assertEquals($expected, Utils::dirNamesByDepth($fileNames));
+    }
+
+    /**
+     * @return array
+     */
+    public function casesItemProperty2ArrayKey(): array
+    {
+        return [
+            'empty' => [
+                [],
+                [],
+                'id',
+            ],
+            'foo' => [
+                [
+                    'a' => [
+                        'id' => 'a',
+                    ],
+                    'b' => [
+                        'id' => 'b',
+                    ],
+                ],
+                [
+                    [
+                        'id' => 'a',
+                    ],
+                    [
+                        'id' => 'b',
+                    ],
+                ],
+                'id',
+            ],
+        ];
+    }
+
+    /**
+     * @dataProvider casesItemProperty2ArrayKey
+     */
+    public function testItemProperty2ArrayKey(array $expected, array $items, string $property): void
+    {
+        $this->tester->assertEquals($expected, Utils::itemProperty2ArrayKey($items, $property));
+    }
+
+    public function testItemProperty2ArrayKeyNotExists(): void
+    {
+        $items = [
+            [
+                'id' => 1,
+            ],
+            [
+                'name' => 'foo',
+            ],
+        ];
+        $property = 'id';
+        try {
+            Utils::itemProperty2ArrayKey($items, $property);
+            $this->tester->fail('Where is the exception?');
+        } catch (\Exception $e) {
+            $this->tester->assertEquals(
+                "Property doesn't exists '$property'",
+                $e->getMessage()
+            );
+        }
+    }
+
+    public function testItemProperty2ArrayKeyUnique(): void
+    {
+        $items = [
+            [
+                'id' => 1,
+            ],
+            [
+                'id' => 2,
+            ],
+            [
+                'id' => 2,
+            ],
+        ];
+        $property = 'id';
+        try {
+            Utils::itemProperty2ArrayKey($items, $property);
+            $this->tester->fail('Where is the exception?');
+        } catch (\Exception $e) {
+            $this->tester->assertEquals(
+                "Unique key already exists '2'",
+                $e->getMessage()
+            );
+        }
+    }
+
+    /**
+     * @return array
+     */
+    public function casesFilterDisabled(): array
+    {
+        return [
+            'empty' => [
+                [],
+                [],
+            ],
+            'all in' => [
+                [
+                    'a' => true,
+                    'c' => 'foo',
+                    'e' => 1,
+                    'f' => -1,
+                    'h' => [
+                        'enabled' => true,
+                    ],
+                    'j' => (object) [
+                        'enabled' => true,
+                    ],
+                ],
+                [
+                    'a' => true,
+                    'b' => false,
+                    'c' => 'foo',
+                    'd' => '',
+                    'e' => 1,
+                    'f' => -1,
+                    'g' => 0,
+                    'h' => [
+                        'enabled' => true,
+                    ],
+                    'i' => [
+                        'enabled' => false,
+                    ],
+                    'j' => (object) [
+                        'enabled' => true,
+                    ],
+                    'k' => (object) [
+                        'enabled' => false,
+                    ],
+                ],
+            ],
+            'non-default property' => [
+                [
+                    'b' => [
+                        'available' => true,
+                    ],
+                    'e' => (object) [
+                        'available' => true,
+                    ],
+                ],
+                [
+                    'a' => [
+                        'enabled' => true,
+                    ],
+                    'b' => [
+                        'available' => true,
+                    ],
+                    'c' => [
+                        'available' => false,
+                    ],
+                    'd' => (object) [
+                        'enabled' => true,
+                    ],
+                    'e' => (object) [
+                        'available' => true,
+                    ],
+                    'f' => (object) [
+                        'available' => false,
+                    ],
+                ],
+                'available',
+            ],
+        ];
+    }
+
+    /**
+     * @dataProvider casesFilterDisabled
+     */
+    public function testFilterDisabled(array $expected, array $items, string $property = 'enabled'): void
+    {
+        $this->tester->assertEquals($expected, Utils::filterDisabled($items, $property));
     }
 }

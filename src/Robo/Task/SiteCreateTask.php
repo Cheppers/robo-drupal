@@ -24,8 +24,8 @@ use function Stringy\create as s;
  */
 class SiteCreateTask extends BaseTask implements ContainerAwareInterface
 {
-    use TaskAccessor;
     use ContainerAwareTrait;
+    use TaskAccessor;
 
     /**
      * @var \Symfony\Component\Filesystem\Filesystem
@@ -645,15 +645,15 @@ PHP;
     {
         $search = <<< PHP
 
-# if (file_exists(__DIR__ . '/settings.local.php')) {
-#   include __DIR__ . '/settings.local.php';
+# if (file_exists(\$app_root . '/' . \$site_path . '/settings.local.php')) {
+#   include \$app_root . '/' . \$site_path . '/settings.local.php';
 # }
 
 PHP;
         $replace = <<< PHP
 
-if (file_exists(__DIR__ . '/settings.local.php')) {
-  include __DIR__ . '/settings.local.php';
+if (file_exists(\$app_root . '/' . \$site_path . '/settings.local.php')) {
+  include \$app_root . '/' . \$site_path . '/settings.local.php';
 }
 
 PHP;
@@ -723,7 +723,7 @@ PHP;
         $src = "$dirPrefix/default/default.services.yml";
 
         if (file_exists($src)) {
-            $dst = "$dirPrefix/sites/$siteDir/services.yml";
+            $dst = "$dirPrefix/$siteDir/services.yml";
             $this->fs->copy($src, $dst, true);
         }
 

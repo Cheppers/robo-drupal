@@ -9,6 +9,14 @@
     "minimum-stability": "dev",
     "prefer-stable": true,
     "repositories": {
+        "local:cheppers/asset-jar": {
+            "type": "path",
+            "url": "../asset-jar"
+        },
+        "local:cheppers/git-hooks": {
+            "type": "path",
+            "url": "../git-hooks"
+        },
         "local:cheppers/robo-drush": {
             "type": "path",
             "url": "../robo-drush"
@@ -17,28 +25,38 @@
             "type": "path",
             "url": "../robo-git"
         },
+        "local:cheppers/robo-scss-lint": {
+            "type": "path",
+            "url": "../robo-scss-lint"
+        },
         "local:cheppers/robo-serialize": {
             "type": "path",
             "url": "../robo-serialize"
+        },
+        "local:cheppers/robo-tslint": {
+            "type": "path",
+            "url": "../robo-tslint"
         }
     },
     "require": {
         "php": ">=7.1",
-        "cheppers/asset-jar": "^0.0.1",
+        "cheppers/asset-jar": "^0.0",
+        "cheppers/git-hooks": "dev-master",
         "cheppers/robo-drush": "dev-master",
         "cheppers/robo-git": "dev-master",
-        "cheppers/robo-phpcs": "~0.0",
+        "cheppers/robo-phpcs": "dev-master",
+        "cheppers/robo-scss-lint": "dev-master",
         "cheppers/robo-serialize": "dev-master",
-        "consolidation/robo": "~1.0",
+        "cheppers/robo-tslint": "dev-master",
+        "consolidation/robo": "^1.0",
         "danielstjules/stringy": "^2.3",
-        "drupal/coder": "~8.2",
-        "symfony/finder": "~2.8|~3.1",
-        "symfony/process": "~2.8|~3.1",
-        "symfony/yaml": "~2.8|~3.1",
+        "drupal/coder": "^8.2",
+        "symfony/finder": "^2.8||^3.1",
+        "symfony/process": "^2.8||^3.1",
+        "symfony/yaml": "^2.8||^3.1",
         "webmozart/path-util": "^2.3"
     },
     "require-dev": {
-        "cheppers/git-hooks": "~0.0.9",
         "codeception/codeception": "^2.2"
     },
     "autoload": {

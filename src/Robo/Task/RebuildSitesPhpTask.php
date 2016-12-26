@@ -4,12 +4,9 @@ namespace Cheppers\Robo\Drupal\Robo\Task;
 
 use Cheppers\Robo\Drupal\Config\ProjectIncubatorConfig;
 use Cheppers\Robo\Drupal\VarExport;
-use League\Container\ContainerAwareTrait;
 use Robo\Result;
 use Robo\Task\BaseTask;
-use Robo\Task\Filesystem\loadShortcuts as FilesystemShortcuts;
-use Robo\Task\Filesystem\loadTasks as FilesystemTaskLoader;
-use Robo\TaskAccessor;
+use Symfony\Component\Filesystem\Filesystem;
 use Webmozart\PathUtil\Path;
 
 /**
@@ -19,11 +16,6 @@ use Webmozart\PathUtil\Path;
  */
 class RebuildSitesPhpTask extends BaseTask
 {
-    use TaskAccessor;
-    use ContainerAwareTrait;
-    use FilesystemShortcuts;
-    use FilesystemTaskLoader;
-
     /**
      * @var ProjectIncubatorConfig
      */
@@ -38,8 +30,6 @@ class RebuildSitesPhpTask extends BaseTask
     }
 
     /**
-     * @param array $options
-     *
      * @return $this
      */
     public function setOptions(array $options)
@@ -61,8 +51,6 @@ class RebuildSitesPhpTask extends BaseTask
     }
 
     /**
-     * @param \Cheppers\Robo\Drupal\Config\ProjectIncubatorConfig $projectConfig
-     *
      * @return $this
      */
     public function setProjectConfig(ProjectIncubatorConfig $projectConfig)
@@ -83,7 +71,8 @@ class RebuildSitesPhpTask extends BaseTask
         $src = Path::join($pc->drupalRootDir, 'sites', 'example.sites.php');
         $dst = Path::join($pc->drupalRootDir, 'sites', 'sites.php');
         $content = (file_exists($src) ? file_get_contents($src) : "<?php\n\n");
-        $this->_mkdir(Path::join($pc->drupalRootDir, 'sites'));
+
+        (new Filesystem())->mkdir(Path::join($pc->drupalRootDir, 'sites'));
         $writtenBytes = file_put_contents($dst, $content . $sites);
 
         return new Result(

@@ -4,8 +4,8 @@
         "Read more about it at https://getcomposer.org/doc/01-basic-usage.md#composer-lock-the-lock-file",
         "This file is @generated automatically"
     ],
-    "hash": "f9564e8e845b4f2272b12c229c19cd21",
-    "content-hash": "031063aed75eaab710c49cf24c739efd",
+    "hash": "287480f28232f056d3700ebf20f1d2ac",
+    "content-hash": "a821fc955626a79400c5427cf81183c1",
     "packages": [
         {
             "name": "cheppers/asset-jar",
@@ -38,6 +38,47 @@
             ],
             "description": "Provides a very simple, shared, in-memory data storage.",
             "time": "2016-07-30 09:09:38"
+        },
+        {
+            "name": "cheppers/git-hooks",
+            "version": "dev-master",
+            "source": {
+                "type": "git",
+                "url": "https://github.com/Cheppers/git-hooks.git",
+                "reference": "a846af41a1ea63d09bb8d49d9b1631e1a8eb63f8"
+            },
+            "dist": {
+                "type": "zip",
+                "url": "https://api.github.com/repos/Cheppers/git-hooks/zipball/a846af41a1ea63d09bb8d49d9b1631e1a8eb63f8",
+                "reference": "a846af41a1ea63d09bb8d49d9b1631e1a8eb63f8",
+                "shasum": ""
+            },
+            "require-dev": {
+                "behat/behat": "~3.1",
+                "consolidation/robo": "~1.0",
+                "pear/archive_tar": "~1.4",
+                "phpunit/phpunit": "~4.5",
+                "squizlabs/php_codesniffer": "~2.6",
+                "symfony/filesystem": "~3.1",
+                "symfony/process": "~3.1"
+            },
+            "type": "library",
+            "extra": {
+                "cheppers/git-hooks": {
+                    "symlink": true
+                }
+            },
+            "autoload": {
+                "psr-4": {
+                    "Cheppers\\GitHooks\\": "src/"
+                }
+            },
+            "notification-url": "https://packagist.org/downloads/",
+            "license": [
+                "GPL-2.0"
+            ],
+            "description": "Provide a bridge between Git hooks and scripts under VCS.",
+            "time": "2016-10-15 10:06:14"
         },
         {
             "name": "cheppers/lint-report",
@@ -169,7 +210,7 @@
         },
         {
             "name": "cheppers/robo-phpcs",
-            "version": "v0.0.11",
+            "version": "dev-master",
             "source": {
                 "type": "git",
                 "url": "https://github.com/Cheppers/robo-phpcs.git",
@@ -205,6 +246,48 @@
             ],
             "description": "Robo task wrapper for PHPCS",
             "time": "2016-12-14 21:26:13"
+        },
+        {
+            "name": "cheppers/robo-scss-lint",
+            "version": "dev-master",
+            "dist": {
+                "type": "path",
+                "url": "../robo-scss-lint",
+                "reference": "2e1ded00228a684beca760da2d14ee229e542bb2",
+                "shasum": null
+            },
+            "require": {
+                "cheppers/asset-jar": "^0.0",
+                "consolidation/robo": "^1.0"
+            },
+            "require-dev": {
+                "cheppers/git-hooks": "^0.0",
+                "cheppers/robo-git": "^0.0",
+                "cheppers/robo-phpcs": "^0.0",
+                "codeception/codeception": "^2.2",
+                "symfony/yaml": "^2.8||3.1"
+            },
+            "type": "library",
+            "autoload": {
+                "psr-4": {
+                    "Cheppers\\Robo\\ScssLint\\": "src/"
+                }
+            },
+            "scripts": {
+                "post-install-cmd": [
+                    "@deploy-git-hooks"
+                ],
+                "post-update-cmd": [
+                    "@deploy-git-hooks"
+                ],
+                "deploy-git-hooks": [
+                    "\\Cheppers\\GitHooks\\Main::deploy"
+                ]
+            },
+            "license": [
+                "GPL-2.0+"
+            ],
+            "description": "Robo task wrapper for scss-lint"
         },
         {
             "name": "cheppers/robo-serialize",
@@ -257,17 +340,67 @@
             "description": "Export variables in various format"
         },
         {
+            "name": "cheppers/robo-tslint",
+            "version": "dev-master",
+            "dist": {
+                "type": "path",
+                "url": "../robo-tslint",
+                "reference": "60700755900b2e6f6c734f678d08cc4014f0323b",
+                "shasum": null
+            },
+            "require": {
+                "cheppers/asset-jar": "^0.0",
+                "consolidation/robo": "^1.0",
+                "samsonasik/package-versions": "^1.1"
+            },
+            "require-dev": {
+                "cheppers/git-hooks": "^0.0",
+                "cheppers/lint-report": "^0.0",
+                "cheppers/robo-git": "^0.0",
+                "cheppers/robo-phpcs": "^0.0",
+                "codeception/codeception": "^2.2",
+                "symfony/process": "^2.8||^3.1",
+                "symfony/yaml": "^2.8||^3.1"
+            },
+            "type": "library",
+            "autoload": {
+                "psr-4": {
+                    "Cheppers\\Robo\\TsLint\\": "src/"
+                }
+            },
+            "scripts": {
+                "post-install-cmd": [
+                    "@deploy-git-hooks",
+                    "@npm-install"
+                ],
+                "post-update-cmd": [
+                    "@deploy-git-hooks",
+                    "@npm-install"
+                ],
+                "deploy-git-hooks": [
+                    "\\Cheppers\\GitHooks\\Main::deploy"
+                ],
+                "npm-install": [
+                    "cd tests/_data && npm install"
+                ]
+            },
+            "license": [
+                "GPL-2.0+"
+            ],
+            "description": "Robo task wrapper for tslint"
+        },
+        {
             "name": "consolidation/annotated-command",
-            "version": "2.2.1",
+            "version": "2.2.2",
             "source": {
                 "type": "git",
                 "url": "https://github.com/consolidation/annotated-command.git",
-                "reference": "cd3bc8eae38abc480e39e7a171171e58f7dc6948"
+                "reference": "1f1d92807f72901e049e9df048b412c3bc3652c9"
             },
             "dist": {
                 "type": "zip",
-                "url": "https://api.github.com/repos/consolidation/annotated-command/zipball/cd3bc8eae38abc480e39e7a171171e58f7dc6948",
-                "reference": "cd3bc8eae38abc480e39e7a171171e58f7dc6948",
+                "url": "https://api.github.com/repos/consolidation/annotated-command/zipball/1f1d92807f72901e049e9df048b412c3bc3652c9",
+                "reference": "1f1d92807f72901e049e9df048b412c3bc3652c9",
                 "shasum": ""
             },
             "require": {
@@ -306,7 +439,7 @@
                 }
             ],
             "description": "Initialize Symfony Console commands from annotated command class methods.",
-            "time": "2016-12-14 19:06:04"
+            "time": "2016-12-16 01:23:33"
         },
         {
             "name": "consolidation/log",
@@ -1629,47 +1762,6 @@
             "time": "2016-10-30 11:50:56"
         },
         {
-            "name": "cheppers/git-hooks",
-            "version": "v0.0.9",
-            "source": {
-                "type": "git",
-                "url": "https://github.com/Cheppers/git-hooks.git",
-                "reference": "a846af41a1ea63d09bb8d49d9b1631e1a8eb63f8"
-            },
-            "dist": {
-                "type": "zip",
-                "url": "https://api.github.com/repos/Cheppers/git-hooks/zipball/a846af41a1ea63d09bb8d49d9b1631e1a8eb63f8",
-                "reference": "a846af41a1ea63d09bb8d49d9b1631e1a8eb63f8",
-                "shasum": ""
-            },
-            "require-dev": {
-                "behat/behat": "~3.1",
-                "consolidation/robo": "~1.0",
-                "pear/archive_tar": "~1.4",
-                "phpunit/phpunit": "~4.5",
-                "squizlabs/php_codesniffer": "~2.6",
-                "symfony/filesystem": "~3.1",
-                "symfony/process": "~3.1"
-            },
-            "type": "library",
-            "extra": {
-                "cheppers/git-hooks": {
-                    "symlink": true
-                }
-            },
-            "autoload": {
-                "psr-4": {
-                    "Cheppers\\GitHooks\\": "src/"
-                }
-            },
-            "notification-url": "https://packagist.org/downloads/",
-            "license": [
-                "GPL-2.0"
-            ],
-            "description": "Provide a bridge between Git hooks and scripts under VCS.",
-            "time": "2016-10-15 10:06:14"
-        },
-        {
             "name": "codeception/codeception",
             "version": "2.2.7",
             "source": {
@@ -1926,28 +2018,28 @@
         },
         {
             "name": "guzzlehttp/promises",
-            "version": "1.3.0",
+            "version": "v1.3.1",
             "source": {
                 "type": "git",
                 "url": "https://github.com/guzzle/promises.git",
-                "reference": "2693c101803ca78b27972d84081d027fca790a1e"
+                "reference": "a59da6cf61d80060647ff4d3eb2c03a2bc694646"
             },
             "dist": {
                 "type": "zip",
-                "url": "https://api.github.com/repos/guzzle/promises/zipball/2693c101803ca78b27972d84081d027fca790a1e",
-                "reference": "2693c101803ca78b27972d84081d027fca790a1e",
+                "url": "https://api.github.com/repos/guzzle/promises/zipball/a59da6cf61d80060647ff4d3eb2c03a2bc694646",
+                "reference": "a59da6cf61d80060647ff4d3eb2c03a2bc694646",
                 "shasum": ""
             },
             "require": {
                 "php": ">=5.5.0"
             },
             "require-dev": {
-                "phpunit/phpunit": "~4.0"
+                "phpunit/phpunit": "^4.0"
             },
             "type": "library",
             "extra": {
                 "branch-alias": {
-                    "dev-master": "1.0-dev"
+                    "dev-master": "1.4-dev"
                 }
             },
             "autoload": {
@@ -1973,7 +2065,7 @@
             "keywords": [
                 "promise"
             ],
-            "time": "2016-11-18 17:47:58"
+            "time": "2016-12-20 10:07:11"
         },
         {
             "name": "guzzlehttp/psr7",
@@ -2140,16 +2232,16 @@
         },
         {
             "name": "phpunit/php-code-coverage",
-            "version": "4.0.3",
+            "version": "4.0.4",
             "source": {
                 "type": "git",
                 "url": "https://github.com/sebastianbergmann/php-code-coverage.git",
-                "reference": "903fd6318d0a90b4770a009ff73e4a4e9c437929"
+                "reference": "c14196e64a78570034afd0b7a9f3757ba71c2a0a"
             },
             "dist": {
                 "type": "zip",
-                "url": "https://api.github.com/repos/sebastianbergmann/php-code-coverage/zipball/903fd6318d0a90b4770a009ff73e4a4e9c437929",
-                "reference": "903fd6318d0a90b4770a009ff73e4a4e9c437929",
+                "url": "https://api.github.com/repos/sebastianbergmann/php-code-coverage/zipball/c14196e64a78570034afd0b7a9f3757ba71c2a0a",
+                "reference": "c14196e64a78570034afd0b7a9f3757ba71c2a0a",
                 "shasum": ""
             },
             "require": {
@@ -2199,7 +2291,7 @@
                 "testing",
                 "xunit"
             ],
-            "time": "2016-11-28 16:00:31"
+            "time": "2016-12-20 15:22:42"
         },
         {
             "name": "phpunit/php-file-iterator",
@@ -3256,9 +3348,13 @@
     "aliases": [],
     "minimum-stability": "dev",
     "stability-flags": {
+        "cheppers/git-hooks": 20,
         "cheppers/robo-drush": 20,
         "cheppers/robo-git": 20,
-        "cheppers/robo-serialize": 20
+        "cheppers/robo-phpcs": 20,
+        "cheppers/robo-scss-lint": 20,
+        "cheppers/robo-serialize": 20,
+        "cheppers/robo-tslint": 20
     },
     "prefer-stable": true,
     "prefer-lowest": false,

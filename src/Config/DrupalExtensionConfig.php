@@ -17,6 +17,16 @@ class DrupalExtensionConfig extends BaseConfig
      */
     public $phpcs = null;
 
+    public $hasTypeScript = false;
+
+    public $hasSCSS = false;
+
+    public $scssLint = [
+        'paths' => [
+            'css/'
+        ],
+    ];
+
     /**
      * {@inheritdoc}
      */

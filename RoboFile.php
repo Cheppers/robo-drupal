@@ -272,7 +272,7 @@ class RoboFile extends \Robo\Tasks
         $env = $this->getEnvironment();
 
         $files = [
-            'src/',
+            'src/*.php',
             'tests/_support/Helper/',
             'tests/unit/',
             'RoboFile.php',

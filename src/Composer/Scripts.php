@@ -5,19 +5,9 @@ namespace Cheppers\Robo\Drupal\Composer;
 use Composer\Script\Event;
 use Symfony\Component\Process\Process;
 
-/**
- * Class Scripts.
- *
- * @package Cheppers\DcTester\Composer
- */
 class Scripts
 {
-    /**
-     * @param \Composer\Script\Event $event
-     *
-     * @return bool
-     */
-    public static function phpcsConfigSet(Event $event): int
+    public static function phpcsConfigSet(Event $event): bool
     {
         if (!$event->isDevMode()) {
             $event->getIO()->write('To call "' . __METHOD__ . '" method is allowed only in "dev" mode.');

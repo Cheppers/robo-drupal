@@ -15,7 +15,9 @@ use Cheppers\Robo\Drupal\Utils;
 use Cheppers\Robo\Drush\DrushTaskLoader;
 use Cheppers\Robo\Git\GitTaskLoader;
 use Cheppers\Robo\Phpcs\PhpcsTaskLoader;
+use Cheppers\Robo\ScssLint\ScssLintTaskLoader;
 use Cheppers\Robo\Serialize\SerializeTaskLoader;
+use Cheppers\Robo\TsLint\TsLintTaskLoader;
 use League\Container\ContainerInterface;
 use Robo\Collection\CollectionBuilder;
 use Robo\Contract\TaskInterface;
@@ -38,12 +40,14 @@ class ProjectIncubatorRoboFile extends Tasks
     // @codingStandardsIgnoreEnd
 
     use ComposerTaskLoader;
-    use DrupalTaskLoader;
     use DrupalCoreTestsTaskLoader;
+    use DrupalTaskLoader;
     use DrushTaskLoader;
-    use PhpcsTaskLoader;
     use GitTaskLoader;
+    use PhpcsTaskLoader;
+    use ScssLintTaskLoader;
     use SerializeTaskLoader;
+    use TsLintTaskLoader;
     use FilesystemShortcuts;
 
     /**
@@ -305,7 +309,69 @@ class ProjectIncubatorRoboFile extends Tasks
     //endregion
 
     //region Lint
+    public function lint(array $extensionNames): CollectionBuilder
+    {
+        $extensionNames = $this->validateArgExtensions($extensionNames);
+        $managedDrupalExtensions = $this->getManagedDrupalExtensions();
+
+        $cb = $this->collectionBuilder();
+        foreach ($extensionNames as $extensionName) {
+            $extension = $managedDrupalExtensions[$extensionName];
+            $cb->addTask($this->getTaskPhpcsLintDrupalExtension($extension));
+
+            if ($extension->hasTypeScript) {
+                $cb->addTask($this->getTaskTsLintDrupalExtension($extension));
+            }
+
+            if ($extension->hasSCSS) {
+                $cb->addTask($this->getTaskScssLintDrupalExtension($extension));
+            }
+        }
+
+        return $cb;
+    }
+
     public function lintPhpcs(array $extensions): CollectionBuilder
+    {
+        $extensions = $this->validateArgExtensions($extensions);
+        $managedDrupalExtensions = $this->getManagedDrupalExtensions();
+
+        $cb = $this->collectionBuilder();
+        foreach ($extensions as $extension) {
+            $cb->addTask($this->getTaskPhpcsLintDrupalExtension($managedDrupalExtensions[$extension]));
+        }
+
+        return $cb;
+    }
+
+    public function lintTs(array $extensions): CollectionBuilder
+    {
+        $extensions = $this->validateArgExtensions($extensions);
+        $managedDrupalExtensions = $this->getManagedDrupalExtensions();
+
+        $cb = $this->collectionBuilder();
+        foreach ($extensions as $extension) {
+            $cb->addTask($this->getTaskTsLintDrupalExtension($managedDrupalExtensions[$extension]));
+        }
+
+        return $cb;
+    }
+
+    public function lintScss(array $extensions): CollectionBuilder
+    {
+        $extensions = $this->validateArgExtensions($extensions);
+        $managedDrupalExtensions = $this->getManagedDrupalExtensions();
+
+        $cb = $this->collectionBuilder();
+        foreach ($extensions as $extension) {
+            $cb->addTask($this->getTaskScssLintDrupalExtension($managedDrupalExtensions[$extension]));
+        }
+
+        return $cb;
+    }
+    //endregion
+
+    protected function validateArgExtensions(array $extensions): array
     {
         // @todo Show a an error message in case of duplicated items.
         $managedDrupalExtensions = $this->getManagedDrupalExtensions();
@@ -321,14 +387,8 @@ class ProjectIncubatorRoboFile extends Tasks
             $extensions = array_keys($managedDrupalExtensions);
         }
 
-        $cb = $this->collectionBuilder();
-        foreach ($extensions as $extension) {
-            $cb->addTask($this->getTaskPhpcsLintDrupalExtension($managedDrupalExtensions[$extension]));
-        }
-
-        return $cb;
+        return $extensions;
     }
-    //endregion
 
     //region Test - Drupal.
     public function testDrupal(
@@ -565,6 +625,25 @@ class ProjectIncubatorRoboFile extends Tasks
                     ->taskPhpcsLintInput($options)
                     ->setAssetJar($assetJar)
                     ->setAssetJarMap('files', ['files']),
+            ]);
+    }
+
+    protected function getTaskScssLintDrupalExtension(DrupalExtensionConfig $extension): TaskInterface
+    {
+        $task = $this
+            ->taskScssLintRun()
+            ->workingDirectory($extension->path);
+
+        return $task;
+    }
+
+    protected function getTaskTsLintDrupalExtension(DrupalExtensionConfig $extension): TaskInterface
+    {
+        return $this
+            ->taskTsLintRun()
+            ->workingDirectory($extension->path)
+            ->paths([
+                'js/*.ts',
             ]);
     }
 
@@ -927,6 +1006,10 @@ class ProjectIncubatorRoboFile extends Tasks
             $ec->path = $path;
             $ec->packageVendor = $vendor;
             $ec->packageName = $name;
+            // @todo Better detection.
+            $ec->hasTypeScript = file_exists("$path/tsconfig.json");
+            // @todo Better detection.
+            $ec->hasSCSS = file_exists("$path/config.rb");
 
             if (!$ec->phpcs->paths) {
                  $ec->phpcs->paths = ['.'];

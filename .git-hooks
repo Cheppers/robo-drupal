@@ -2,7 +2,7 @@
 
 echo "BEGIN Git hook: ${cghHookName}"
 
-function myExit ()
+function cghExit ()
 {
     echo "End Git hook: ${cghHookName}"
 
@@ -19,13 +19,13 @@ test -s "${cghBridge}.local" && . "${cghBridge}.local"
 cghTask="githook:${cghHookName}"
 
 # Exit without error if "robo" doesn't exists or it has no corresponding task.
-test -x "$cghRobo" || myExit 0
-"${cghRobo}" help "${cghTask}" 1> /dev/null 2>&1 || myExit 0
+test -x "$cghRobo" || cghExit 0
+"${cghRobo}" help "${cghTask}" 1> /dev/null 2>&1 || cghExit 0
 
 if [ "$cghHasInput" = 'true' ]; then
-    "$cghRobo" "${cghTask}" $@ <<< $(</dev/stdin) || myExit $?
+    "$cghRobo" "${cghTask}" $@ <<< $(</dev/stdin) || cghExit $?
 else
-    "$cghRobo" "${cghTask}" $@ || myExit $?
+    "$cghRobo" "${cghTask}" $@ || cghExit $?
 fi
 
-myExit 0
+cghExit 0

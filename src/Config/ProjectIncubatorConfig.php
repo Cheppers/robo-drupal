@@ -5,13 +5,6 @@ namespace Cheppers\Robo\Drupal\Config;
 use Cheppers\Robo\Drupal\Utils;
 use function Stringy\create as s;
 
-/**
- * This class is only for IDE completion helper purposes.
- *
- * @todo Check that there is only one default database.
- *
- * @package Cheppers\Robo\Drupal\Config
- */
 class ProjectIncubatorConfig extends BaseConfig
 {
     /**

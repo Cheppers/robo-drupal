@@ -88,6 +88,8 @@ class ProjectIncubatorRoboFile extends Tasks
     /**
      * Allowed values: dev, git-hook, ci, prod, jenkins
      *
+     * @todo The "git-hook" isn't an environment.
+     *
      * @var string
      */
     protected $environment = 'dev';
@@ -311,7 +313,7 @@ class ProjectIncubatorRoboFile extends Tasks
     //region Lint
     public function lint(array $extensionNames): CollectionBuilder
     {
-        $extensionNames = $this->validateArgExtensions($extensionNames);
+        $extensionNames = $this->validateArgExtensionNames($extensionNames);
         $managedDrupalExtensions = $this->getManagedDrupalExtensions();
 
         $cb = $this->collectionBuilder();
@@ -319,10 +321,40 @@ class ProjectIncubatorRoboFile extends Tasks
             $extension = $managedDrupalExtensions[$extensionName];
             $cb->addTask($this->getTaskPhpcsLintDrupalExtension($extension));
 
+            if ($extension->hasSCSS) {
+                $cb->addTask($this->getTaskScssLintDrupalExtension($extension));
+            }
+
             if ($extension->hasTypeScript) {
                 $cb->addTask($this->getTaskTsLintDrupalExtension($extension));
             }
+        }
 
+        return $cb;
+    }
+
+    public function lintPhpcs(array $extensionNames): CollectionBuilder
+    {
+        $extensionNames = $this->validateArgExtensionNames($extensionNames);
+        $managedDrupalExtensions = $this->getManagedDrupalExtensions();
+
+        $cb = $this->collectionBuilder();
+        foreach ($extensionNames as $extensionName) {
+            $extension = $managedDrupalExtensions[$extensionName];
+            $cb->addTask($this->getTaskPhpcsLintDrupalExtension($extension));
+        }
+
+        return $cb;
+    }
+
+    public function lintScss(array $extensionNames): CollectionBuilder
+    {
+        $extensionNames = $this->validateArgExtensionNames($extensionNames);
+        $managedDrupalExtensions = $this->getManagedDrupalExtensions();
+
+        $cb = $this->collectionBuilder();
+        foreach ($extensionNames as $extensionName) {
+            $extension = $managedDrupalExtensions[$extensionName];
             if ($extension->hasSCSS) {
                 $cb->addTask($this->getTaskScssLintDrupalExtension($extension));
             }
@@ -331,47 +363,24 @@ class ProjectIncubatorRoboFile extends Tasks
         return $cb;
     }
 
-    public function lintPhpcs(array $extensions): CollectionBuilder
+    public function lintTs(array $extensionNames): CollectionBuilder
     {
-        $extensions = $this->validateArgExtensions($extensions);
+        $extensionNames = $this->validateArgExtensionNames($extensionNames);
         $managedDrupalExtensions = $this->getManagedDrupalExtensions();
 
         $cb = $this->collectionBuilder();
-        foreach ($extensions as $extension) {
-            $cb->addTask($this->getTaskPhpcsLintDrupalExtension($managedDrupalExtensions[$extension]));
-        }
-
-        return $cb;
-    }
-
-    public function lintTs(array $extensions): CollectionBuilder
-    {
-        $extensions = $this->validateArgExtensions($extensions);
-        $managedDrupalExtensions = $this->getManagedDrupalExtensions();
-
-        $cb = $this->collectionBuilder();
-        foreach ($extensions as $extension) {
-            $cb->addTask($this->getTaskTsLintDrupalExtension($managedDrupalExtensions[$extension]));
-        }
-
-        return $cb;
-    }
-
-    public function lintScss(array $extensions): CollectionBuilder
-    {
-        $extensions = $this->validateArgExtensions($extensions);
-        $managedDrupalExtensions = $this->getManagedDrupalExtensions();
-
-        $cb = $this->collectionBuilder();
-        foreach ($extensions as $extension) {
-            $cb->addTask($this->getTaskScssLintDrupalExtension($managedDrupalExtensions[$extension]));
+        foreach ($extensionNames as $extensionName) {
+            $extension = $managedDrupalExtensions[$extensionName];
+            if ($extension->hasTypeScript) {
+                $cb->addTask($this->getTaskTsLintDrupalExtension($extension));
+            }
         }
 
         return $cb;
     }
     //endregion
 
-    protected function validateArgExtensions(array $extensions): array
+    protected function validateArgExtensionNames(array $extensions): array
     {
         // @todo Show a an error message in case of duplicated items.
         $managedDrupalExtensions = $this->getManagedDrupalExtensions();
@@ -631,20 +640,40 @@ class ProjectIncubatorRoboFile extends Tasks
     protected function getTaskScssLintDrupalExtension(DrupalExtensionConfig $extension): TaskInterface
     {
         $task = $this
-            ->taskScssLintRun()
-            ->workingDirectory($extension->path);
+            ->taskScssLintRunFiles()
+            ->setFailOn('warning')
+            ->setWorkingDirectory($extension->path)
+            ->addLintReporter('lintVerboseReporter')
+            ->setExclude('*.css')
+            ->setPaths([
+                'css/',
+            ]);
+
+        $gemFile = $this->getFallbackFileName('Gemfile', $extension->path);
+        if ($gemFile) {
+            $task->setBundleGemFile($gemFile);
+        }
 
         return $task;
     }
 
     protected function getTaskTsLintDrupalExtension(DrupalExtensionConfig $extension): TaskInterface
     {
-        return $this
+        $task = $this
             ->taskTsLintRun()
-            ->workingDirectory($extension->path)
-            ->paths([
-                'js/*.ts',
+            ->setWorkingDirectory($extension->path)
+            ->setFailOn('warning')
+            ->addLintReporter('verbose:StdOutput', 'lintVerboseReporter')
+            ->setPaths([
+                'js/**/*.ts',
             ]);
+
+        $configFile = $this->getFallbackFileName('tslint.json', $extension->path);
+        if ($configFile) {
+            $task->setConfigFile($configFile);
+        }
+
+        return $task;
     }
 
     protected function getTaskDrupalRebuildSitesPhp(): CollectionBuilder
@@ -948,6 +977,25 @@ class ProjectIncubatorRoboFile extends Tasks
         }
 
         return $this;
+    }
+
+    protected function getFallbackFileName(string $fileName, string $path): string
+    {
+        if (file_exists("$path/$fileName")) {
+            return '';
+        }
+
+        $path = getcwd();
+        if (file_exists("$path/$fileName")) {
+            return "$path/$fileName";
+        }
+
+        $path = Path::makeAbsolute("../../$fileName", __DIR__);
+        if (file_exists("$path/$fileName")) {
+            return "$path/$fileName";
+        }
+
+        throw new \InvalidArgumentException("Has no fallback for file: '$fileName'");
     }
 
     /**

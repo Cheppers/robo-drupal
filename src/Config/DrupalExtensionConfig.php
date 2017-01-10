@@ -6,6 +6,11 @@ class DrupalExtensionConfig extends BaseConfig
 {
     public $enabled = true;
 
+    /**
+     * Root directory of the package.
+     *
+     * @var string
+     */
     public $path = '';
 
     public $packageVendor = '';
@@ -13,7 +18,7 @@ class DrupalExtensionConfig extends BaseConfig
     public $packageName = '';
 
     /**
-     * @var \Cheppers\Robo\Drupal\Config\PhpcsConfig
+     * @var null|\Cheppers\Robo\Drupal\Config\PhpcsConfig
      */
     public $phpcs = null;
 

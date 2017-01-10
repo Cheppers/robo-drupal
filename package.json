@@ -1,0 +1,15 @@
+{
+  "name": "robo-drupal",
+  "description": "Helper for Drupal related Robo tasks.",
+  "version": "0.0.1",
+  "license": "propietary",
+  "private": true,
+  "repository": {
+    "url": "/dev/null"
+  },
+  "devDependencies": {
+    "eslint": "^3.13.1",
+    "tslint": "^4.2.0",
+    "typescript": "^2.1.4"
+  }
+}

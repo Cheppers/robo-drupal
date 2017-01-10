@@ -13,6 +13,7 @@ use Cheppers\Robo\Drupal\Robo\DrupalCoreTestsTaskLoader;
 use Cheppers\Robo\Drupal\Robo\DrupalTaskLoader;
 use Cheppers\Robo\Drupal\Utils;
 use Cheppers\Robo\Drush\DrushTaskLoader;
+use Cheppers\Robo\ESLint\ESLintTaskLoader;
 use Cheppers\Robo\Git\GitTaskLoader;
 use Cheppers\Robo\Phpcs\PhpcsTaskLoader;
 use Cheppers\Robo\ScssLint\ScssLintTaskLoader;
@@ -44,6 +45,7 @@ class ProjectIncubatorRoboFile extends Tasks
     use DrupalTaskLoader;
     use DrushTaskLoader;
     use GitTaskLoader;
+    use ESLintTaskLoader;
     use PhpcsTaskLoader;
     use ScssLintTaskLoader;
     use SerializeTaskLoader;
@@ -154,7 +156,7 @@ class ProjectIncubatorRoboFile extends Tasks
     }
 
     //region Self
-    //region Self - Git hooks
+    //region Self - Git hooks.
     /**
      * Git "pre-commit" hook callback.
      */
@@ -190,6 +192,7 @@ class ProjectIncubatorRoboFile extends Tasks
         $this->environment = 'git-hook';
 
         return $this->collectionBuilder()->addCode(function () use ($oldRef, $newRef) {
+            // @todo Create dedicated Robo task. Maybe in the cheppers/robo-git package.
             $command = sprintf(
                 '%s diff --exit-code --name-only %s..%s -- %s %s',
                 escapeshellcmd($this->projectConfig->gitExecutable),
@@ -210,7 +213,7 @@ class ProjectIncubatorRoboFile extends Tasks
     }
     //endregion
 
-    //region Self - Lint
+    //region Self - Lint.
     /**
      * @todo Move this settings to ProjectConfig.php.
      *
@@ -242,9 +245,18 @@ class ProjectIncubatorRoboFile extends Tasks
         ]);
     }
     //endregion
+
+    public function selfManagedExtensions()
+    {
+        // @todo Improve the output format.
+        $managedExtensions = $this->getManagedDrupalExtensions();
+        foreach ($managedExtensions as $e) {
+            $this->say("{$e->packageVendor}/{$e->packageName} {$e->path}");
+        }
+    }
     //endregion
 
-    //region Site - CRUD
+    //region Site - CRUD.
     /**
      * @option string $profile Name of the install profile.
      * @option string $long    Long machine-name prefix. Example: "awesome"
@@ -287,30 +299,28 @@ class ProjectIncubatorRoboFile extends Tasks
      */
     public function siteDelete(string $siteId = 'default'): CollectionBuilder
     {
-        /** @var \Robo\Collection\CollectionBuilder $cb */
-        $cb = $this->collectionBuilder();
-        $cb
+        $this->validateArgSiteId($siteId);
+
+        return $this
+            ->collectionBuilder()
             ->addCode($this->getTaskDrupalSiteDelete($siteId))
             ->addTask($this->getTaskDrupalRebuildSitesPhp());
-
-        return $cb;
     }
 
     public function siteInstall(string $siteId = 'default'): CollectionBuilder
     {
-        /** @var \Robo\Collection\CollectionBuilder $cb */
-        $cb = $this->collectionBuilder();
+        $this->validateArgSiteId($siteId);
 
-        $cb->addCode($this->getTaskUnlockSettingsPhp($siteId));
-        $cb->addCode($this->getTaskPublicFilesClean($siteId));
-        $cb->addCode($this->getTaskPrivateFilesClean($siteId));
-        $cb->addTask($this->getTaskSiteInstall($siteId));
-
-        return $cb;
+        return $this
+            ->collectionBuilder()
+            ->addCode($this->getTaskUnlockSettingsPhp($siteId))
+            ->addCode($this->getTaskPublicFilesClean($siteId))
+            ->addCode($this->getTaskPrivateFilesClean($siteId))
+            ->addTask($this->getTaskSiteInstall($siteId));
     }
     //endregion
 
-    //region Lint
+    //region Lint.
     public function lint(array $extensionNames): CollectionBuilder
     {
         $extensionNames = $this->validateArgExtensionNames($extensionNames);
@@ -327,6 +337,8 @@ class ProjectIncubatorRoboFile extends Tasks
 
             if ($extension->hasTypeScript) {
                 $cb->addTask($this->getTaskTsLintDrupalExtension($extension));
+            } else {
+                $cb->addTask($this->getTaskESLintDrupalExtension($extension));
             }
         }
 
@@ -349,6 +361,7 @@ class ProjectIncubatorRoboFile extends Tasks
 
     public function lintScss(array $extensionNames): CollectionBuilder
     {
+        // @todo Configurable directory for "css".
         $extensionNames = $this->validateArgExtensionNames($extensionNames);
         $managedDrupalExtensions = $this->getManagedDrupalExtensions();
 
@@ -365,6 +378,7 @@ class ProjectIncubatorRoboFile extends Tasks
 
     public function lintTs(array $extensionNames): CollectionBuilder
     {
+        // @todo Configurable directory for "js".
         $extensionNames = $this->validateArgExtensionNames($extensionNames);
         $managedDrupalExtensions = $this->getManagedDrupalExtensions();
 
@@ -378,17 +392,46 @@ class ProjectIncubatorRoboFile extends Tasks
 
         return $cb;
     }
+
+    public function lintEs(array $extensionNames): CollectionBuilder
+    {
+        // @todo Configurable directory for "js".
+        $extensionNames = $this->validateArgExtensionNames($extensionNames);
+        $managedDrupalExtensions = $this->getManagedDrupalExtensions();
+
+        $cb = $this->collectionBuilder();
+        foreach ($extensionNames as $extensionName) {
+            $extension = $managedDrupalExtensions[$extensionName];
+            if (!$extension->hasTypeScript) {
+                $cb->addTask($this->getTaskESLintDrupalExtension($extension));
+            }
+        }
+
+        return $cb;
+    }
     //endregion
+
+    /**
+     * @return $this
+     */
+    protected function validateArgSiteId(string $siteId)
+    {
+        if ($siteId && !array_key_exists($siteId, $this->projectConfig->sites)) {
+            throw new \InvalidArgumentException("Unknown site ID: '$siteId'", 1);
+        }
+
+        return $this;
+    }
 
     protected function validateArgExtensionNames(array $extensions): array
     {
         // @todo Show a an error message in case of duplicated items.
         $managedDrupalExtensions = $this->getManagedDrupalExtensions();
 
-        $non_exists_extensions = array_diff_key(array_flip($extensions), $managedDrupalExtensions);
-        if ($non_exists_extensions) {
+        $nonExistsExtensions = array_diff_key(array_flip($extensions), $managedDrupalExtensions);
+        if ($nonExistsExtensions) {
             throw new \InvalidArgumentException(
-                'Unknown managed Drupal extensions: ' . implode(', ', array_keys($non_exists_extensions))
+                'Unknown managed Drupal extensions: ' . implode(', ', array_keys($nonExistsExtensions))
             );
         }
 
@@ -676,6 +719,27 @@ class ProjectIncubatorRoboFile extends Tasks
         return $task;
     }
 
+    protected function getTaskESLintDrupalExtension(DrupalExtensionConfig $extension): TaskInterface
+    {
+        $eslintExecutable = $this->getFallbackFileName('node_modules/.bin/eslint', $extension->path);
+        $configFile = $this->getFallbackFileName('.eslintrc', $extension->path);
+        $task = $this
+            ->taskESLintRunFiles()
+            ->setWorkingDirectory(Path::makeRelative($extension->path, getcwd()))
+            ->setEslintExecutable(Path::makeRelative($eslintExecutable, $extension->path))
+            ->setFailOn('warning')
+            ->addLintReporter('verbose:StdOutput', 'lintVerboseReporter')
+            ->setFiles([
+                'js/**/*.js',
+            ]);
+
+        if ($configFile) {
+            $task->setConfigFile(Path::makeRelative($configFile, $extension->path));
+        }
+
+        return $task;
+    }
+
     protected function getTaskDrupalRebuildSitesPhp(): CollectionBuilder
     {
         return $this->taskDrupalRebuildSitesPhp([
@@ -837,6 +901,7 @@ class ProjectIncubatorRoboFile extends Tasks
 
     protected function getTaskWritableWorkingCopy(): \Closure
     {
+        // @todo Create dedicated Robo task.
         return function () {
             $mask = umask();
 
@@ -859,14 +924,11 @@ class ProjectIncubatorRoboFile extends Tasks
 
     protected function getTaskUnlockSettingsPhp(string $siteId = ''): \Closure
     {
-        return function () use ($siteId) {
+        return function () use ($siteId): int {
             $mask = umask();
-
-            if ($siteId && isset($this->projectConfig->sites[$siteId])) {
-                $sites = [$siteId => $this->projectConfig->sites[$siteId]];
-            } else {
-                $sites = $this->projectConfig->sites;
-            }
+            $sites = $siteId ?
+                [$siteId => $this->projectConfig->sites[$siteId]]
+                : $this->projectConfig->sites;
 
             foreach ($sites as $site) {
                 $siteDir = "{$this->projectConfig->drupalRootDir}/sites/{$site->id}";
@@ -985,14 +1047,26 @@ class ProjectIncubatorRoboFile extends Tasks
             return '';
         }
 
-        $path = getcwd();
-        if (file_exists("$path/$fileName")) {
-            return "$path/$fileName";
-        }
+        $paths = [
+            getcwd(),
+            Path::makeAbsolute("../../..", __DIR__),
+        ];
 
-        $path = Path::makeAbsolute("../../$fileName", __DIR__);
-        if (file_exists("$path/$fileName")) {
-            return "$path/$fileName";
+        $root = [
+            'Gemfile',
+        ];
+        foreach ($paths as $path) {
+            if (strpos($fileName, 'node_modules/.bin/') === 0) {
+                if (file_exists("$path/$fileName")) {
+                    return "$path/$fileName";
+                }
+            } elseif (in_array($fileName, $root)) {
+                if (file_exists("$path/$fileName")) {
+                    return "$path/$fileName";
+                }
+            } elseif (file_exists("$path/src/$fileName")) {
+                return "$path/src/$fileName";
+            }
         }
 
         throw new \InvalidArgumentException("Has no fallback for file: '$fileName'");
@@ -1024,7 +1098,7 @@ class ProjectIncubatorRoboFile extends Tasks
     /**
      * @return \Cheppers\Robo\Drupal\Config\DrupalExtensionConfig[]
      */
-    protected function getManagedDrupalExtensions()
+    protected function getManagedDrupalExtensions(): array
     {
         $this->initManagedDrupalExtensions();
 

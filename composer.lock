@@ -4,8 +4,8 @@
         "Read more about it at https://getcomposer.org/doc/01-basic-usage.md#composer-lock-the-lock-file",
         "This file is @generated automatically"
     ],
-    "hash": "287480f28232f056d3700ebf20f1d2ac",
-    "content-hash": "a821fc955626a79400c5427cf81183c1",
+    "hash": "a2dd795173d9a0948875ae32061eb316",
+    "content-hash": "08e9734cf56e1fd9ec8a802a5bf52153",
     "packages": [
         {
             "name": "cheppers/asset-jar",
@@ -169,6 +169,61 @@
             "description": "Drush related Robo tasks"
         },
         {
+            "name": "cheppers/robo-eslint",
+            "version": "dev-master",
+            "dist": {
+                "type": "path",
+                "url": "../robo-eslint",
+                "reference": "852c86d6a6e87c6ce1844b6724fe10d963e36e8d",
+                "shasum": null
+            },
+            "require": {
+                "cheppers/asset-jar": "^0.0",
+                "consolidation/robo": "^1.0",
+                "symfony/process": "^2.8 || ^3.1"
+            },
+            "require-dev": {
+                "cheppers/git-hooks": "^0.0",
+                "cheppers/lint-report": "^0.0",
+                "cheppers/robo-git": "^0.0",
+                "cheppers/robo-phpcs": "^0.0",
+                "codeception/codeception": "^2.2",
+                "php": ">=7.1"
+            },
+            "type": "library",
+            "autoload": {
+                "psr-4": {
+                    "Cheppers\\Robo\\ESLint\\": "src/"
+                }
+            },
+            "autoload-dev": {
+                "psr-4": {
+                    "Cheppers\\Robo\\ESLint\\Test\\Acceptance\\": "tests/acceptance/",
+                    "Cheppers\\Robo\\ESLint\\Test\\Unit\\": "tests/unit/"
+                }
+            },
+            "scripts": {
+                "post-install-cmd": [
+                    "@deploy-git-hooks",
+                    "@tests-data-npm-install"
+                ],
+                "post-update-cmd": [
+                    "@deploy-git-hooks",
+                    "@tests-data-npm-install"
+                ],
+                "deploy-git-hooks": [
+                    "\\Cheppers\\GitHooks\\Main::deploy"
+                ],
+                "tests-data-npm-install": [
+                    "cd tests/_data && npm install"
+                ]
+            },
+            "license": [
+                "GPL-2.0+"
+            ],
+            "description": "Robo task wrapper for ESLint"
+        },
+        {
             "name": "cheppers/robo-git",
             "version": "dev-master",
             "dist": {
@@ -211,16 +266,11 @@
         {
             "name": "cheppers/robo-phpcs",
             "version": "dev-master",
-            "source": {
-                "type": "git",
-                "url": "https://github.com/Cheppers/robo-phpcs.git",
-                "reference": "6c7447657f35451497f83ffd348d6814a35a9898"
-            },
             "dist": {
-                "type": "zip",
-                "url": "https://api.github.com/repos/Cheppers/robo-phpcs/zipball/6c7447657f35451497f83ffd348d6814a35a9898",
-                "reference": "6c7447657f35451497f83ffd348d6814a35a9898",
-                "shasum": ""
+                "type": "path",
+                "url": "../robo-phpcs",
+                "reference": "9245d034de0463b773c97676e236ac7889e18b86",
+                "shasum": null
             },
             "require": {
                 "cheppers/asset-jar": "^0.0",
@@ -240,12 +290,27 @@
                     "Cheppers\\Robo\\Phpcs\\": "src/"
                 }
             },
-            "notification-url": "https://packagist.org/downloads/",
+            "autoload-dev": {
+                "psr-4": {
+                    "Cheppers\\Robo\\Phpcs\\Tests\\Acceptance\\": "tests/acceptance/",
+                    "Cheppers\\Robo\\Phpcs\\Tests\\Unit\\": "tests/unit/"
+                }
+            },
+            "scripts": {
+                "post-install-cmd": [
+                    "@deploy-git-hooks"
+                ],
+                "post-update-cmd": [
+                    "@deploy-git-hooks"
+                ],
+                "deploy-git-hooks": [
+                    "\\Cheppers\\GitHooks\\Main::deploy"
+                ]
+            },
             "license": [
                 "GPL-2.0+"
             ],
-            "description": "Robo task wrapper for PHPCS",
-            "time": "2016-12-14 21:26:13"
+            "description": "Robo task wrapper for PHPCS"
         },
         {
             "name": "cheppers/robo-scss-lint",
@@ -3350,6 +3415,7 @@
     "stability-flags": {
         "cheppers/git-hooks": 20,
         "cheppers/robo-drush": 20,
+        "cheppers/robo-eslint": 20,
         "cheppers/robo-git": 20,
         "cheppers/robo-phpcs": 20,
         "cheppers/robo-scss-lint": 20,

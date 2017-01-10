@@ -21,9 +21,17 @@
             "type": "path",
             "url": "../robo-drush"
         },
+        "local:cheppers/robo-eslint": {
+            "type": "path",
+            "url": "../robo-eslint"
+        },
         "local:cheppers/robo-git": {
             "type": "path",
             "url": "../robo-git"
+        },
+        "local:cheppers/robo-phpcs": {
+            "type": "path",
+            "url": "../robo-phpcs"
         },
         "local:cheppers/robo-scss-lint": {
             "type": "path",
@@ -43,6 +51,7 @@
         "cheppers/asset-jar": "^0.0",
         "cheppers/git-hooks": "dev-master",
         "cheppers/robo-drush": "dev-master",
+        "cheppers/robo-eslint": "dev-master",
         "cheppers/robo-git": "dev-master",
         "cheppers/robo-phpcs": "dev-master",
         "cheppers/robo-scss-lint": "dev-master",
@@ -72,11 +81,14 @@
     "scripts": {
         "post-install-cmd": [
             "@phpcs-set-installed-paths",
-            "@deploy-git-hooks"
+            "@deploy-git-hooks",
+            "@npm-install"
         ],
         "post-update-cmd": [
-            "@deploy-git-hooks"
+            "@deploy-git-hooks",
+            "@npm-install"
         ],
+        "npm-install": "npm install",
         "deploy-git-hooks": "\\Cheppers\\GitHooks\\Main::deploy",
         "phpcs-set-installed-paths": "\\Cheppers\\Robo\\Drupal\\Composer\\Scripts::phpcsConfigSet"
     }

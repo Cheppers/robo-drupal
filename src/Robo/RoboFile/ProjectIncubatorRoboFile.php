@@ -838,17 +838,18 @@ class ProjectIncubatorRoboFile extends Tasks
      */
     protected function getTaskSiteInstall(string $siteId): TaskInterface
     {
+        $backToRootDir = $this->backToRootDir($this->projectConfig->drupalRootDir);
         $site = $this->projectConfig->sites[$siteId];
         $cmdPattern = '%s --yes --sites-subdir=%s';
         $cmdArgs = [
-            escapeshellcmd("../{$this->binDir}/drush"),
+            escapeshellcmd("$backToRootDir/{$this->binDir}/drush"),
             escapeshellarg($site->id),
         ];
 
         $configDir = "{$this->projectConfig->outerSitesSubDir}/{$site->id}/config/sync";
         if (file_exists($configDir) && glob("$configDir/*.yml")) {
             $cmdPattern .= ' --config-dir=%s';
-            $cmdArgs[] = escapeshellarg("../$configDir");
+            $cmdArgs[] = escapeshellarg("$backToRootDir/$configDir");
         }
 
         $cmdPattern .= ' site-install %s';
@@ -961,12 +962,15 @@ class ProjectIncubatorRoboFile extends Tasks
             '{php}' => $phpVariant->id,
             '{db}' => $databaseServer->id,
         ]);
-            
+
+        $backToRootDir = $this->backToRootDir($this->projectConfig->drupalRootDir);
+
+        // @todo Configurable protocol. HTTP vs HTTPS.
         return $this
             ->taskDrupalCoreTestsRun()
             ->setDrupalRoot($this->projectConfig->drupalRootDir)
             ->setUrl("http://$url")
-            ->setXml(Path::join('..', $this->projectConfig->reportsDir, 'tests'))
+            ->setXml(Path::join($backToRootDir, $this->projectConfig->reportsDir, 'tests'))
             ->setColorized(true)
             ->setNonHtml(true)
             ->setPhpExecutable(PHP_BINARY)
@@ -1039,6 +1043,11 @@ class ProjectIncubatorRoboFile extends Tasks
         }
 
         return $this;
+    }
+
+    protected function backToRootDir(string $from): string
+    {
+        return Path::makeRelative('.', $from) ?: '.';
     }
 
     protected function getFallbackFileName(string $fileName, string $path): string
@@ -1128,10 +1137,8 @@ class ProjectIncubatorRoboFile extends Tasks
             $ec->path = $path;
             $ec->packageVendor = $vendor;
             $ec->packageName = $name;
-            // @todo Better detection.
-            $ec->hasTypeScript = file_exists("$path/tsconfig.json");
-            // @todo Better detection.
-            $ec->hasSCSS = file_exists("$path/config.rb");
+            $ec->hasTypeScript = $this->hasDrupalExtensionTypeScript($path);
+            $ec->hasSCSS = $this->hasDrupalExtensionScss($path);
 
             if (!$ec->phpcs->paths) {
                  $ec->phpcs->paths = ['.'];
@@ -1159,7 +1166,7 @@ class ProjectIncubatorRoboFile extends Tasks
         $this->initComposerLock();
         $managedExtensions = [];
         $packagePaths = $this->getPackagePaths();
-        
+
         $currentDir = getcwd();
         foreach ($packagePaths as $packageName => $packagePath) {
             foreach (['packages', 'packages-dev'] as $lockKey) {
@@ -1173,5 +1180,17 @@ class ProjectIncubatorRoboFile extends Tasks
         }
 
         return $managedExtensions;
+    }
+
+    protected function hasDrupalExtensionTypeScript(string $path): bool
+    {
+        // @todo Better detection.
+        return file_exists("$path/tsconfig.json");
+    }
+
+    protected function hasDrupalExtensionScss(string $path): bool
+    {
+        // @todo Better detection.
+        return file_exists("$path/config.rb");
     }
 }

@@ -2,6 +2,13 @@
 
 namespace Cheppers\Robo\Drupal\Config;
 
+/**
+ * @todo Add ::$phpcsConfig property.
+ * @todo Add ::$tsLintConfig property.
+ * @todo Add ::$esLintConfig property.
+ * @todo Add ::$scssLintConfig property.
+ * @todo Decision about ::$hasTypeScript vs ::$typeScriptDir vs ::$tsLintConfig - (same with JavaScript and SCSS).
+ */
 class DrupalExtensionConfig extends BaseConfig
 {
     public $enabled = true;
@@ -13,8 +20,18 @@ class DrupalExtensionConfig extends BaseConfig
      */
     public $path = '';
 
+    /**
+     * First part of the composer.json:name.
+     *
+     * @var string
+     */
     public $packageVendor = '';
 
+    /**
+     * Second part of the composer.json:name.
+     *
+     * @var string
+     */
     public $packageName = '';
 
     /**

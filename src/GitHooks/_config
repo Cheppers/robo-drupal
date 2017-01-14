@@ -1,0 +1,5 @@
+#!/usr/bin/env bash
+
+roboDrupalTask="githook:${roboDrupalHookName}"
+roboDrupalHostDir='/home/andor/Documents/Composer/vendor/cheppers/drupal-incubator'
+roboDrupalExtensionName='dummy'

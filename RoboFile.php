@@ -269,7 +269,7 @@ class RoboFile extends \Robo\Tasks
         $env = $this->getEnvironment();
 
         $files = [
-            'src/*.php',
+            'src/',
             'tests/_support/Helper/',
             'tests/unit/',
             'RoboFile.php',
@@ -280,6 +280,9 @@ class RoboFile extends \Robo\Tasks
             'standard' => 'PSR2',
             'lintReporters' => [
                 'lintVerboseReporter' => null,
+            ],
+            'ignore' => [
+                'src/GitHooks/',
             ],
         ];
 

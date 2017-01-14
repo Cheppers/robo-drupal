@@ -35,6 +35,11 @@ class DrupalExtensionConfig extends BaseConfig
     public $packageName = '';
 
     /**
+     * @var bool
+     */
+    public $hasGit = false;
+
+    /**
      * @var null|\Cheppers\Robo\Drupal\Config\PhpcsConfig
      */
     public $phpcs = null;

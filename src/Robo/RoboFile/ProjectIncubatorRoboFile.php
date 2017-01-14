@@ -24,22 +24,16 @@ use Robo\Collection\CollectionBuilder;
 use Robo\Contract\TaskInterface;
 use Robo\Task\Filesystem\loadShortcuts as FilesystemShortcuts;
 use Robo\Tasks;
+use Symfony\Component\Filesystem\Filesystem;
 use Symfony\Component\Finder\Finder;
 use Symfony\Component\Process\Process;
 use Webmozart\PathUtil\Path;
 
 /**
- * Class ProjectIncubator.
- *
- * @todo Support from Drupal extensions where the "vendor" name isn't "drupal".
- *
- * @package Cheppers\Robo\Drupal\Robo\RoboClass
+ * @todo Support for Drupal extensions where the "vendor" name isn't "drupal".
  */
-// @codingStandardsIgnoreStart
 class ProjectIncubatorRoboFile extends Tasks
 {
-    // @codingStandardsIgnoreEnd
-
     use ComposerTaskLoader;
     use DrupalCoreTestsTaskLoader;
     use DrupalTaskLoader;
@@ -98,9 +92,15 @@ class ProjectIncubatorRoboFile extends Tasks
 
     protected $areManagedDrupalExtensionsInitialized = false;
 
+    /**
+     * @var string
+     */
+    protected $roboDrupalRoot = '';
+
     public function __construct()
     {
         putenv('COMPOSER_DISABLE_XDEBUG_WARN=1');
+        $this->roboDrupalRoot = Path::makeAbsolute("../../..", __DIR__);
 
         require_once 'ProjectConfig.php';
         $this->projectConfig = $GLOBALS['projectConfig'];
@@ -156,11 +156,12 @@ class ProjectIncubatorRoboFile extends Tasks
     }
 
     //region Self
+
     //region Self - Git hooks.
     /**
      * Git "pre-commit" hook callback.
      */
-    public function selfGitHookPreCommit(): CollectionBuilder
+    public function selfGithookPreCommit(): CollectionBuilder
     {
         $this->environment = 'git-hook';
 
@@ -187,7 +188,7 @@ class ProjectIncubatorRoboFile extends Tasks
      *
      * @return CollectionBuilder
      */
-    public function selfGitHookPostCheckout(string $oldRef, string $newRef, string $isBranch): CollectionBuilder
+    public function selfGithookPostCheckout(string $oldRef, string $newRef, string $isBranch): CollectionBuilder
     {
         $this->environment = 'git-hook';
 
@@ -253,6 +254,46 @@ class ProjectIncubatorRoboFile extends Tasks
         foreach ($managedExtensions as $e) {
             $this->say("{$e->packageVendor}/{$e->packageName} {$e->path}");
         }
+    }
+    //endregion
+
+    //region Git hooks.
+    public function githooksInstall(): ?CollectionBuilder
+    {
+        $extensions = Utils::filterDisabled(
+            $this->getManagedDrupalExtensions(),
+            'hasGit'
+        );
+
+        if (!$extensions) {
+            $this->say('There is no managed extension under Git VCS.');
+
+            return null;
+        }
+
+        $cb = $this->collectionBuilder();
+        foreach ($extensions as $extension) {
+            $cb->addCode($this->getTaskGitHookInstall($extension));
+        }
+
+        return $cb;
+    }
+
+    /**
+     * @todo Implement.
+     */
+    public function githooksUninstall(): ?CollectionBuilder
+    {
+        $this->yell('@todo');
+
+        return null;
+    }
+
+    public function githookPreCommit(string $extensionPath, string $extensionName): CollectionBuilder
+    {
+        $cb = $this->collectionBuilder();
+
+        return $cb;
     }
     //endregion
 
@@ -923,6 +964,61 @@ class ProjectIncubatorRoboFile extends Tasks
         };
     }
 
+    protected function getTaskGitHookInstall(DrupalExtensionConfig $extension): \Closure
+    {
+        return function () use ($extension) {
+            /** @var \Psr\Log\LoggerInterface $logger */
+            $logger = $this->getContainer()->get('logger');
+            $logger->notice(
+                'Install Git hooks for "<info>{extension}</info>"',
+                [
+                    'extension' => $extension->packageName,
+                ]
+            );
+
+            $mask = umask();
+            $fs = new Filesystem();
+            $hostDir = getcwd();
+            $srcDirUpstream = $this->getPackagePath('cheppers/git-hooks') . '/git-hooks';
+            $srcDirCustom = "{$this->roboDrupalRoot}/src/GitHooks";
+            // @todo Support .git pointers.
+            $dstDir = "{$extension->path}/.git/hooks";
+
+            $fs->mirror($srcDirUpstream, $dstDir, null, ['override' => true]);
+            $fs->copy("$srcDirCustom/_common", "$dstDir/_common", true);
+
+            $file = new \DirectoryIterator($srcDirUpstream);
+            while ($file->valid()) {
+                if ($file->isFile() && is_executable($file->getPathname())) {
+                    $fs->chmod("$dstDir/" . $file->getBasename(), 0777, $mask);
+                }
+
+                $file->next();
+            }
+
+            $configFileName = '_config';
+            $configContentPattern = implode("\n", [
+                '#!/usr/bin/env bash',
+                '',
+                'roboDrupalTask="githook:${roboDrupalHookName}"',
+                'roboDrupalHostDir=%s',
+                'roboDrupalExtensionName=%s',
+                '',
+            ]);
+            $configContentArgs = [
+                escapeshellarg($hostDir),
+                escapeshellarg($extension->packageName)
+            ];
+            $configContent = vsprintf($configContentPattern, $configContentArgs);
+            $result = file_put_contents("$dstDir/$configFileName", $configContent);
+            if ($result === false) {
+                throw new \Exception("Failed to install git hooks for '{$extension->packageName}'.");
+            }
+
+            return 0;
+        };
+    }
+
     protected function getTaskUnlockSettingsPhp(string $siteId = ''): \Closure
     {
         return function () use ($siteId): int {
@@ -1058,7 +1154,7 @@ class ProjectIncubatorRoboFile extends Tasks
 
         $paths = [
             getcwd(),
-            Path::makeAbsolute("../../..", __DIR__),
+            $this->roboDrupalRoot,
         ];
 
         $root = [
@@ -1086,10 +1182,11 @@ class ProjectIncubatorRoboFile extends Tasks
      */
     protected $packagePaths = null;
 
+    /**
+     * @return string[]
+     */
     protected function getPackagePaths(): array
     {
-        $this->packagePaths = null;
-
         if ($this->packagePaths === null) {
             $ppResult = $this
                 ->taskComposerPackagePaths([
@@ -1102,6 +1199,13 @@ class ProjectIncubatorRoboFile extends Tasks
         }
 
         return $this->packagePaths;
+    }
+
+    protected function getPackagePath(string $packageId): ?string
+    {
+        $pp = $this->getPackagePaths();
+
+        return $pp[$packageId] ?? null;
     }
 
     /**
@@ -1137,6 +1241,7 @@ class ProjectIncubatorRoboFile extends Tasks
             $ec->path = $path;
             $ec->packageVendor = $vendor;
             $ec->packageName = $name;
+            $ec->hasGit = file_exists("$path/.git");
             $ec->hasTypeScript = $this->hasDrupalExtensionTypeScript($path);
             $ec->hasSCSS = $this->hasDrupalExtensionScss($path);
 
@@ -1170,6 +1275,7 @@ class ProjectIncubatorRoboFile extends Tasks
         $currentDir = getcwd();
         foreach ($packagePaths as $packageName => $packagePath) {
             foreach (['packages', 'packages-dev'] as $lockKey) {
+                // @todo Do we need the packages without ".git" dir?
                 if (isset($this->composerLock[$lockKey][$packageName])
                     && Utils::isDrupalPackage($this->composerLock[$lockKey][$packageName])
                     && strpos($packagePath, $currentDir) !== 0

@@ -1,0 +1,48 @@
+#!/usr/bin/env bash
+
+echo "BEGIN Git hook: ${cghHookName}"
+
+function roboDrupalExit ()
+{
+	if [ "$2" != '' ]; then
+		echo "Exit message: '${2}'"
+	fi
+
+	echo "End Git hook: ${cghHookName}"
+
+	exit $1
+}
+
+roboDrupalHookName=$(basename "${0}")
+roboDrupalExtensionPath=$(pwd)
+. "$(dirname $0)/_config"
+roboDrupalRoboExecutable="${roboDrupalHostDir}/$(COMPOSER_DISABLE_XDEBUG_WARN=1 composer --working-dir=${roboDrupalHostDir} config 'bin-dir')/robo"
+
+# Exit without error if "robo" doesn't exists.
+test -x "${roboDrupalRoboExecutable}" || roboDrupalExit 0 "Not executable '${roboDrupalRoboExecutable}'"
+
+# Exit without error if "robo" has no corresponding task.
+"${roboDrupalRoboExecutable}" \
+	--load-from="${roboDrupalHostDir}/RoboFile.php" \
+	help \
+	"${roboDrupalTask}" \
+	1> /dev/null 2>&1 \
+	|| roboDrupalExit 0 "Robo task not exists '${roboDrupalTask}'"
+
+if [ "$cghHasInput" = 'true' ]; then
+	"${roboDrupalRoboExecutable}" \
+		--load-from="${roboDrupalHostDir}/RoboFile.php" \
+		"${roboDrupalTask}" \
+		"${roboDrupalExtensionPath}" \
+		"${roboDrupalExtensionName}" \
+		$@ <<< $(</dev/stdin) || roboDrupalExit $?
+else
+	"${roboDrupalRoboExecutable}" \
+		--load-from="${roboDrupalHostDir}/RoboFile.php" \
+		"${roboDrupalTask}" \
+		"${roboDrupalExtensionPath}" \
+		"${roboDrupalExtensionName}" \
+		$@ || roboDrupalExit $?
+fi
+
+roboDrupalExit 0

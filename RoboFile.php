@@ -182,9 +182,6 @@ class RoboFile extends \Robo\Tasks
         return $this;
     }
 
-    /**
-     * @return CollectionBuilder
-     */
     protected function getTaskCodecept(): CollectionBuilder
     {
         $environment = $this->getEnvironment();
@@ -265,7 +262,7 @@ class RoboFile extends \Robo\Tasks
     }
 
     /**
-     * @return \Cheppers\Robo\Phpcs\Task\PhpcsLintFiles|CollectionBuilder
+     * @return \Cheppers\Robo\Phpcs\Task\PhpcsLintFiles|\Robo\Collection\CollectionBuilder
      */
     protected function getTaskPhpcsLint()
     {

@@ -93,6 +93,8 @@ class ProjectIncubatorRoboFile extends Tasks
     protected $areManagedDrupalExtensionsInitialized = false;
 
     /**
+     * Root directory of the "cheppers/robo-drupal" package.
+     *
      * @var string
      */
     protected $roboDrupalRoot = '';
@@ -165,13 +167,15 @@ class ProjectIncubatorRoboFile extends Tasks
     {
         $this->environment = 'git-hook';
 
-        /** @var \Robo\Collection\CollectionBuilder $cb */
-        $cb = $this->collectionBuilder();
-
-        return $cb->addTaskList([
-            'lint.composer.lock' => $this->taskComposerValidate(),
-            'lint.phpcs.psr2' => $this->getTaskPhpcsLint('PSR2', $this->selfPhpcsFiles),
-        ]);
+        return $this
+            ->collectionBuilder()
+            ->addTaskList([
+                'lint.composer.lock' => $this->taskComposerValidate(),
+                'lint.phpcs.psr2' => $this->getTaskPhpcsLint([
+                    'standard' => 'PSR2',
+                    'files' => $this->selfPhpcsFiles,
+                ]),
+            ]);
     }
 
     /**
@@ -227,23 +231,27 @@ class ProjectIncubatorRoboFile extends Tasks
 
     public function selfLint(): CollectionBuilder
     {
-        /** @var CollectionBuilder $cb */
-        $cb = $this->collectionBuilder();
-
-        return $cb->addTaskList([
-            'lint:phpcs' => $this->getTaskPhpcsLint('PSR2', $this->selfPhpcsFiles),
-        ]);
+        return $this
+            ->collectionBuilder()
+            ->addTaskList([
+                'lint:phpcs' => $this->getTaskPhpcsLint([
+                    'standard' => 'PSR2',
+                    'files' => $this->selfPhpcsFiles,
+                ]),
+            ]);
     }
 
     public function selfLintPhpcs(): CollectionBuilder
     {
-        /** @var CollectionBuilder $cb */
-        $cb = $this->collectionBuilder();
-
-        return $cb->addTaskList([
-            'lint:phpcs' => $this->getTaskPhpcsLint('PSR2', $this->selfPhpcsFiles),
-            'composer:validate' => $this->taskComposerValidate(),
-        ]);
+        return $this
+            ->collectionBuilder()
+            ->addTaskList([
+                'lint:phpcs' => $this->getTaskPhpcsLint([
+                    'standard' => 'PSR2',
+                    'files' => $this->selfPhpcsFiles,
+                ]),
+                'composer:validate' => $this->taskComposerValidate(),
+            ]);
     }
     //endregion
 
@@ -291,9 +299,14 @@ class ProjectIncubatorRoboFile extends Tasks
 
     public function githookPreCommit(string $extensionPath, string $extensionName): CollectionBuilder
     {
-        $cb = $this->collectionBuilder();
+        $extensions = $this->getManagedDrupalExtensions();
+        $extension = $extensions[$extensionName];
 
-        return $cb;
+        $this->environment = 'git-hook';
+
+        return $this
+            ->collectionBuilder()
+            ->addTask($this->getTaskPhpcsLintDrupalExtension($extension));
     }
     //endregion
 
@@ -452,37 +465,6 @@ class ProjectIncubatorRoboFile extends Tasks
     }
     //endregion
 
-    /**
-     * @return $this
-     */
-    protected function validateArgSiteId(string $siteId)
-    {
-        if ($siteId && !array_key_exists($siteId, $this->projectConfig->sites)) {
-            throw new \InvalidArgumentException("Unknown site ID: '$siteId'", 1);
-        }
-
-        return $this;
-    }
-
-    protected function validateArgExtensionNames(array $extensions): array
-    {
-        // @todo Show a an error message in case of duplicated items.
-        $managedDrupalExtensions = $this->getManagedDrupalExtensions();
-
-        $nonExistsExtensions = array_diff_key(array_flip($extensions), $managedDrupalExtensions);
-        if ($nonExistsExtensions) {
-            throw new \InvalidArgumentException(
-                'Unknown managed Drupal extensions: ' . implode(', ', array_keys($nonExistsExtensions))
-            );
-        }
-
-        if (!$extensions) {
-            $extensions = array_keys($managedDrupalExtensions);
-        }
-
-        return $extensions;
-    }
-
     //region Test - Drupal.
     public function testDrupal(
         array $args,
@@ -537,6 +519,49 @@ class ProjectIncubatorRoboFile extends Tasks
         }
 
         return $cb;
+    }
+
+    public function testDrupalClean(): CollectionBuilder
+    {
+        return $this->getTaskDrupalCoreTestsClean();
+    }
+
+    public function testDrupalList(): CollectionBuilder
+    {
+        return $this->getTaskDrupalCoreTestsList();
+    }
+    //endregion
+
+    //region Argument validators.
+    /**
+     * @return $this
+     */
+    protected function validateArgSiteId(string $siteId)
+    {
+        if ($siteId && !array_key_exists($siteId, $this->projectConfig->sites)) {
+            throw new \InvalidArgumentException("Unknown site ID: '$siteId'", 1);
+        }
+
+        return $this;
+    }
+
+    protected function validateArgExtensionNames(array $extensions): array
+    {
+        // @todo Show a an error message in case of duplicated items.
+        $managedDrupalExtensions = $this->getManagedDrupalExtensions();
+
+        $nonExistsExtensions = array_diff_key(array_flip($extensions), $managedDrupalExtensions);
+        if ($nonExistsExtensions) {
+            throw new \InvalidArgumentException(
+                'Unknown managed Drupal extensions: ' . implode(', ', array_keys($nonExistsExtensions))
+            );
+        }
+
+        if (!$extensions) {
+            $extensions = array_keys($managedDrupalExtensions);
+        }
+
+        return $extensions;
     }
 
     protected function validateInputSiteId(string $input): string
@@ -599,16 +624,6 @@ class ProjectIncubatorRoboFile extends Tasks
 
         return array_intersect_key($available, array_flip($ids));
     }
-
-    public function testDrupalClean(): CollectionBuilder
-    {
-        return $this->getTaskDrupalCoreTestsClean();
-    }
-
-    public function testDrupalList(): CollectionBuilder
-    {
-        return $this->getTaskDrupalCoreTestsList();
-    }
     //endregion
 
     /**
@@ -649,46 +664,67 @@ class ProjectIncubatorRoboFile extends Tasks
 
     protected function getTaskPhpcsLintDrupalExtension(DrupalExtensionConfig $extension): TaskInterface
     {
-        return $this->getTaskPhpcsLint(
-            'Drupal',
-            $extension->phpcs->paths,
-            $extension->path
-        );
-    }
-
-    protected function getTaskPhpcsLint(string $standard, array $files, string $workingDirectory = ''): TaskInterface
-    {
-        $standardLower = strtolower($standard);
-        $environment = $this->getEnvironment();
-
         $options = [
-            'failOn' => 'warning',
-            'standard' => $standard,
-            'lintReporters' => [
-                'lintVerboseReporter' => null,
+            'workingDirectory' => $extension->path,
+            'files' => [
+                '.' => true,
             ],
         ];
 
-        if ($standard === 'Drupal') {
-            $options += [
-                'extensions' => [
-                    'php/PHP',
-                    'inc/PHP',
-                    'engine/PHP',
-                    'install/PHP',
-                    'module/PHP',
-                    'profile/PHP',
-                    'theme/PHP',
-                ],
-                'ignore' => [
-                    'node_modules/',
-                    'vendor/'
-                ],
+        $options['files']['**/*.css'] = !$extension->hasSCSS;
+        $options['ignore']['*.css'] = $extension->hasSCSS;
+
+        $options['files']['**/*.js'] = !$extension->hasTypeScript;
+        $options['ignore']['*.js'] = $extension->hasTypeScript;
+
+        return $this->getTaskPhpcsLint($options);
+    }
+
+    protected function getTaskPhpcsLint(array $options = []): TaskInterface
+    {
+        $environment = $this->getEnvironment();
+
+        $options += [
+            'workingDirectory' => '',
+            'standard' => 'Drupal',
+            'failOn' => 'warning',
+            'lintReporters' => [
+                'lintVerboseReporter' => null,
+            ],
+            'ignore' => [],
+            'extensions' => [],
+            'files' => [
+              '.',
+            ],
+        ];
+
+        $standardLower = strtolower($options['standard']);
+
+        $options['ignore'] += [
+            'node_modules/' => true,
+            '.nvmrc' => true,
+            '.gitignore' => true,
+            '*.json' => true,
+            '*.scss' => true,
+        ];
+        $options['extensions'] += [
+            'php/PHP' => true,
+            'inc/PHP' => true,
+        ];
+
+        if ($options['standard'] === 'Drupal') {
+            $options['extensions'] += [
+                'engine/PHP' => true,
+                'install/PHP' => true,
+                'module/PHP' => true,
+                'profile/PHP' => true,
+                'theme/PHP' => true,
+                'js/JS' => true,
+                'css/CSS' => true,
             ];
         }
 
-        if ($workingDirectory) {
-            $options['workingDirectory'] = $workingDirectory;
+        if (!empty($options['workingDirectory'])) {
             $options['phpcsExecutable'] = Path::makeAbsolute("{$this->binDir}/phpcs", getcwd());
         }
 
@@ -700,8 +736,16 @@ class ProjectIncubatorRoboFile extends Tasks
         }
 
         if ($environment !== 'git-hook') {
-            return $this->taskPhpcsLintFiles($options + ['files' => $files]);
+            return $this->taskPhpcsLintFiles($options);
         }
+
+        $files = $options['files'];
+        unset($options['files']);
+
+        $options['ignore'] += [
+            '*.ts' => true,
+            '*.rb' => true,
+        ];
 
         $assetJar = new AssetJar();
 
@@ -710,6 +754,7 @@ class ProjectIncubatorRoboFile extends Tasks
             ->addTaskList([
                 'git.readStagedFiles' => $this
                     ->taskGitReadStagedFiles()
+                    ->setWorkingDirectory($options['workingDirectory'])
                     ->setCommandOnly(true)
                     ->setAssetJar($assetJar)
                     ->setAssetJarMap('files', ['files'])
@@ -1201,11 +1246,11 @@ class ProjectIncubatorRoboFile extends Tasks
         return $this->packagePaths;
     }
 
-    protected function getPackagePath(string $packageId): ?string
+    protected function getPackagePath(string $packageId): string
     {
         $pp = $this->getPackagePaths();
 
-        return $pp[$packageId] ?? null;
+        return $pp[$packageId] ?? '';
     }
 
     /**

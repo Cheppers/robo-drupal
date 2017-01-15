@@ -1,6 +1,9 @@
 #!/usr/bin/env bash
 
-echo "BEGIN Git hook: ${cghHookName}"
+roboDrupalHookName="${0##*/}"
+roboDrupalExtensionPath=$(pwd)
+
+echo "BEGIN Git hook: ${roboDrupalHookName}"
 
 function roboDrupalExit ()
 {
@@ -8,14 +11,14 @@ function roboDrupalExit ()
 		echo "Exit message: '${2}'"
 	fi
 
-	echo "End Git hook: ${cghHookName}"
+	echo "End Git hook: ${roboDrupalHookName}"
 
 	exit $1
 }
 
-roboDrupalHookName=$(basename "${0}")
-roboDrupalExtensionPath=$(pwd)
-. "$(dirname $0)/_config"
+. "${0%/*}/_config"
+
+# @todo Better detection for "composer" executable.
 roboDrupalRoboExecutable="${roboDrupalHostDir}/$(COMPOSER_DISABLE_XDEBUG_WARN=1 composer --working-dir=${roboDrupalHostDir} config 'bin-dir')/robo"
 
 # Exit without error if "robo" doesn't exists.

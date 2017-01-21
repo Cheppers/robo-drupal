@@ -54,6 +54,7 @@
         "php": ">=7.1",
         "cheppers/asset-jar": "^0.0",
         "cheppers/git-hooks": "dev-master",
+        "cheppers/lint-report": "^0.0",
         "cheppers/robo-drush": "dev-master",
         "cheppers/robo-eslint": "dev-master",
         "cheppers/robo-git": "dev-master",

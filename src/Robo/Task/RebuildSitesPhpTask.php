@@ -2,7 +2,7 @@
 
 namespace Cheppers\Robo\Drupal\Robo\Task;
 
-use Cheppers\Robo\Drupal\Config\ProjectIncubatorConfig;
+use Cheppers\Robo\Drupal\ProjectType\Incubator\ProjectConfig;
 use Cheppers\Robo\Drupal\VarExport;
 use Robo\Result;
 use Robo\Task\BaseTask;
@@ -17,7 +17,7 @@ use Webmozart\PathUtil\Path;
 class RebuildSitesPhpTask extends BaseTask
 {
     /**
-     * @var ProjectIncubatorConfig
+     * @var \Cheppers\Robo\Drupal\ProjectType\Incubator\ProjectConfig
      */
     protected $projectConfig;
 
@@ -45,7 +45,7 @@ class RebuildSitesPhpTask extends BaseTask
         return $this;
     }
 
-    public function getProjectConfig(): ProjectIncubatorConfig
+    public function getProjectConfig(): ProjectConfig
     {
         return $this->projectConfig;
     }
@@ -53,7 +53,7 @@ class RebuildSitesPhpTask extends BaseTask
     /**
      * @return $this
      */
-    public function setProjectConfig(ProjectIncubatorConfig $projectConfig)
+    public function setProjectConfig(ProjectConfig $projectConfig)
     {
         $this->projectConfig = $projectConfig;
 

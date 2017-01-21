@@ -4,8 +4,8 @@
         "Read more about it at https://getcomposer.org/doc/01-basic-usage.md#composer-lock-the-lock-file",
         "This file is @generated automatically"
     ],
-    "hash": "a2dd795173d9a0948875ae32061eb316",
-    "content-hash": "08e9734cf56e1fd9ec8a802a5bf52153",
+    "hash": "b2d2de1545a53a0540da0db833740951",
+    "content-hash": "885fb01806049d93002491af14dfa5f1",
     "packages": [
         {
             "name": "cheppers/asset-jar",
@@ -42,11 +42,6 @@
         {
             "name": "cheppers/git-hooks",
             "version": "dev-master",
-            "source": {
-                "type": "git",
-                "url": "https://github.com/Cheppers/git-hooks.git",
-                "reference": "a846af41a1ea63d09bb8d49d9b1631e1a8eb63f8"
-            },
             "dist": {
                 "type": "zip",
                 "url": "https://api.github.com/repos/Cheppers/git-hooks/zipball/a846af41a1ea63d09bb8d49d9b1631e1a8eb63f8",
@@ -761,6 +756,47 @@
                 "utils"
             ],
             "time": "2016-05-02 15:18:10"
+        },
+        {
+            "name": "drupal-composer/drupal-scaffold",
+            "version": "2.2.0",
+            "source": {
+                "type": "git",
+                "url": "https://github.com/drupal-composer/drupal-scaffold.git",
+                "reference": "3ad465ac853c2e52e6a808f5529859917662c256"
+            },
+            "dist": {
+                "type": "zip",
+                "url": "https://api.github.com/repos/drupal-composer/drupal-scaffold/zipball/3ad465ac853c2e52e6a808f5529859917662c256",
+                "reference": "3ad465ac853c2e52e6a808f5529859917662c256",
+                "shasum": ""
+            },
+            "require": {
+                "composer-plugin-api": "^1.0.0",
+                "php": ">=5.4.5"
+            },
+            "require-dev": {
+                "composer/composer": "dev-master",
+                "phpunit/phpunit": "^4.4.0"
+            },
+            "type": "composer-plugin",
+            "extra": {
+                "class": "DrupalComposer\\DrupalScaffold\\Plugin",
+                "branch-alias": {
+                    "dev-master": "2.0.x-dev"
+                }
+            },
+            "autoload": {
+                "psr-4": {
+                    "DrupalComposer\\DrupalScaffold\\": "src/"
+                }
+            },
+            "notification-url": "https://packagist.org/downloads/",
+            "license": [
+                "GPL-2.0+"
+            ],
+            "description": "Composer Plugin for updating the Drupal scaffold files when using drupal/core",
+            "time": "2016-11-05 10:46:44"
         },
         {
             "name": "drupal/coder",

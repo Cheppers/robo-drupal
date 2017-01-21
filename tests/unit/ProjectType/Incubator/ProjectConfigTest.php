@@ -1,23 +1,22 @@
 <?php
 
-namespace Cheppers\Robo\Drupal\Tests\Unit\Config;
+namespace Cheppers\Robo\Drupal\Tests\Unit\ProjectType\Incubator;
 
 use Cheppers\Robo\Drupal\Config\DatabaseServerConfig;
 use Cheppers\Robo\Drupal\Config\PhpVariantConfig;
-use Cheppers\Robo\Drupal\Config\ProjectIncubatorConfig;
+use Cheppers\Robo\Drupal\ProjectType\Incubator\ProjectConfig;
 use Cheppers\Robo\Drupal\Config\SiteConfig;
+use Codeception\Test\Unit;
 use ReflectionClass;
 
 /**
- * Class ProjectIncubatorConfigTest.
- *
- * @coversDefaultClass \Cheppers\Robo\Drupal\Config\ProjectIncubatorConfig
+ * @coversDefaultClass \Cheppers\Robo\Drupal\ProjectType\Incubator\ProjectConfig
  */
-class ProjectIncubatorConfigTest extends \Codeception\Test\Unit
+class ProjectConfigTest extends Unit
 {
     protected static function getMethod(string $name): \ReflectionMethod
     {
-        $class = new ReflectionClass(ProjectIncubatorConfig::class);
+        $class = new ReflectionClass(ProjectConfig::class);
         $method = $class->getMethod($name);
         $method->setAccessible(true);
 
@@ -82,7 +81,7 @@ class ProjectIncubatorConfigTest extends \Codeception\Test\Unit
         string $baseHostName,
         int $baseHostPort
     ) {
-        $pc = new ProjectIncubatorConfig();
+        $pc = new ProjectConfig();
         $pc->id = $id;
         $pc->baseHostName = $baseHostName;
         $pc->baseHostPort = $baseHostPort;
@@ -106,7 +105,7 @@ class ProjectIncubatorConfigTest extends \Codeception\Test\Unit
      */
     public function testGetBaseHostName(string $expected, string $name, string $baseHostName)
     {
-        $pc = new ProjectIncubatorConfig();
+        $pc = new ProjectConfig();
         $pc->id = $name;
         $pc->baseHostName = $baseHostName;
         $pc->baseHostPort = 8080;
@@ -141,7 +140,7 @@ class ProjectIncubatorConfigTest extends \Codeception\Test\Unit
      */
     public function testGetProjectUrls(array $expected, array $phpIds, array $dbIds)
     {
-        $pc = new ProjectIncubatorConfig();
+        $pc = new ProjectConfig();
         $pc->name = 'a';
         $pc->baseHostName = 'b.c';
         foreach ($phpIds as $phpId) {
@@ -184,7 +183,7 @@ class ProjectIncubatorConfigTest extends \Codeception\Test\Unit
      */
     public function testGetSiteBranchUrls(array $expected, array $phpIds, array $dbIds, string $siteBranch)
     {
-        $pc = new ProjectIncubatorConfig();
+        $pc = new ProjectConfig();
         $pc->name = 'a';
         $pc->baseHostName = 'b.c';
         foreach ($phpIds as $phpId) {
@@ -217,7 +216,7 @@ class ProjectIncubatorConfigTest extends \Codeception\Test\Unit
      */
     public function testGetSiteVariantUrl(string $expected, string $siteVariantUrlPattern, array $placeholders)
     {
-        $pc = new ProjectIncubatorConfig();
+        $pc = new ProjectConfig();
         $pc->id = 'my_name_01';
         $pc->siteVariantUrlPattern = $siteVariantUrlPattern;
         $this->tester->assertEquals($expected, $pc->getSiteVariantUrl($placeholders));
@@ -240,7 +239,7 @@ class ProjectIncubatorConfigTest extends \Codeception\Test\Unit
      */
     public function testGetSiteVariantDir(string $expected, string $siteVariantDirPattern, array $placeholders)
     {
-        $pc = new ProjectIncubatorConfig();
+        $pc = new ProjectConfig();
         $pc->id = 'my_name_01';
         $pc->siteVariantDirPattern = $siteVariantDirPattern;
         $this->tester->assertEquals($expected, $pc->getSiteVariantDir($placeholders));
@@ -251,7 +250,7 @@ class ProjectIncubatorConfigTest extends \Codeception\Test\Unit
      */
     public function testPopulateDefaultValues()
     {
-        $pc = new ProjectIncubatorConfig();
+        $pc = new ProjectConfig();
         $pc->phpVariants['a'] = new PhpVariantConfig();
         $pc->databaseServers['b'] = new DatabaseServerConfig();
         $pc->sites['c'] = new SiteConfig();
@@ -311,7 +310,7 @@ class ProjectIncubatorConfigTest extends \Codeception\Test\Unit
      */
     public function testGetDefaultSiteId($expected, string $defaultSiteId, array $sites)
     {
-        $pc = new ProjectIncubatorConfig();
+        $pc = new ProjectConfig();
         $pc->defaultSiteId = $defaultSiteId;
         $pc->sites = $sites;
 
@@ -325,7 +324,7 @@ class ProjectIncubatorConfigTest extends \Codeception\Test\Unit
      */
     public function testGetDefaultSiteIdInvalid()
     {
-        $pc = new ProjectIncubatorConfig();
+        $pc = new ProjectConfig();
         $pc->defaultSiteId = 'non-exists';
         $pc->sites = [];
 
@@ -361,7 +360,7 @@ class ProjectIncubatorConfigTest extends \Codeception\Test\Unit
     public function testProcessPattern(string $expected, string $pattern, array $placeholders)
     {
         $method = static::getMethod('processPattern');
-        $pc = new ProjectIncubatorConfig();
+        $pc = new ProjectConfig();
         $pc->id = 'p1';
         $pc->baseHostName = 'p1.loc';
 

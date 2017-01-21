@@ -2,7 +2,7 @@
 
 namespace Cheppers\Robo\Drupal\Tests\Unit\Robo\Task;
 
-use Cheppers\Robo\Drupal\Config\ProjectIncubatorConfig;
+use Cheppers\Robo\Drupal\ProjectType\Incubator\ProjectConfig;
 use Cheppers\Robo\Drupal\Robo\Task\SiteCreateTask;
 use Codeception\Test\Unit;
 use Robo\Robo;
@@ -93,7 +93,7 @@ class SiteCreateTaskTest extends Unit
         return codecept_data_dir('fixtures/Robo/Task/SiteCreateTask');
     }
 
-    protected function getProjectConfig(string $projectRootDir): ProjectIncubatorConfig
+    protected function getProjectConfig(string $projectRootDir): ProjectConfig
     {
         require "$projectRootDir/ProjectConfig.php";
 

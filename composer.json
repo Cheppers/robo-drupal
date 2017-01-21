@@ -17,6 +17,10 @@
             "type": "path",
             "url": "../git-hooks"
         },
+        "local:cheppers/lint-report": {
+            "type": "path",
+            "url": "../lint-report"
+        },
         "local:cheppers/robo-drush": {
             "type": "path",
             "url": "../robo-drush"
@@ -59,6 +63,7 @@
         "cheppers/robo-tslint": "dev-master",
         "consolidation/robo": "^1.0",
         "danielstjules/stringy": "^2.3",
+        "drupal-composer/drupal-scaffold": "^2.2",
         "drupal/coder": "^8.2",
         "symfony/finder": "^2.8||^3.1",
         "symfony/process": "^2.8||^3.1",

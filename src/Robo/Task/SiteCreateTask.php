@@ -3,7 +3,7 @@
 namespace Cheppers\Robo\Drupal\Robo\Task;
 
 use Cheppers\Robo\Drupal\Config\DatabaseServerConfig;
-use Cheppers\Robo\Drupal\Config\ProjectIncubatorConfig;
+use Cheppers\Robo\Drupal\ProjectType\Incubator\ProjectConfig;
 use Cheppers\Robo\Drupal\Config\SiteConfig;
 use Cheppers\Robo\Drupal\Utils;
 use Cheppers\Robo\Drupal\VarExport;
@@ -184,21 +184,21 @@ class SiteCreateTask extends BaseTask implements ContainerAwareInterface
 
     //region projectConfig
     /**
-     * @var ProjectIncubatorConfig
+     * @var \Cheppers\Robo\Drupal\ProjectType\Incubator\ProjectConfig
      */
     protected $projectConfig = null;
 
-    public function getProjectConfig(): ProjectIncubatorConfig
+    public function getProjectConfig(): ProjectConfig
     {
         return $this->projectConfig;
     }
 
     /**
-     * @param \Cheppers\Robo\Drupal\Config\ProjectIncubatorConfig $projectConfig
+     * @param \Cheppers\Robo\Drupal\ProjectType\Incubator\ProjectConfig $projectConfig
      *
      * @return $this
      */
-    public function setProjectConfig(ProjectIncubatorConfig $projectConfig)
+    public function setProjectConfig(ProjectConfig $projectConfig)
     {
         $this->projectConfig = $projectConfig;
 

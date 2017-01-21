@@ -2,14 +2,14 @@
 
 use Cheppers\Robo\Drupal\Config\DatabaseServerConfig;
 use Cheppers\Robo\Drupal\Config\PhpVariantConfig;
-use Cheppers\Robo\Drupal\Config\ProjectIncubatorConfig;
+use Cheppers\Robo\Drupal\ProjectType\Incubator\ProjectConfig;
 use Cheppers\Robo\Drupal\Config\SiteConfig;
 
 if (!isset($GLOBALS['projectConfig'])) {
-  /** @var \Cheppers\Robo\Drupal\Config\ProjectIncubatorConfig $projectConfig */
+  /** @var \Cheppers\Robo\Drupal\ProjectType\Incubator\ProjectConfig $projectConfig */
   global $projectConfig;
 
-  $projectConfig = new ProjectIncubatorConfig();
+  $projectConfig = new ProjectConfig();
   $projectConfig->id = 'test';
   $projectConfig->gitExecutable = 'git';
   $projectConfig->environment = 'dev';

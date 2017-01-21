@@ -1,6 +1,6 @@
 <?php
 
-namespace Cheppers\Robo\Drupal\Robo\RoboFile;
+namespace Cheppers\Robo\Drupal\ProjectType\Incubator;
 
 use Cheppers\AssetJar\AssetJar;
 use Cheppers\LintReport\Reporter\BaseReporter;
@@ -8,22 +8,20 @@ use Cheppers\LintReport\Reporter\CheckstyleReporter;
 use Cheppers\Robo\Drupal\Config\DatabaseServerConfig;
 use Cheppers\Robo\Drupal\Config\DrupalExtensionConfig;
 use Cheppers\Robo\Drupal\Config\PhpVariantConfig;
+use Cheppers\Robo\Drupal\ProjectType\Base as Base;
 use Cheppers\Robo\Drupal\Robo\ComposerTaskLoader;
 use Cheppers\Robo\Drupal\Robo\DrupalCoreTestsTaskLoader;
 use Cheppers\Robo\Drupal\Robo\DrupalTaskLoader;
 use Cheppers\Robo\Drupal\Utils;
 use Cheppers\Robo\Drush\DrushTaskLoader;
 use Cheppers\Robo\ESLint\ESLintTaskLoader;
-use Cheppers\Robo\Git\GitTaskLoader;
 use Cheppers\Robo\Phpcs\PhpcsTaskLoader;
 use Cheppers\Robo\ScssLint\ScssLintTaskLoader;
-use Cheppers\Robo\Serialize\SerializeTaskLoader;
 use Cheppers\Robo\TsLint\TsLintTaskLoader;
 use League\Container\ContainerInterface;
 use Robo\Collection\CollectionBuilder;
 use Robo\Contract\TaskInterface;
 use Robo\Task\Filesystem\loadShortcuts as FilesystemShortcuts;
-use Robo\Tasks;
 use Symfony\Component\Filesystem\Filesystem;
 use Symfony\Component\Finder\Finder;
 use Symfony\Component\Process\Process;
@@ -32,85 +30,19 @@ use Webmozart\PathUtil\Path;
 /**
  * @todo Support for Drupal extensions where the "vendor" name isn't "drupal".
  */
-class ProjectIncubatorRoboFile extends Tasks
+class RoboFile extends Base\RoboFile
 {
     use ComposerTaskLoader;
     use DrupalCoreTestsTaskLoader;
     use DrupalTaskLoader;
     use DrushTaskLoader;
-    use GitTaskLoader;
     use ESLintTaskLoader;
     use PhpcsTaskLoader;
     use ScssLintTaskLoader;
-    use SerializeTaskLoader;
     use TsLintTaskLoader;
     use FilesystemShortcuts;
 
-    /**
-     * @var array
-     */
-    protected $composerInfo = [];
-
-    /**
-     * @var array
-     */
-    protected $composerLock = [];
-
-    /**
-     * @var string
-     */
-    protected $packageVendor = '';
-
-    /**
-     * @var string
-     */
-    protected $packageName = '';
-
-    /**
-     * @var string
-     */
-    protected $binDir = 'vendor/bin';
-
-    /**
-     * @var string
-     */
-    protected $envNamePrefix = '';
-
-    /**
-     * @var \Cheppers\Robo\Drupal\Config\ProjectIncubatorConfig
-     */
-    protected $projectConfig = null;
-
-    /**
-     * Allowed values: dev, git-hook, ci, prod, jenkins
-     *
-     * @todo The "git-hook" isn't an environment.
-     *
-     * @var string
-     */
-    protected $environment = 'dev';
-
     protected $areManagedDrupalExtensionsInitialized = false;
-
-    /**
-     * Root directory of the "cheppers/robo-drupal" package.
-     *
-     * @var string
-     */
-    protected $roboDrupalRoot = '';
-
-    public function __construct()
-    {
-        putenv('COMPOSER_DISABLE_XDEBUG_WARN=1');
-        $this->roboDrupalRoot = Path::makeAbsolute("../../..", __DIR__);
-
-        require_once 'ProjectConfig.php';
-        $this->projectConfig = $GLOBALS['projectConfig'];
-
-        $this
-            ->initComposerInfo()
-            ->initEnvNamePrefix();
-    }
 
     /**
      * {@inheritdoc}
@@ -121,30 +53,6 @@ class ProjectIncubatorRoboFile extends Tasks
         parent::setContainer($container);
 
         return $this;
-    }
-
-    /**
-     * @return $this
-     */
-    protected function initEnvNamePrefix()
-    {
-        $this->envNamePrefix = strtoupper(str_replace('-', '_', $this->packageName));
-
-        return $this;
-    }
-
-    protected function getEnvName(string $name): string
-    {
-        return "{$this->envNamePrefix}_" . strtoupper($name);
-    }
-
-    protected function getEnvironment(): string
-    {
-        if ($this->environment) {
-            return $this->environment;
-        }
-
-        return getenv($this->getEnvName('environment')) ?: 'dev';
     }
 
     protected function getPhpExecutable(): string
@@ -634,34 +542,6 @@ class ProjectIncubatorRoboFile extends Tasks
         return $this->getTaskDrupalRebuildSitesPhp();
     }
 
-    public function unlockSettingsPhp(): CollectionBuilder
-    {
-        return $this
-            ->collectionBuilder()
-            ->addCode($this->getTaskUnlockSettingsPhp());
-    }
-
-    public function writableWorkingCopy(): CollectionBuilder
-    {
-        return $this
-            ->collectionBuilder()
-            ->addCode($this->getTaskWritableWorkingCopy());
-    }
-
-    /**
-     * Export the project configuration.
-     *
-     * @param string $format One of: json, yaml.
-     *
-     * @return \Robo\Collection\CollectionBuilder
-     */
-    public function exportProjectConfig(string $format = 'json'): CollectionBuilder
-    {
-        return $this->getTaskExportProjectConfig([
-            'serializer' => $format,
-        ]);
-    }
-
     protected function getTaskPhpcsLintDrupalExtension(DrupalExtensionConfig $extension): TaskInterface
     {
         $options = [
@@ -833,17 +713,6 @@ class ProjectIncubatorRoboFile extends Tasks
         ]);
     }
 
-    protected function getTaskExportProjectConfig(array $options = []): CollectionBuilder
-    {
-        $options['subject'] = $this->projectConfig;
-        $options += [
-            'serializer' => 'json',
-            'destination' => $this->output(),
-        ];
-
-        return $this->taskSerialize($options);
-    }
-
     protected function getTaskDrupalSiteCreate(array $options): CollectionBuilder
     {
         $options['projectConfig'] = $this->projectConfig;
@@ -986,29 +855,6 @@ class ProjectIncubatorRoboFile extends Tasks
         return $this->taskDrush('pm-enable', $options, $extensions);
     }
 
-    protected function getTaskWritableWorkingCopy(): \Closure
-    {
-        // @todo Create dedicated Robo task.
-        return function () {
-            $mask = umask();
-
-            $listFilesResult = $this
-                ->taskGitListFiles()
-                ->run();
-
-            $fileNames = array_keys($listFilesResult['files']);
-            $dirNamesByDepth = Utils::dirNamesByDepth($fileNames);
-            ksort($dirNamesByDepth, SORT_NUMERIC);
-            foreach ($dirNamesByDepth as $dirNames) {
-                $this->_chmod($dirNames, 0777, $mask);
-            }
-
-            $this->_chmod($fileNames, 0666, $mask);
-
-            return 0;
-        };
-    }
-
     protected function getTaskGitHookInstall(DrupalExtensionConfig $extension): \Closure
     {
         return function () use ($extension) {
@@ -1058,29 +904,6 @@ class ProjectIncubatorRoboFile extends Tasks
             $result = file_put_contents("$dstDir/$configFileName", $configContent);
             if ($result === false) {
                 throw new \Exception("Failed to install git hooks for '{$extension->packageName}'.");
-            }
-
-            return 0;
-        };
-    }
-
-    protected function getTaskUnlockSettingsPhp(string $siteId = ''): \Closure
-    {
-        return function () use ($siteId): int {
-            $mask = umask();
-            $sites = $siteId ?
-                [$siteId => $this->projectConfig->sites[$siteId]]
-                : $this->projectConfig->sites;
-
-            foreach ($sites as $site) {
-                $siteDir = "{$this->projectConfig->drupalRootDir}/sites/{$site->id}";
-                if (file_exists($siteDir)) {
-                    $this->_chmod($siteDir, 0777, $mask);
-
-                    if (file_exists("$siteDir/settings.php")) {
-                        $this->_chmod("$siteDir/settings.php", 0666, $mask);
-                    }
-                }
             }
 
             return 0;
@@ -1138,57 +961,6 @@ class ProjectIncubatorRoboFile extends Tasks
             ->taskDrupalCoreTestsList()
             ->setOutput($this->output())
             ->setDrupalRoot($this->projectConfig->drupalRootDir);
-    }
-
-    /**
-     * @return $this
-     */
-    protected function initComposerInfo()
-    {
-        if ($this->composerInfo || !is_readable('composer.json')) {
-            return $this;
-        }
-
-        $this->composerInfo = json_decode(file_get_contents('composer.json'), true);
-        list($this->packageVendor, $this->packageName) = explode('/', $this->composerInfo['name']);
-
-        if (!empty($this->composerInfo['config']['bin-dir'])) {
-            $this->binDir = $this->composerInfo['config']['bin-dir'];
-        }
-
-        return $this;
-    }
-
-    /**
-     * @return $this
-     */
-    protected function initComposerLock()
-    {
-        if (!$this->composerLock) {
-            if (is_readable('composer.lock')) {
-                $this->composerLock = json_decode(file_get_contents('composer.lock'), true);
-            }
-
-            $this->composerLock += [
-                'packages' => [],
-                'packages-dev' => [],
-            ];
-
-            foreach (['packages', 'packages-dev'] as $key) {
-                $this->composerLock += [$key => []];
-                $this->composerLock[$key] = Utils::itemProperty2ArrayKey(
-                    $this->composerLock[$key],
-                    'name'
-                );
-            }
-        }
-
-        return $this;
-    }
-
-    protected function backToRootDir(string $from): string
-    {
-        return Path::makeRelative('.', $from) ?: '.';
     }
 
     protected function getFallbackFileName(string $fileName, string $path): string

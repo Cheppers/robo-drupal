@@ -1,11 +1,12 @@
 <?php
 
-namespace Cheppers\Robo\Drupal\Config;
+namespace Cheppers\Robo\Drupal\ProjectType\Incubator;
 
+use Cheppers\Robo\Drupal\ProjectType\Base as Base;
 use Cheppers\Robo\Drupal\Utils;
 use function Stringy\create as s;
 
-class ProjectIncubatorConfig extends BaseConfig
+class ProjectConfig extends Base\ProjectConfig
 {
     /**
      * @var string
@@ -26,34 +27,6 @@ class ProjectIncubatorConfig extends BaseConfig
      * @var string
      */
     public $siteVariantDirPattern = '{siteBranch}.{db}';
-
-    /**
-     * Environment type. Allowed values are: dev, ci, prod.
-     *
-     * @var string
-     */
-    public $environment = 'dev';
-
-    /**
-     * Reports directory.
-     *
-     * @var string
-     */
-    public $reportsDir = 'reports';
-
-    /**
-     * Drupal root.
-     *
-     * @var string
-     */
-    public $drupalRootDir = 'drupal_root';
-
-    /**
-     * Public HTML directory.
-     *
-     * @var string
-     */
-    public $publicHtmlDir = 'public_html';
 
     /**
      * @var string
@@ -81,15 +54,6 @@ class ProjectIncubatorConfig extends BaseConfig
     public $siteDefaults = [];
 
     /**
-     * Root directory of "sites" directory outside of "$drupalRootDir".
-     *
-     * Relative path from the project root.
-     *
-     * @var string
-     */
-    public $outerSitesSubDir = 'sites';
-
-    /**
      * @var string
      */
     public $defaultSiteId = '';
@@ -103,23 +67,6 @@ class ProjectIncubatorConfig extends BaseConfig
      * @var string
      */
     public $defaultPhpVariant = '';
-
-    /**
-     * @var \Cheppers\Robo\Drupal\Config\SiteConfig[]
-     */
-    public $sites = [];
-
-    /**
-     * Path to the Git executable.
-     *
-     * @var string
-     */
-    public $gitExecutable = 'git';
-
-    /**
-     * @var string
-     */
-    public $composerExecutable = 'composer';
 
     /**
      * @var \Cheppers\Robo\Drupal\Config\PhpVariantConfig[]
@@ -206,7 +153,10 @@ class ProjectIncubatorConfig extends BaseConfig
         return $this->processPattern($this->siteVariantDirPattern, $placeholders);
     }
 
-    public function populateDefaultValues(): void
+    /**
+     * {@inheritdoc}
+     */
+    public function populateDefaultValues()
     {
         foreach ($this->sites as $id => $site) {
             $site->id = $id;
@@ -219,25 +169,8 @@ class ProjectIncubatorConfig extends BaseConfig
         foreach ($this->phpVariants as $id => $php) {
             $php->id = $id;
         }
-    }
 
-    public function getDefaultSiteId(): string
-    {
-        if ($this->defaultSiteId) {
-            if (!isset($this->sites[$this->defaultSiteId])) {
-                trigger_error("The configured default site ID '{$this->defaultSiteId}' does not exists.");
-            } else {
-                return $this->defaultSiteId;
-            }
-        }
-
-        if (isset($this->sites['default'])) {
-            return 'default';
-        }
-
-        $first = each($this->sites);
-
-        return $first ? $first['key'] : '';
+        return parent::populateDefaultValues();
     }
 
     protected function processPattern(string $pattern, array $placeholders): string

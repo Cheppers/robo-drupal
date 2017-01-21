@@ -4,7 +4,7 @@ namespace Cheppers\Robo\Drupal\Tests\Unit\Robo\Task;
 
 use Cheppers\Robo\Drupal\Config\DatabaseServerConfig;
 use Cheppers\Robo\Drupal\Config\PhpVariantConfig;
-use Cheppers\Robo\Drupal\Config\ProjectIncubatorConfig;
+use Cheppers\Robo\Drupal\ProjectType\Incubator\ProjectConfig;
 use Cheppers\Robo\Drupal\Config\SiteConfig;
 use Cheppers\Robo\Drupal\Robo\Task\RebuildSitesPhpTask;
 use Codeception\Util\Stub;
@@ -106,7 +106,7 @@ class RebuildSitesPhpTaskTest extends \Codeception\Test\Unit
         $container = Robo::createDefaultContainer();
         Robo::setContainer($container);
 
-        $pc = new ProjectIncubatorConfig();
+        $pc = new ProjectConfig();
         $pc->id = 'foo';
         $pc->drupalRootDir = $drupalRootDir;
         foreach ($phpVariants as $phpVariant) {

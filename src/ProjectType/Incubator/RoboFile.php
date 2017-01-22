@@ -3,7 +3,6 @@
 namespace Cheppers\Robo\Drupal\ProjectType\Incubator;
 
 use Cheppers\AssetJar\AssetJar;
-use Cheppers\LintReport\Reporter\BaseReporter;
 use Cheppers\LintReport\Reporter\CheckstyleReporter;
 use Cheppers\Robo\Drupal\Config\DatabaseServerConfig;
 use Cheppers\Robo\Drupal\Config\DrupalExtensionConfig;
@@ -18,7 +17,6 @@ use Cheppers\Robo\ESLint\ESLintTaskLoader;
 use Cheppers\Robo\Phpcs\PhpcsTaskLoader;
 use Cheppers\Robo\ScssLint\ScssLintTaskLoader;
 use Cheppers\Robo\TsLint\TsLintTaskLoader;
-use League\Container\ContainerInterface;
 use Robo\Collection\CollectionBuilder;
 use Robo\Contract\TaskInterface;
 use Robo\Task\Filesystem\loadShortcuts as FilesystemShortcuts;
@@ -43,17 +41,6 @@ class RoboFile extends Base\RoboFile
     use FilesystemShortcuts;
 
     protected $areManagedDrupalExtensionsInitialized = false;
-
-    /**
-     * {@inheritdoc}
-     */
-    public function setContainer(ContainerInterface $container)
-    {
-        BaseReporter::lintReportConfigureContainer($container);
-        parent::setContainer($container);
-
-        return $this;
-    }
 
     protected function getPhpExecutable(): string
     {

@@ -2,9 +2,11 @@
 
 namespace Cheppers\Robo\Drupal\ProjectType\Base;
 
+use Cheppers\LintReport\Reporter\BaseReporter;
 use Cheppers\Robo\Drupal\Utils;
 use Cheppers\Robo\Git\GitTaskLoader;
 use Cheppers\Robo\Serialize\SerializeTaskLoader;
+use League\Container\ContainerInterface;
 use Robo\Collection\CollectionBuilder;
 use Robo\Tasks;
 use Webmozart\PathUtil\Path;
@@ -76,6 +78,17 @@ class RoboFile extends Tasks
         $this
             ->initComposerInfo()
             ->initEnvNamePrefix();
+    }
+
+    /**
+     * {@inheritdoc}
+     */
+    public function setContainer(ContainerInterface $container)
+    {
+        BaseReporter::lintReportConfigureContainer($container);
+        parent::setContainer($container);
+
+        return $this;
     }
 
     //region Tasks.

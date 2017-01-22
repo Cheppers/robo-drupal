@@ -10,4 +10,14 @@ class ProjectConfig extends Base\ProjectConfig
      * {@inheritdoc}
      */
     public $defaultSiteId = 'default';
+
+    /**
+     * {@inheritdoc}
+     */
+    public $siteVariantDirPattern = '{siteBranch}';
+
+    /**
+     * {@inheritdoc}
+     */
+    public $siteVariantUrlPattern = '{siteBranch}.{baseHost}';
 }

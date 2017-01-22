@@ -20,6 +20,5 @@ coverage:
     enabled: true
     whitelist:
         include:
-            - 'src/*'
-        exclude:
-            - 'src/GitHooks/_common'
+            - 'src/*.php'
+            - 'src/**/*.php'

@@ -41,6 +41,7 @@ class Scripts
      */
     public static function postUpdateCmd(Event $event): bool
     {
+        static::initProjectConfig();
         static::buildScaffold($event);
         static::createRequiredFiles($event);
         static::phpcsConfigSet($event);
@@ -65,8 +66,7 @@ class Scripts
             }
         }
 
-        $namespace = static::getBaseNamespace();
-        $class = "$namespace\\ProjectConfig";
+        $class = static::getBaseNamespace() . '\\ProjectConfig';
 
         static::$projectConfig = new $class();
     }

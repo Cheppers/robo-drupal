@@ -42,16 +42,6 @@ class RoboFile extends Base\RoboFile
 
     protected $areManagedDrupalExtensionsInitialized = false;
 
-    protected function getPhpExecutable(): string
-    {
-        return getenv($this->getEnvName('php_executable')) ?: PHP_BINARY;
-    }
-
-    protected function getPhpdbgExecutable(): string
-    {
-        return getenv($this->getEnvName('phpdbg_executable')) ?: Path::join(PHP_BINDIR, 'phpdbg');
-    }
-
     //region Self
 
     //region Self - Git hooks.
@@ -231,14 +221,12 @@ class RoboFile extends Base\RoboFile
             'machineNameShort' => $options['short'],
         ]);
 
-        /** @var \Robo\Collection\CollectionBuilder $cb */
-        $cb = $this->collectionBuilder();
-        $cb->addTaskList([
-            'create:site' => $this->getTaskDrupalSiteCreate($o),
-            'rebuild:sites-php' => $this->getTaskDrupalRebuildSitesPhp(),
-        ]);
-
-        return $cb;
+        return $this
+            ->collectionBuilder()
+            ->addTaskList([
+                'create:site' => $this->getTaskDrupalSiteCreate($o),
+                'rebuild:sites-php' => $this->getTaskDrupalRebuildSitesPhp(),
+            ]);
     }
 
     /**

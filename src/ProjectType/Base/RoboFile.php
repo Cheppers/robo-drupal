@@ -196,6 +196,16 @@ class RoboFile extends Tasks
         return Path::makeRelative('.', $from) ?: '.';
     }
 
+    protected function getPhpExecutable(): string
+    {
+        return getenv($this->getEnvName('php_executable')) ?: PHP_BINARY;
+    }
+
+    protected function getPhpdbgExecutable(): string
+    {
+        return getenv($this->getEnvName('phpdbg_executable')) ?: Path::join(PHP_BINDIR, 'phpdbg');
+    }
+
     //region Task builders.
     protected function getTaskExportProjectConfig(array $options = []): CollectionBuilder
     {

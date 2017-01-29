@@ -4,11 +4,6 @@ namespace Cheppers\Robo\Drupal\Config;
 
 use Webmozart\PathUtil\Path;
 
-/**
- * Class PhpVariant.
- *
- * @package Cheppers\Robo\Drupal\Config
- */
 class PhpVariantConfig extends BaseConfig
 {
     /**

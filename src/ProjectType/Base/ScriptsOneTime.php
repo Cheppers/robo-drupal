@@ -2,6 +2,7 @@
 
 namespace Cheppers\Robo\Drupal\ProjectType\Base;
 
+use Cheppers\Robo\Drupal\Utils;
 use Composer\Script\Event;
 use Symfony\Component\Finder\Finder;
 use Symfony\Component\Yaml\Yaml;
@@ -29,21 +30,25 @@ class ScriptsOneTime
     protected static $newNameNamespace = '';
 
     /**
+     * @var string
+     */
+    protected static $projectConfigClass = ProjectConfig::class;
+
+    /**
      * @var \Cheppers\Robo\Drupal\ProjectType\Base\ProjectConfig
      */
     protected static $projectConfig = null;
 
-    protected static function getProjectConfig(): ProjectConfig
+    protected static function initProjectConfig(): void
     {
         if (!static::$projectConfig) {
-            if (file_exists('ProjectConfig.php')) {
-                require_once 'ProjectConfig.php';
+            if (file_exists(Utils::$projectConfigFileName)) {
+                require_once Utils::$projectConfigFileName;
             }
 
-            static::$projectConfig = $GLOBALS['projectConfig'] ?? new ProjectConfig();
+            $class = static::$projectConfigClass;
+            static::$projectConfig = $GLOBALS['projectConfig'] ?? new $class();
         }
-
-        return static::$projectConfig;
     }
 
     public static function oneTime(Event $event): bool
@@ -58,6 +63,7 @@ class ScriptsOneTime
     protected static function oneTimePre(Event $event)
     {
         static::$packageFileName = getcwd() . '/composer.json';
+        static::initProjectConfig();
 
         static::packageRead();
         static::removeOneTimeScript();
@@ -110,6 +116,12 @@ class ScriptsOneTime
 
         $event->getIO()->write(
             sprintf('The new package name is "<info>%s</info>"', static::$package['name']),
+            true
+        );
+
+        $namespace = '\\' . static::$newVendorNamespace . '\\' . static::$newNameNamespace;
+        $event->getIO()->write(
+            sprintf('The new namespace name is "<info>%s</info>"', $namespace),
             true
         );
     }
@@ -293,6 +305,7 @@ class ScriptsOneTime
         }
 
         $pattern[] = 'Default: "<info>{default}</info>"';
+        $pattern[] = ': ';
 
         $replacements = [
             '{question}' => $question,
@@ -306,33 +319,39 @@ class ScriptsOneTime
     protected static function ioSelectDrupalProfileChoices(string $drupalRoot, bool $withHiddenOnes = false): array
     {
         $choices = [];
-        foreach (static::getDrupalProfiles($drupalRoot) as $name => $info) {
-            if ($withHiddenOnes || empty($info['hidden'])) {
-                $label = $info['name'] ?? $name;
-                $choices[$name] = "$label ($name)";
-            }
+        foreach (static::getDrupalProfiles($drupalRoot, $withHiddenOnes) as $name => $info) {
+            $label = $info['name'] ?? $name;
+            $choices[$name] = "$label ($name)";
         }
 
         return $choices;
     }
 
-    protected static function getDrupalProfiles(string $drupalRoot): array
+    protected static function getDrupalProfiles(string $drupalRoot, bool $withHiddenOnes = false): array
     {
         $profiles = [];
 
         $infoFiles = new Finder();
         $infoFiles
-            ->in(["$drupalRoot/profiles"])
+            ->in([
+                "$drupalRoot/core/profiles",
+                "$drupalRoot/profiles",
+            ])
             ->name('*.info.yml')
             ->depth('< 3');
 
         foreach ($infoFiles as $infoFile) {
             $info = Yaml::parse(file_get_contents($infoFile->getPathname()));
-            if (!empty($info['type']) && $info['type'] === 'profile') {
+            if (!empty($info['type'])
+                && $info['type'] === 'profile'
+                && ($withHiddenOnes || empty($info['hidden']))
+            ) {
                 $name = $infoFile->getBasename('.info.yml');
                 $profiles[$name] = $info;
             }
         }
+
+        ksort($profiles);
 
         return $profiles;
     }

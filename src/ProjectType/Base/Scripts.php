@@ -3,6 +3,7 @@
 namespace Cheppers\Robo\Drupal\ProjectType\Base;
 
 use Cheppers\GitHooks\Main as GitHooksComposerScripts;
+use Cheppers\Robo\Drupal\Utils;
 use Composer\Script\Event;
 use DrupalComposer\DrupalScaffold\Plugin;
 use Symfony\Component\Filesystem\Filesystem;
@@ -57,8 +58,10 @@ class Scripts
         }
 
         $rootDir = getcwd();
-        if (file_exists("$rootDir/ProjectConfig.php")) {
-            require_once "$rootDir/ProjectConfig.php";
+
+        $projectConfigFilePath = $rootDir . '/' . Utils::$projectConfigFileName;
+        if (file_exists($projectConfigFilePath)) {
+            require_once $projectConfigFilePath;
             if (!empty($GLOBALS['projectConfig'])) {
                 static::$projectConfig = $GLOBALS['projectConfig'];
 

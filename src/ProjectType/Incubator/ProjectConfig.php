@@ -3,7 +3,6 @@
 namespace Cheppers\Robo\Drupal\ProjectType\Incubator;
 
 use Cheppers\Robo\Drupal\ProjectType\Base as Base;
-use function Stringy\create as s;
 
 class ProjectConfig extends Base\ProjectConfig
 {

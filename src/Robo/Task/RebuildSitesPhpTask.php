@@ -2,22 +2,17 @@
 
 namespace Cheppers\Robo\Drupal\Robo\Task;
 
-use Cheppers\Robo\Drupal\ProjectType\Incubator\ProjectConfig;
+use Cheppers\Robo\Drupal\ProjectType\Base\ProjectConfig;
 use Cheppers\Robo\Drupal\VarExport;
 use Robo\Result;
 use Robo\Task\BaseTask;
 use Symfony\Component\Filesystem\Filesystem;
 use Webmozart\PathUtil\Path;
 
-/**
- * Class RebuildSitesPhpTask.
- *
- * @package Cheppers\Robo\Drupal\Robo\Task
- */
 class RebuildSitesPhpTask extends BaseTask
 {
     /**
-     * @var \Cheppers\Robo\Drupal\ProjectType\Incubator\ProjectConfig
+     * @var \Cheppers\Robo\Drupal\ProjectType\Base\ProjectConfig
      */
     protected $projectConfig;
 

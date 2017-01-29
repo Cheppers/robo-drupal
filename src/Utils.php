@@ -2,16 +2,16 @@
 
 namespace Cheppers\Robo\Drupal;
 
-/**
- * Class Utils.
- *
- * @package Cheppers\Robo\Drupal
- */
 class Utils
 {
     const DEFAULT_HTTP_PORT = 80;
 
     const DEFAULT_HTTPS_PORT = 443;
+
+    /**
+     * @var string
+     */
+    public static $projectConfigFileName = 'ProjectConfig.php';
 
     /**
      * Drupal related composer package types.

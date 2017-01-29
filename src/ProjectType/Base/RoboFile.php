@@ -47,6 +47,11 @@ class RoboFile extends Tasks
     protected $envNamePrefix = '';
 
     /**
+     * @var string
+     */
+    protected $projectConfigClass = ProjectConfig::class;
+
+    /**
      * @var \Cheppers\Robo\Drupal\ProjectType\Base\ProjectConfig
      */
     protected $projectConfig = null;
@@ -72,10 +77,8 @@ class RoboFile extends Tasks
         putenv('COMPOSER_DISABLE_XDEBUG_WARN=1');
         $this->roboDrupalRoot = Path::makeAbsolute('../../..', __DIR__);
 
-        require_once 'ProjectConfig.php';
-        $this->projectConfig = $GLOBALS['projectConfig'];
-
         $this
+            ->initProjectConfig()
             ->initComposerInfo()
             ->initEnvNamePrefix();
     }
@@ -120,6 +123,24 @@ class RoboFile extends Tasks
             ->addCode($this->getTaskUnlockSettingsPhp());
     }
     //endregion
+
+    /**
+     * @return $this
+     */
+    protected function initProjectConfig()
+    {
+        if (!$this->projectConfig) {
+            if (file_exists(Utils::$projectConfigFileName)) {
+                require_once Utils::$projectConfigFileName;
+                $this->projectConfig = $GLOBALS['projectConfig'];
+            }
+
+            $class = $this->projectConfigClass;
+            $this->projectConfig = $GLOBALS['projectConfig'] ?? new $class();
+        }
+
+        return $this;
+    }
 
     /**
      * @return $this
@@ -244,13 +265,14 @@ class RoboFile extends Tasks
     protected function getTaskUnlockSettingsPhp(string $siteId = ''): \Closure
     {
         return function () use ($siteId): int {
+            $pc = $this->projectConfig;
             $mask = umask();
             $sites = $siteId ?
-                [$siteId => $this->projectConfig->sites[$siteId]]
-                : $this->projectConfig->sites;
+                [$siteId => $pc->sites[$siteId]]
+                : $pc->sites;
 
             foreach ($sites as $site) {
-                $siteDir = "{$this->projectConfig->drupalRootDir}/sites/{$site->id}";
+                $siteDir = "{$pc->drupalRootDir}/sites/{$site->id}";
                 if (file_exists($siteDir)) {
                     $this->_chmod($siteDir, 0777, $mask);
 

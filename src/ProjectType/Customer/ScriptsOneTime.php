@@ -14,11 +14,30 @@ class ScriptsOneTime extends Base\ScriptsOneTime
      */
     protected static $siteBranch = 'default';
 
+    /**
+     * @var string
+     */
     protected static $siteProfile = '';
 
+    /**
+     * @var string
+     */
     protected static $siteMachineNameLong = '';
 
+    /**
+     * @var string
+     */
     protected static $siteMachineNameShort = '';
+
+    /**
+     * {@inheritdoc}
+     */
+    protected static $projectConfigClass = ProjectConfig::class;
+
+    /**
+     * @var \Cheppers\Robo\Drupal\ProjectType\Customer\ProjectConfig
+     */
+    protected static $projectConfig = null;
 
     protected static function oneTimeMain(Event $event)
     {
@@ -34,7 +53,7 @@ class ScriptsOneTime extends Base\ScriptsOneTime
 
     protected static function siteCreateInput(Event $event)
     {
-        $pc = static::getProjectConfig();
+        $pc = static::$projectConfig;
 
         $question = static::ioAskQuestion(
             'Name of the directory under DRUPAL_ROOT/sites/',

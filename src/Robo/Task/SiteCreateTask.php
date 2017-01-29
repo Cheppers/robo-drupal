@@ -3,7 +3,7 @@
 namespace Cheppers\Robo\Drupal\Robo\Task;
 
 use Cheppers\Robo\Drupal\Config\DatabaseServerConfig;
-use Cheppers\Robo\Drupal\ProjectType\Incubator\ProjectConfig;
+use Cheppers\Robo\Drupal\ProjectType\Base\ProjectConfig;
 use Cheppers\Robo\Drupal\Config\SiteConfig;
 use Cheppers\Robo\Drupal\Utils;
 use Cheppers\Robo\Drupal\VarExport;
@@ -17,11 +17,6 @@ use Webmozart\PathUtil\Path;
 
 use function Stringy\create as s;
 
-/**
- * Class SiteCreateTask.
- *
- * @package Cheppers\Robo\Drupal\Robo\Task
- */
 class SiteCreateTask extends BaseTask implements ContainerAwareInterface
 {
     use ContainerAwareTrait;
@@ -184,7 +179,7 @@ class SiteCreateTask extends BaseTask implements ContainerAwareInterface
 
     //region projectConfig
     /**
-     * @var \Cheppers\Robo\Drupal\ProjectType\Incubator\ProjectConfig
+     * @var \Cheppers\Robo\Drupal\ProjectType\Base\ProjectConfig
      */
     protected $projectConfig = null;
 
@@ -194,7 +189,7 @@ class SiteCreateTask extends BaseTask implements ContainerAwareInterface
     }
 
     /**
-     * @param \Cheppers\Robo\Drupal\ProjectType\Incubator\ProjectConfig $projectConfig
+     * @param \Cheppers\Robo\Drupal\ProjectType\Base\ProjectConfig $projectConfig
      *
      * @return $this
      */
@@ -406,7 +401,7 @@ class SiteCreateTask extends BaseTask implements ContainerAwareInterface
     protected function readProjectConfigPhp()
     {
         // @todo Error handling if the file doesn't exists.
-        $fileName = Path::join($this->projectRootDir, 'ProjectConfig.php');
+        $fileName = Path::join($this->projectRootDir, Utils::$projectConfigFileName);
         $this->projectConfigPhp = file_get_contents($fileName);
 
         return $this;
@@ -417,7 +412,7 @@ class SiteCreateTask extends BaseTask implements ContainerAwareInterface
      */
     protected function dumpProjectConfigPhp()
     {
-        $fileName = Path::join($this->projectRootDir, 'ProjectConfig.php');
+        $fileName = Path::join($this->projectRootDir, Utils::$projectConfigFileName);
 
         return $this->filePutContent($fileName, $this->projectConfigPhp);
     }

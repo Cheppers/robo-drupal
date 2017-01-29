@@ -42,6 +42,16 @@ class RoboFile extends Base\RoboFile
 
     protected $areManagedDrupalExtensionsInitialized = false;
 
+    /**
+     * {@inheritdoc}
+     */
+    protected $projectConfigClass = ProjectConfig::class;
+
+    /**
+     * @var \Cheppers\Robo\Drupal\ProjectType\Incubator\ProjectConfig
+     */
+    protected $projectConfig;
+
     //region Self
 
     //region Self - Git hooks.
@@ -82,10 +92,11 @@ class RoboFile extends Base\RoboFile
         $this->environment = 'git-hook';
 
         return $this->collectionBuilder()->addCode(function () use ($oldRef, $newRef) {
+            $pc  = $this->projectConfig;
             // @todo Create dedicated Robo task. Maybe in the cheppers/robo-git package.
             $command = sprintf(
                 '%s diff --exit-code --name-only %s..%s -- %s %s',
-                escapeshellcmd($this->projectConfig->gitExecutable),
+                escapeshellcmd($pc->gitExecutable),
                 escapeshellarg($oldRef),
                 escapeshellarg($newRef),
                 escapeshellarg('composer.json'),
@@ -209,8 +220,9 @@ class RoboFile extends Base\RoboFile
             'short|s' => '',
         ]
     ): CollectionBuilder {
+        $pc = $this->projectConfig;
         if (!$sitesSubDir) {
-            $defaultSettingsPhp = "{$this->projectConfig->drupalRootDir}/sites/default/settings.php";
+            $defaultSettingsPhp = "{$pc->drupalRootDir}/sites/default/settings.php";
             $sitesSubDir = (!file_exists($defaultSettingsPhp) ? 'default' : $options['profile']);
         }
 
@@ -378,6 +390,7 @@ class RoboFile extends Base\RoboFile
             return $cb;
         }
 
+        $pc = $this->projectConfig;
         $placeholders = [
             '{php}' => '',
             '{db}' => '',
@@ -388,7 +401,7 @@ class RoboFile extends Base\RoboFile
             $placeholders['{db}'] = $databaseServer->id;
             foreach ($phpVariants as $phpVariant) {
                 $placeholders['{php}'] = $phpVariant->id;
-                $url = $this->projectConfig->getSiteVariantUrl($placeholders);
+                $url = $pc->getSiteVariantUrl($placeholders);
 
                 if (!$tasks) {
                     $tasks['enable.simpletest'] = $this->getTaskDrushPmEnable($url, ['simpletest']);
@@ -421,7 +434,8 @@ class RoboFile extends Base\RoboFile
      */
     protected function validateArgSiteId(string $siteId)
     {
-        if ($siteId && !array_key_exists($siteId, $this->projectConfig->sites)) {
+        $pc = $this->projectConfig;
+        if ($siteId && !array_key_exists($siteId, $pc->sites)) {
             throw new \InvalidArgumentException("Unknown site ID: '$siteId'", 1);
         }
 
@@ -449,15 +463,16 @@ class RoboFile extends Base\RoboFile
 
     protected function validateInputSiteId(string $input): string
     {
+        $pc = $this->projectConfig;
         if ($input) {
-            if (!isset($this->projectConfig->sites[$input])) {
+            if (!isset($pc->sites[$input])) {
                 throw new \InvalidArgumentException('@todo');
             }
 
             return $input;
         }
 
-        return $this->projectConfig->getDefaultSiteId();
+        return $pc->getDefaultSiteId();
     }
 
     /**
@@ -703,14 +718,15 @@ class RoboFile extends Base\RoboFile
         // @todo Delete other resources: Solr, Elastic.
         // @todo Delete other resources: Nginx, Apache.
         return function () use ($siteId) {
+            $pc = $this->projectConfig;
             $filesToDelete = [];
             $dirsToDelete = [
-                $rootSiteDir = "{$this->projectConfig->outerSitesSubDir}/$siteId",
+                $rootSiteDir = "{$pc->outerSitesSubDir}/$siteId",
             ];
 
             if ($siteId === 'default') {
                 $finder = Finder::create()
-                    ->in("{$this->projectConfig->drupalRootDir}/$rootSiteDir")
+                    ->in("{$pc->drupalRootDir}/$rootSiteDir")
                     ->depth('== 0')
                     ->notName('default.services.yml')
                     ->notName('default.settings.php');
@@ -723,13 +739,13 @@ class RoboFile extends Base\RoboFile
                     }
                 }
             } else {
-                $dirsToDelete[] = "{$this->projectConfig->drupalRootDir}/$rootSiteDir";
+                $dirsToDelete[] = "{$pc->drupalRootDir}/$rootSiteDir";
             }
 
             $this->_deleteDir(array_filter($dirsToDelete, 'is_dir'));
             $this->_remove($filesToDelete);
 
-            $projectConfigFileName = 'ProjectConfig.php';
+            $projectConfigFileName = Utils::$projectConfigFileName;
             if (file_exists($projectConfigFileName)) {
                 $lines = file($projectConfigFileName);
                 $lineIndex = 0;
@@ -755,7 +771,7 @@ class RoboFile extends Base\RoboFile
                 file_put_contents($projectConfigFileName, implode('', $lines));
             }
 
-            unset($this->projectConfig->sites[$siteId]);
+            unset($pc->sites[$siteId]);
 
             return 0;
         };
@@ -768,15 +784,16 @@ class RoboFile extends Base\RoboFile
      */
     protected function getTaskSiteInstall(string $siteId): TaskInterface
     {
-        $backToRootDir = $this->backToRootDir($this->projectConfig->drupalRootDir);
-        $site = $this->projectConfig->sites[$siteId];
+        $pc = $this->projectConfig;
+        $backToRootDir = $this->backToRootDir($pc->drupalRootDir);
+        $site = $pc->sites[$siteId];
         $cmdPattern = '%s --yes --sites-subdir=%s';
         $cmdArgs = [
             escapeshellcmd("$backToRootDir/{$this->binDir}/drush"),
             escapeshellarg($site->id),
         ];
 
-        $configDir = "{$this->projectConfig->outerSitesSubDir}/{$site->id}/config/sync";
+        $configDir = "{$pc->outerSitesSubDir}/{$site->id}/config/sync";
         if (file_exists($configDir) && glob("$configDir/*.yml")) {
             $cmdPattern .= ' --config-dir=%s';
             $cmdArgs[] = escapeshellarg("$backToRootDir/$configDir");
@@ -787,17 +804,17 @@ class RoboFile extends Base\RoboFile
 
         return $this
             ->taskExec(vsprintf($cmdPattern, $cmdArgs))
-            ->dir($this->projectConfig->drupalRootDir);
+            ->dir($pc->drupalRootDir);
     }
 
     protected function getTaskPublicFilesClean(string $siteId): \Closure
     {
-        return $this->getTaskDirectoryClean("{$this->projectConfig->drupalRootDir}/sites/{$siteId}/files");
+        return $this->getTaskDirectoryClean("{$pc->drupalRootDir}/sites/{$siteId}/files");
     }
 
     protected function getTaskPrivateFilesClean($siteId): \Closure
     {
-        return $this->getTaskDirectoryClean("{$this->projectConfig->outerSitesSubDir}/{$siteId}/private");
+        return $this->getTaskDirectoryClean("{$pc->outerSitesSubDir}/{$siteId}/private");
     }
 
     protected function getTaskDirectoryClean(string $dir): \Closure
@@ -896,20 +913,20 @@ class RoboFile extends Base\RoboFile
         PhpVariantConfig $phpVariant,
         DatabaseServerConfig $databaseServer
     ): CollectionBuilder {
-        $url = $this->projectConfig->getSiteVariantUrl([
+        $pc = $this->projectConfig;
+        $url = $pc->getSiteVariantUrl([
             '{siteBranch}' => $siteId,
             '{php}' => $phpVariant->id,
             '{db}' => $databaseServer->id,
         ]);
-
-        $backToRootDir = $this->backToRootDir($this->projectConfig->drupalRootDir);
+        $backToRootDir = $this->backToRootDir($pc->drupalRootDir);
 
         // @todo Configurable protocol. HTTP vs HTTPS.
         return $this
             ->taskDrupalCoreTestsRun()
             ->setDrupalRoot($this->projectConfig->drupalRootDir)
             ->setUrl("http://$url")
-            ->setXml(Path::join($backToRootDir, $this->projectConfig->reportsDir, 'tests'))
+            ->setXml(Path::join($backToRootDir, $pc->reportsDir, 'tests'))
             ->setColorized(true)
             ->setNonHtml(true)
             ->setPhpExecutable(PHP_BINARY)

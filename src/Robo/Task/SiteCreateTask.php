@@ -15,7 +15,7 @@ use Robo\TaskAccessor;
 use Symfony\Component\Filesystem\Filesystem;
 use Webmozart\PathUtil\Path;
 
-use function Stringy\create as s;
+use Stringy\StaticStringy;
 
 class SiteCreateTask extends BaseTask implements ContainerAwareInterface
 {
@@ -768,8 +768,8 @@ PHP;
             $connection['database'] = "$dbDir/default__default.sqlite";
         } else {
             $connection['database'] = implode('__', [
-                s($pc->id)->underscored(),
-                s($siteBranch)->underscored(),
+                StaticStringy::underscored($pc->id),
+                StaticStringy::underscored($siteBranch),
                 'dev',
             ]);
         }

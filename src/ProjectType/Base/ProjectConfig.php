@@ -6,7 +6,7 @@ use Cheppers\Robo\Drupal\Config\BaseConfig;
 use Cheppers\Robo\Drupal\Config\DatabaseServerConfig;
 use Cheppers\Robo\Drupal\Utils;
 
-use function Stringy\create as s;
+use Stringy\StaticStringy;
 
 class ProjectConfig extends BaseConfig
 {
@@ -175,7 +175,7 @@ class ProjectConfig extends BaseConfig
 
     public function getBaseHostName(): string
     {
-        return $this->baseHostName ?: s($this->id)->dasherize() . '.localhost';
+        return $this->baseHostName ?: StaticStringy::dasherize($this->id) . '.localhost';
     }
 
     public function getProjectUrls(): array

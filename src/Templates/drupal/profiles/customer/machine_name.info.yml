@@ -1,0 +1,14 @@
+name: HumanName
+type: profile
+description: 'Foo.'
+core: 8.x
+dependencies:
+  - block
+  - config
+  - dblog
+  - help
+  - menu_ui
+  - node
+themes:
+  - bartik
+  - seven

@@ -311,6 +311,11 @@ class RoboFile extends \Robo\Tasks
                     ->setPaths($files),
                 'lint.phpcs.psr2' => $this
                     ->taskPhpcsLintInput($options)
+                    ->setIgnore([
+                        '*/composer.json',
+                        '*/.gitignore',
+                        '*.yml',
+                    ])
                     ->setAssetJar($assetJar)
                     ->setAssetJarMap('files', ['files']),
             ]);

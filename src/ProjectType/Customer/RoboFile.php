@@ -72,16 +72,16 @@ class RoboFile extends Base\RoboFile
     public function githookPreCommit(): CollectionBuilder
     {
         $this->environment = 'git-hook';
-        $phpcsConfig = $this->getPhpcsConfigDrupal();
 
         return $this
             ->collectionBuilder()
             ->addTaskList([
-                'lint.phpcs.drupal' => $this->getTaskPhpcsLint($phpcsConfig),
+                'lint.phpcs.Drupal' => $this->getTaskPhpcsLint($this->getPhpcsConfigDrupal()),
             ]);
     }
     //endregion
 
+    //region Lint.
     /**
      * Run all kind of linters and static analyzers.
      */
@@ -94,6 +94,12 @@ class RoboFile extends Base\RoboFile
                 'lint.composer.lock' => $this->taskComposerValidate(),
             ]);
     }
+
+    public function lintPhpcs(): TaskInterface
+    {
+        return $this->getTaskPhpcsLint($this->getPhpcsConfigDrupal());
+    }
+    //endregion
 
     /**
      * @return \Robo\Contract\TaskInterface|\Robo\Collection\CollectionBuilder

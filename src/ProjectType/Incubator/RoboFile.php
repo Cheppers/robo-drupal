@@ -91,7 +91,7 @@ class RoboFile extends Base\RoboFile
     {
         $this->environment = 'git-hook';
 
-        return $this->collectionBuilder()->addCode(function () use ($oldRef, $newRef) {
+        return $this->collectionBuilder()->addCode(function () use ($oldRef, $newRef, $isBranch) {
             $pc  = $this->projectConfig;
             // @todo Create dedicated Robo task. Maybe in the cheppers/robo-git package.
             $command = sprintf(
@@ -725,13 +725,13 @@ class RoboFile extends Base\RoboFile
             ];
 
             if ($siteId === 'default') {
-                $finder = Finder::create()
+                /** @var \Symfony\Component\Finder\Finder $files */
+                $files = Finder::create()
                     ->in("{$pc->drupalRootDir}/$rootSiteDir")
                     ->depth('== 0')
                     ->notName('default.services.yml')
                     ->notName('default.settings.php');
-
-                foreach ($finder as $file) {
+                foreach ($files as $file) {
                     if ($file->isDir()) {
                         $dirsToDelete[] = $file->getPathname();
                     } else {
@@ -809,12 +809,12 @@ class RoboFile extends Base\RoboFile
 
     protected function getTaskPublicFilesClean(string $siteId): \Closure
     {
-        return $this->getTaskDirectoryClean("{$pc->drupalRootDir}/sites/{$siteId}/files");
+        return $this->getTaskDirectoryClean("{$this->projectConfig->drupalRootDir}/sites/{$siteId}/files");
     }
 
     protected function getTaskPrivateFilesClean($siteId): \Closure
     {
-        return $this->getTaskDirectoryClean("{$pc->outerSitesSubDir}/{$siteId}/private");
+        return $this->getTaskDirectoryClean("{$this->projectConfig->outerSitesSubDir}/{$siteId}/private");
     }
 
     protected function getTaskDirectoryClean(string $dir): \Closure
@@ -1054,8 +1054,8 @@ class RoboFile extends Base\RoboFile
             $ec->hasTypeScript = $this->hasDrupalExtensionTypeScript($path);
             $ec->hasSCSS = $this->hasDrupalExtensionScss($path);
 
-            if (!$ec->phpcs->paths) {
-                 $ec->phpcs->paths = ['.'];
+            if (!$ec->phpcs->files) {
+                 $ec->phpcs->files = ['.'];
             }
         }
 

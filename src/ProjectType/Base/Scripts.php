@@ -142,9 +142,7 @@ class Scripts
             return;
         }
 
-        $rootDir = getcwd();
-
-        $projectConfigFilePath = $rootDir . '/' . Utils::$projectConfigFileName;
+        $projectConfigFilePath = static::$packageRootDir . '/' . Utils::$projectConfigFileName;
         if (file_exists($projectConfigFilePath)) {
             require_once $projectConfigFilePath;
             if (!empty($GLOBALS['projectConfig'])) {
@@ -252,14 +250,13 @@ class Scripts
         static::$package = json_decode(file_get_contents($composerJsonFileName), true);
         list(static::$oldVendorMachine, static::$oldNameMachine) = explode('/', static::$package['name']);
         $oldNamespace = array_search('src/', static::$package['autoload']['psr-4']);
-        // @todo What if there are more than two levels?
         list(static::$oldVendorNamespace, static::$oldNameNamespace) = explode('\\', $oldNamespace);
     }
 
     protected static function packageDump(): void
     {
         file_put_contents(
-            static::$packageFileName,
+            $composerJsonFileName = static::$packageRootDir . '/' . static::$packageFileName,
             json_encode(
                 static::$package,
                 JSON_PRETTY_PRINT | JSON_UNESCAPED_SLASHES
@@ -275,6 +272,7 @@ class Scripts
     protected static function renamePackage(): void
     {
         static::renamePackageInput();
+        static::renamePackageProjectConfig();
         static::renamePackageComposer();
         static::renamePackageSource();
         static::renamePackageSummary();
@@ -287,7 +285,8 @@ class Scripts
             return;
         }
 
-        $cwdParts = explode('/', getcwd());
+        $cwd = static::$packageRootDir === '.' ? getcwd() : static::$packageRootDir;
+        $cwdParts = explode('/', $cwd);
         $defaultNewNameMachine = array_pop($cwdParts);
         $defaultNewVendorMachine = array_pop($cwdParts);
 
@@ -362,24 +361,53 @@ class Scripts
         );
     }
 
+    protected static function renamePackageProjectConfig(): void
+    {
+        static::$projectConfig->id = StaticStringy::underscored(static::$inputNewNameMachine);
+        $fileName = static::$packageRootDir . '/ProjectConfig.php';
+        file_put_contents(
+            $fileName,
+            str_replace(
+                StaticStringy::underscored(static::$oldNameMachine),
+                static::$projectConfig->id,
+                file_get_contents($fileName)
+            )
+        );
+    }
+
     protected static function renamePackageComposer(): void
     {
         $oldNamespace = static::$oldVendorNamespace . '\\' . static::$oldNameNamespace . '\\';
         $newNamespace = static::$inputNewVendorNamespace . '\\' . static::$inputNewNameNamespace . '\\';
 
         static::$package['name'] = static::$inputNewVendorMachine . '/' . static::$inputNewNameMachine;
-        unset(static::$package['autoload']['psr-4'][$oldNamespace]);
-        static::$package['autoload']['psr-4'][$newNamespace] = 'src/';
+
+        $psr4 = static::$package['autoload']['psr-4'];
+        static::$package['autoload']['psr-4'] = [];
+        foreach ($psr4 as $namespace => $dir) {
+            $namespace = static::replaceNamespace($namespace, $oldNamespace, $newNamespace);
+
+            static::$package['autoload']['psr-4'][$namespace] = $dir;
+        }
 
         foreach (static::$package['scripts'] as $key => $scripts) {
             if (is_string($scripts)) {
-                static::$package['scripts'][$key] = str_replace($oldNamespace, $newNamespace, $scripts);
+                static::$package['scripts'][$key] = static::replaceNamespace($scripts, $oldNamespace, $newNamespace);
             } else {
                 foreach ($scripts as $i => $script) {
-                    static::$package['scripts'][$key][$i] = str_replace($oldNamespace, $newNamespace, $script);
+                    static::$package['scripts'][$key][$i] = static::replaceNamespace(
+                        $script,
+                        $oldNamespace,
+                        $newNamespace
+                    );
                 }
             }
         }
+    }
+
+    protected static function replaceNamespace(string $namespace, string $old, string $new): string
+    {
+        return preg_replace('/^' . preg_quote($old) . '/', $new, $namespace);
     }
 
     protected static function renamePackageSource(): void

@@ -2,6 +2,8 @@
 
 namespace Cheppers\Robo\Drupal;
 
+use Symfony\Component\Finder\Finder;
+
 class Utils
 {
     const DEFAULT_HTTP_PORT = 80;
@@ -137,5 +139,27 @@ class Utils
         }
 
         return $filtered;
+    }
+    
+    public static function getCustomDrupalProfiles(string $drupalRoot): array
+    {
+        $profiles = [];
+
+        if (file_exists("$drupalRoot/profiles/custom")) {
+            $root = "$drupalRoot/profiles/custom";
+        } else {
+            $root = "$drupalRoot/profiles";
+        }
+
+        /** @var \Symfony\Component\Finder\Finder $dirs */
+        $dirs = (new Finder())
+            ->in($root)
+            ->directories()
+            ->depth(0);
+        foreach ($dirs as $dir) {
+            $profiles[$dir->getBasename()] = "$root/" . $dir->getRelativePathname();
+        }
+
+        return $profiles;
     }
 }

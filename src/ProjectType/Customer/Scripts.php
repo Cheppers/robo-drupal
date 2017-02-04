@@ -133,7 +133,7 @@ class Scripts extends Base\Scripts
         if (static::$inputSiteProfile === 'new') {
             static::$inputSiteProfile = static::$inputSiteMachineNameLong;
             static::newInstanceFromDrupalProfileCustomer(
-                static::$projectConfig->drupalRootDir . '/profiles',
+                static::$projectConfig->drupalRootDir . '/profiles/custom',
                 static::$inputSiteProfile
             );
         }

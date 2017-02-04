@@ -5,6 +5,7 @@ use Cheppers\LintReport\Reporter\BaseReporter;
 use Cheppers\LintReport\Reporter\CheckstyleReporter;
 use League\Container\ContainerInterface;
 use Robo\Collection\CollectionBuilder;
+use Symfony\Component\Finder\Finder;
 use Symfony\Component\Process\Process;
 use Symfony\Component\Yaml\Yaml;
 use Webmozart\PathUtil\Path;
@@ -27,6 +28,11 @@ class RoboFile extends \Robo\Tasks
      * @var array
      */
     protected $codeceptionInfo = [];
+
+    /**
+     * @var string[]
+     */
+    protected $codeceptionSuiteNames = [];
 
     /**
      * @var string
@@ -88,16 +94,16 @@ class RoboFile extends \Robo\Tasks
             ->addTaskList([
                 'lint.composer.lock' => $this->taskComposerValidate(),
                 'lint.phpcs.psr2' => $this->getTaskPhpcsLint(),
-                'codecept' => $this->getTaskCodecept(),
+                'codecept' => $this->getTaskCodeceptRunSuites(),
             ]);
     }
 
     /**
      * Run the Robo unit tests.
      */
-    public function test(): CollectionBuilder
+    public function test(array $suiteNames): CollectionBuilder
     {
-        return $this->getTaskCodecept();
+        return $this->getTaskCodeceptRunSuites($suiteNames);
     }
 
     /**
@@ -174,6 +180,7 @@ class RoboFile extends \Robo\Tasks
         } else {
             $this->codeceptionInfo = [
                 'paths' => [
+                    'tests' => 'tests',
                     'log' => 'tests/_output',
                 ],
             ];
@@ -182,8 +189,23 @@ class RoboFile extends \Robo\Tasks
         return $this;
     }
 
-    protected function getTaskCodecept(): CollectionBuilder
+    protected function getTaskCodeceptRunSuites(array $suiteNames = []): CollectionBuilder
     {
+        if (!$suiteNames) {
+            $suiteNames = $this->getCodeceptionSuiteNames();
+        }
+
+        $cb = $this->collectionBuilder();
+        foreach ($suiteNames as $suiteName) {
+            $cb->addTask($this->getTaskCodeceptRunSuite($suiteName));
+        }
+
+        return $cb;
+    }
+
+    protected function getTaskCodeceptRunSuite(string $suite): CollectionBuilder
+    {
+        $this->initCodeceptionInfo();
         $environment = $this->getEnvironment();
 
         $withCoverageHtml = in_array($environment, ['dev', 'git-hook']);
@@ -214,40 +236,41 @@ class RoboFile extends \Robo\Tasks
         $tasks = [];
         if ($withCoverageHtml) {
             $cmdPattern .= ' --coverage-html=%s';
-            $cmdArgs[] = escapeshellarg('coverage/html');
+            $cmdArgs[] = escapeshellarg("test/$suite/coverage/html");
         }
 
         if ($withCoverageXml) {
             $cmdPattern .= ' --coverage-xml=%s';
-            $cmdArgs[] = escapeshellarg('coverage/coverage.xml');
+            $cmdArgs[] = escapeshellarg("test/$suite/coverage/coverage.xml");
         }
 
         if ($withCoverageAny) {
             $cmdPattern .= ' --coverage=%s';
-            $cmdArgs[] = escapeshellarg('coverage/coverage.serialized');
+            $cmdArgs[] = escapeshellarg("test/$suite/coverage/coverage.serialized");
 
             $tasks['prepareCoverageDir'] = $this
                 ->taskFilesystemStack()
-                ->mkdir("$logDir/coverage");
+                ->mkdir("$logDir/test/$suite/coverage");
         }
 
         if ($withUnitReportHtml) {
             $cmdPattern .= ' --html=%s';
-            $cmdArgs[] = escapeshellarg('junit/junit.html');
+            $cmdArgs[] = escapeshellarg("test/$suite/junit/junit.html");
         }
 
         if ($withUnitReportXml) {
             $cmdPattern .= ' --xml=%s';
-            $cmdArgs[] = escapeshellarg('junit/junit.xml');
+            $cmdArgs[] = escapeshellarg("test/$suite/junit/junit.xml");
         }
 
         if ($withUnitReportXml || $withUnitReportHtml) {
             $tasks['prepareJUnitDir'] = $this
                 ->taskFilesystemStack()
-                ->mkdir("$logDir/junit");
+                ->mkdir("$logDir/test/$suite/junit");
         }
 
-        $cmdPattern .= ' run';
+        $cmdPattern .= ' run %s';
+        $cmdArgs[] = $suite;
 
         if ($environment === 'jenkins') {
             // Jenkins has to use a post-build action to mark the build "unstable".
@@ -348,5 +371,25 @@ class RoboFile extends \Robo\Tasks
         return !empty($this->codeceptionInfo['paths']['log']) ?
             $this->codeceptionInfo['paths']['log']
             : 'tests/_output';
+    }
+
+    protected function getCodeceptionSuiteNames(): array
+    {
+        if (!$this->codeceptionSuiteNames) {
+            $this->initCodeceptionInfo();
+
+            /** @var \Symfony\Component\Finder\Finder $suiteFiles */
+            $suiteFiles = Finder::create()
+                ->in($this->codeceptionInfo['paths']['tests'])
+                ->files()
+                ->name('*.suite.yml')
+                ->depth(0);
+
+            foreach ($suiteFiles as $suiteFile) {
+                $this->codeceptionSuiteNames[] = $suiteFile->getBasename('.suite.yml');
+            }
+        }
+
+        return $this->codeceptionSuiteNames;
     }
 }

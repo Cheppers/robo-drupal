@@ -81,8 +81,12 @@
     },
     "autoload-dev": {
         "psr-4": {
+            "Cheppers\\Robo\\Drupal\\Tests\\Acceptance\\": "tests/acceptance/",
             "Cheppers\\Robo\\Drupal\\Tests\\Unit\\": "tests/unit/"
-        }
+        },
+        "classmap": [
+            "tests/_data/fixtures/RoboFiles/"
+        ]
     },
     "scripts": {
         "post-install-cmd": [

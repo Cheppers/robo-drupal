@@ -17,5 +17,6 @@ class ComposerPackagePathsTaskCest
     {
         $I->runRoboTask(\ComposerPackagePathsTaskRoboFile::class, 'basic', 'false');
         $I->assertEquals(1, $I->getRoboTaskExitCode());
+        $I->assertContains("Fail\n", $I->getRoboTaskStdError());
     }
 }

@@ -7,40 +7,36 @@ use Cheppers\Robo\Drupal\Config\PhpVariantConfig;
 use Cheppers\Robo\Drupal\ProjectType\Incubator\ProjectConfig;
 use Cheppers\Robo\Drupal\Config\SiteConfig;
 use Cheppers\Robo\Drupal\Robo\Task\RebuildSitesPhpTask;
+use Codeception\Test\Unit;
 use Codeception\Util\Stub;
 use Robo\Robo;
 use Robo\Task\Filesystem\FilesystemStack;
-use Robo\Tasks;
 use Symfony\Component\Filesystem\Filesystem;
 
 /**
  * @covers \Cheppers\Robo\Drupal\Robo\Task\RebuildSitesPhpTask
  */
-class RebuildSitesPhpTaskTest extends \Codeception\Test\Unit
+class RebuildSitesPhpTaskTest extends Unit
 {
     /**
      * @var \UnitTester
      */
     protected $tester;
 
-    /**
-     * {@inheritdoc}
-     */
-    protected function setUp()
+    // @codingStandardsIgnoreStart
+    protected function _before()
     {
+        // @codingStandardsIgnoreEnd
+        parent::_before();
         $this->cleanFixturesDir();
-
-        return parent::setUp();
     }
 
-    /**
-     * {@inheritdoc}
-     */
-    protected function tearDown()
+    // @codingStandardsIgnoreStart
+    protected function _after()
     {
+        // @codingStandardsIgnoreEnd
         $this->cleanFixturesDir();
-
-        parent::tearDown();
+        parent::_after();
     }
 
     public function casesRun(): array
@@ -149,13 +145,16 @@ class RebuildSitesPhpTaskTest extends \Codeception\Test\Unit
     protected function cleanFixturesDir()
     {
         $fixturesDir = $this->getFixturesDir();
-        $filesToDelete = [
-            "$fixturesDir/with-example-sites-php/sites/sites.php",
-            "$fixturesDir/without-example-sites-php/sites/sites.php",
-            "$fixturesDir/without-example-sites-php/sites",
-        ];
-        $fs = new Filesystem();
-        $fs->remove($filesToDelete);
+        $filesToDelete = array_filter(
+            [
+                "$fixturesDir/with-example-sites-php/sites/sites.php",
+                //"$fixturesDir/without-example-sites-php/sites/sites.php",
+                "$fixturesDir/without-example-sites-php/sites",
+            ],
+            'file_exists'
+        );
+
+        (new Filesystem())->remove($filesToDelete);
     }
 
     protected function getFixturesDir(): string

@@ -3,6 +3,7 @@
 namespace Cheppers\Robo\Drupal;
 
 use Symfony\Component\Finder\Finder;
+use Webmozart\PathUtil\Path;
 
 class Utils
 {
@@ -26,6 +27,16 @@ class Utils
         'drupal-module',
         'drupal-theme',
     ];
+
+    /**
+     * Get the root directory of the "cheppers/robo-drupal" package.
+     *
+     * @todo The "composer/installers" can broke this.
+     */
+    public static function getRoboDrupalRoot(): string
+    {
+        return Path::canonicalize(Path::join(__DIR__, '/..'));
+    }
 
     public static function isDefaultHttpPort(int $port): bool
     {

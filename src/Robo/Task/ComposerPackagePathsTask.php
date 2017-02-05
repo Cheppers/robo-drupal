@@ -2,17 +2,12 @@
 
 namespace Cheppers\Robo\Drupal\Robo\Task;
 
-use Cheppers\AssetJar\AssetJarAware;
-use Cheppers\AssetJar\AssetJarAwareInterface;
 use Robo\Contract\CommandInterface;
 use Robo\Result;
-use Robo\Task\BaseTask;
 use Symfony\Component\Process\Process;
 
-class ComposerPackagePathsTask extends BaseTask implements CommandInterface, AssetJarAwareInterface
+class ComposerPackagePathsTask extends BaseTask implements CommandInterface
 {
-    use AssetJarAware;
-
     public static function parseOutput(string $stdOutput): array
     {
         $packagePaths = [];
@@ -43,6 +38,7 @@ class ComposerPackagePathsTask extends BaseTask implements CommandInterface, Ass
         'packagePaths' => [],
     ];
 
+    //region Options.
     //region Option - workingDirectory
     /**
      * @var string
@@ -90,6 +86,7 @@ class ComposerPackagePathsTask extends BaseTask implements CommandInterface, Ass
         return $this;
     }
     //endregion
+    //endregion
 
     public function __construct(array $options = [])
     {
@@ -99,8 +96,14 @@ class ComposerPackagePathsTask extends BaseTask implements CommandInterface, Ass
     }
 
     /**
-     * @param array $options
-     *
+     * {@inheritdoc}
+     */
+    public function getTaskName(): string
+    {
+        return 'Composer package paths';
+    }
+
+    /**
      * @return $this
      */
     public function setOptions(array $options)
@@ -144,7 +147,6 @@ class ComposerPackagePathsTask extends BaseTask implements CommandInterface, Ass
         $this->assets['workingDirectory'] = $this->getWorkingDirectory();
         $this->assets['packagePaths'] = static::parseOutput($process->getOutput());
         $this->releaseAssets();
-
 
         return Result::success($this, '', $this->assets);
     }

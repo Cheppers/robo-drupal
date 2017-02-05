@@ -2,36 +2,35 @@
 
 use Cheppers\AssetJar\AssetJar;
 use Cheppers\Robo\Drupal\Robo\ComposerTaskLoader;
-use Robo\Collection\CollectionBuilder;
+use Cheppers\Robo\Drupal\Utils;
+use Symfony\Component\Console\Output\ConsoleOutputInterface;
 
 class ComposerPackagePathsTaskRoboFile extends Robo\Tasks
 {
     use ComposerTaskLoader;
 
-    public function basic(string $composerExecutable): CollectionBuilder
+    public function basic(string $composerExecutable): int
     {
-        return $this
-            ->collectionBuilder()
-            ->addCode(
-                function () use ($composerExecutable) {
-                    $assetJar = new AssetJar();
-                    $result = $this
-                        ->taskComposerPackagePaths([
-                            'assetJar' => $assetJar,
-                            'assetJarMapping' => [
-                                'packagePaths' => ['foo', 'bar'],
-                            ],
-                            'workingDirectory' => '.',
-                            'composerExecutable' => $composerExecutable,
-                        ])
-                        ->run();
+        $assetJar = new AssetJar();
+        $result = $this
+            ->taskComposerPackagePaths([
+                'assetJar' => $assetJar,
+                'assetJarMapping' => [
+                    'packagePaths' => ['foo', 'bar'],
+                ],
+                'workingDirectory' => Utils::getRoboDrupalRoot(),
+                'composerExecutable' => $composerExecutable,
+            ])
+            ->run();
 
-                    if ($result->wasSuccessful() && isset($result['packagePaths']['cheppers/asset-jar'])) {
-                        $this->output()->writeln('Success');
-                    }
+        $stdOutput = $this->output();
+        if ($result->wasSuccessful() && isset($result['packagePaths']['cheppers/asset-jar'])) {
+            $stdOutput->writeln('Success');
+        } else {
+            $stdError = ($stdOutput instanceof ConsoleOutputInterface) ? $stdOutput->getErrorOutput() : $stdOutput;
+            $stdError->writeln('Fail');
+        }
 
-                    return $result->getExitCode();
-                }
-            );
+        return $result->getExitCode();
     }
 }

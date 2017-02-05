@@ -3,16 +3,17 @@
 namespace Helper\Module;
 
 use Codeception\Module as CodeceptionModule;
+use Helper\Dummy\Output as DummyOutput;
 use Robo\Robo;
-use Symfony\Component\Console\Output\BufferedOutput;
+use Robo\Runner;
 use Symfony\Component\Console\Output\OutputInterface;
 
 class RoboTaskRunner extends CodeceptionModule
 {
     /**
-     * @var \Symfony\Component\Console\Output\OutputInterface
+     * @var \Helper\Dummy\Output
      */
-    protected $roboTaskOutput = null;
+    protected $roboTaskStdOutput = null;
 
     protected $roboTaskExitCode = 0;
 
@@ -21,34 +22,35 @@ class RoboTaskRunner extends CodeceptionModule
         return $this->roboTaskExitCode;
     }
 
-    protected $roboTaskStdOutput = '';
-
     public function getRoboTaskStdOutput(): string
     {
-        return $this->roboTaskStdOutput;
+        return $this->roboTaskStdOutput->output;
     }
-
-    protected $roboTaskStdError = '';
 
     public function getRoboTaskStdError(): string
     {
-        return $this->roboTaskStdError;
+        /** @var \Helper\Dummy\Output $errorOutput */
+        $errorOutput = $this->roboTaskStdOutput->getErrorOutput();
+
+        return $errorOutput->output;
     }
 
     public function runRoboTask(string $class, string ...$args): void
     {
-        $this->roboTaskOutput = new BufferedOutput(OutputInterface::VERBOSITY_DEBUG);
-        array_unshift($args, 'RoboTaskRunner.php');
-        $this->roboTaskExitCode = Robo::run(
-            $args,
-            [
-                $class,
-            ],
-            'RoboDrupalTester',
-            '0.0.0-alpha0',
-            $this->roboTaskOutput
-        );
+        $config = [
+            'verbosity' => OutputInterface::VERBOSITY_DEBUG,
+        ];
+        $this->roboTaskStdOutput = new DummyOutput($config);
+        $this->roboTaskStdOutput->setErrorOutput(new DummyOutput($config));
 
-        $this->roboTaskStdOutput = $this->roboTaskOutput->fetch();
+        array_unshift($args, 'RoboTaskRunner.php', '--no-ansi');
+
+        $container = Robo::createDefaultContainer(null, $this->roboTaskStdOutput);
+        $container->add('output', $this->roboTaskStdOutput, false);
+
+        Robo::setContainer($container);
+        $runner = new Runner($class);
+
+        $this->roboTaskExitCode = $runner->execute($args);
     }
 }

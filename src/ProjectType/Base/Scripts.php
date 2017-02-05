@@ -554,6 +554,9 @@ class Scripts
      * Get the root directory of the "cheppers/robo-drupal" package.
      *
      * @todo The "composer/installers" can broke this.
+     *
+     * @deprecated
+     *   See \Cheppers\Robo\Drupal\Utils::getRoboDrupalRoot().
      */
     protected static function getRoboDrupalRoot(): string
     {

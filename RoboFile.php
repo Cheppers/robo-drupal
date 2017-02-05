@@ -5,6 +5,8 @@ use Cheppers\LintReport\Reporter\BaseReporter;
 use Cheppers\LintReport\Reporter\CheckstyleReporter;
 use League\Container\ContainerInterface;
 use Robo\Collection\CollectionBuilder;
+use Symfony\Component\Console\Output\ConsoleOutputInterface;
+use Symfony\Component\Console\Output\OutputInterface;
 use Symfony\Component\Finder\Finder;
 use Symfony\Component\Process\Process;
 use Symfony\Component\Yaml\Yaml;
@@ -103,6 +105,8 @@ class RoboFile extends \Robo\Tasks
      */
     public function test(array $suiteNames): CollectionBuilder
     {
+        $this->validateArgCodeceptionSuiteNames($suiteNames);
+
         return $this->getTaskCodeceptRunSuites($suiteNames);
     }
 
@@ -117,6 +121,13 @@ class RoboFile extends \Robo\Tasks
                 'lint.composer.lock' => $this->taskComposerValidate(),
                 'lint.phpcs.psr2' => $this->getTaskPhpcsLint(),
             ]);
+    }
+
+    protected function errorOutput(): ?OutputInterface
+    {
+        $output = $this->output();
+
+        return ($output instanceof ConsoleOutputInterface) ? $output->getErrorOutput() : $output;
     }
 
     /**
@@ -153,7 +164,10 @@ class RoboFile extends \Robo\Tasks
         return getenv($this->getEnvName('phpdbg_executable')) ?: Path::join(PHP_BINDIR, 'phpdbg');
     }
 
-    protected function initComposerInfo(): self
+    /**
+     * @return $this
+     */
+    protected function initComposerInfo()
     {
         if ($this->composerInfo || !is_readable('composer.json')) {
             return $this;
@@ -169,7 +183,10 @@ class RoboFile extends \Robo\Tasks
         return $this;
     }
 
-    protected function initCodeceptionInfo(): self
+    /**
+     * @return $this
+     */
+    protected function initCodeceptionInfo()
     {
         if ($this->codeceptionInfo) {
             return $this;
@@ -192,7 +209,7 @@ class RoboFile extends \Robo\Tasks
     protected function getTaskCodeceptRunSuites(array $suiteNames = []): CollectionBuilder
     {
         if (!$suiteNames) {
-            $suiteNames = $this->getCodeceptionSuiteNames();
+            $suiteNames = ['all'];
         }
 
         $cb = $this->collectionBuilder();
@@ -269,19 +286,38 @@ class RoboFile extends \Robo\Tasks
                 ->mkdir("$logDir/test/$suite/junit");
         }
 
-        $cmdPattern .= ' run %s';
-        $cmdArgs[] = $suite;
+        $cmdPattern .= ' run';
+        if ($suite !== 'all') {
+            $cmdPattern .= ' %s';
+            $cmdArgs[] = escapeshellarg($suite);
+        }
 
         if ($environment === 'jenkins') {
             // Jenkins has to use a post-build action to mark the build "unstable".
             $cmdPattern .= ' || [[ "${?}" == "1" ]]';
         }
 
-        $tasks['runCodeception'] = $this->taskExec(vsprintf($cmdPattern, $cmdArgs));
+        $command = vsprintf($cmdPattern, $cmdArgs);
 
         return $this
             ->collectionBuilder()
-            ->addTaskList($tasks);
+            ->addTaskList($tasks)
+            ->addCode(function () use ($command) {
+                $process = new Process($command);
+                $exitCode = $process->run(function ($type, $data) {
+                    switch ($type) {
+                        case Process::OUT:
+                            $this->output()->write($data);
+                            break;
+
+                        case Process::ERR:
+                            $this->errorOutput()->write($data);
+                            break;
+                    }
+                });
+
+                return $exitCode;
+            });
     }
 
     /**
@@ -391,5 +427,20 @@ class RoboFile extends \Robo\Tasks
         }
 
         return $this->codeceptionSuiteNames;
+    }
+
+    protected function validateArgCodeceptionSuiteNames(array $suiteNames): void
+    {
+        if (!$suiteNames) {
+            return;
+        }
+
+        $invalidSuiteNames = array_diff($suiteNames, $this->getCodeceptionSuiteNames());
+        if ($invalidSuiteNames) {
+            throw new \InvalidArgumentException(
+                'The following Codeception suite names are invalid: ' . implode(', ', $invalidSuiteNames),
+                1
+            );
+        }
     }
 }

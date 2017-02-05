@@ -2,14 +2,10 @@
 
 namespace Helper\Dummy;
 
-/**
- * Class Output.
- *
- * @package Helper\Dummy
- */
-class Output extends \Symfony\Component\Console\Output\Output
-{
+use Codeception\Lib\Console\Output as ConsoleOutput;
 
+class Output extends ConsoleOutput
+{
     /**
      * @var string
      */

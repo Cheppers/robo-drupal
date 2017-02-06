@@ -1,6 +1,5 @@
 
 class_name: AcceptanceTester
-error_level: 32767
 modules:
     enabled:
         - Asserts

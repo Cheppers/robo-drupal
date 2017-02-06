@@ -317,25 +317,6 @@ class ProjectConfigTest extends Unit
         $this->tester->assertEquals($expected, $pc->getDefaultSiteId());
     }
 
-    /**
-     * @dataProvider casesGetDefaultSiteId
-     *
-     * @covers ::getDefaultSiteId
-     */
-    public function testGetDefaultSiteIdInvalid()
-    {
-        $pc = new ProjectConfig();
-        $pc->defaultSiteId = 'non-exists';
-        $pc->sites = [];
-
-        $this->tester->assertEquals('', @$pc->getDefaultSiteId());
-        $error = error_get_last();
-        $this->tester->assertEquals(
-            "The configured default site ID 'non-exists' does not exists.",
-            $error['message']
-        );
-    }
-
     public function casesProcessPattern(): array
     {
         return [

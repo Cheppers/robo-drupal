@@ -148,7 +148,10 @@ class ProjectConfig extends BaseConfig
     {
         if ($this->defaultSiteId) {
             if (!isset($this->sites[$this->defaultSiteId])) {
-                trigger_error("The configured default site ID '{$this->defaultSiteId}' does not exists.");
+                trigger_error(
+                    "The configured default site ID '{$this->defaultSiteId}' does not exists.",
+                    E_USER_WARNING
+                );
             } else {
                 return $this->defaultSiteId;
             }

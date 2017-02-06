@@ -303,6 +303,13 @@ class RoboFile extends \Robo\Tasks
             ->collectionBuilder()
             ->addTaskList($tasks)
             ->addCode(function () use ($command) {
+                $this->output()->writeln(strtr(
+                    '<question>[{name}]</question> runs <info>{command}</info>',
+                    [
+                        '{name}' => 'Codeception',
+                        '{command}' => $command,
+                    ]
+                ));
                 $process = new Process($command);
                 $exitCode = $process->run(function ($type, $data) {
                     switch ($type) {
@@ -330,6 +337,7 @@ class RoboFile extends \Robo\Tasks
         $files = [
             'src/',
             'tests/_support/Helper/',
+            'tests/acceptance/',
             'tests/unit/',
             'RoboFile.php',
         ];

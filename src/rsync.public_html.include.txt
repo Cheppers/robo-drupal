@@ -4,6 +4,7 @@
 + *.jpg
 + *.jpeg
 + *.ico
++ *.svg
 + *.ttf
 + *.otf
 + *.woff
@@ -12,6 +13,8 @@
 + /core/modules/statistics/statistics.php
 
 # @todo Include these only in non-production mode.
++ /**/*.css.map
++ /**/*.js.map
 + /core/modules/system/tests/http.php
 + /core/modules/system/tests/https.php
 + /core/authorize.php

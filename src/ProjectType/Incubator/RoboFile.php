@@ -17,6 +17,7 @@ use Cheppers\Robo\ESLint\ESLintTaskLoader;
 use Cheppers\Robo\Phpcs\PhpcsTaskLoader;
 use Cheppers\Robo\ScssLint\ScssLintTaskLoader;
 use Cheppers\Robo\TsLint\TsLintTaskLoader;
+use function GuzzleHttp\debug_resource;
 use Robo\Collection\CollectionBuilder;
 use Robo\Contract\TaskInterface;
 use Robo\Task\Filesystem\loadShortcuts as FilesystemShortcuts;
@@ -421,11 +422,6 @@ class RoboFile extends Base\RoboFile
     {
         return $this->getTaskDrupalCoreTestsClean();
     }
-
-    public function testDrupalList(): CollectionBuilder
-    {
-        return $this->getTaskDrupalCoreTestsList();
-    }
     //endregion
 
     //region Argument validators.
@@ -719,31 +715,39 @@ class RoboFile extends Base\RoboFile
         // @todo Delete other resources: Nginx, Apache.
         return function () use ($siteId) {
             $pc = $this->projectConfig;
-            $filesToDelete = [];
-            $dirsToDelete = [
-                $rootSiteDir = "{$pc->outerSitesSubDir}/$siteId",
-            ];
+            $site = $pc->sites[$siteId];
 
-            if ($siteId === 'default') {
-                /** @var \Symfony\Component\Finder\Finder $files */
-                $files = Finder::create()
-                    ->in("{$pc->drupalRootDir}/$rootSiteDir")
-                    ->depth('== 0')
-                    ->notName('default.services.yml')
-                    ->notName('default.settings.php');
-                foreach ($files as $file) {
-                    if ($file->isDir()) {
-                        $dirsToDelete[] = $file->getPathname();
-                    } else {
-                        $filesToDelete[] = $file->getPathname();
+            foreach (array_unique($site->urls) as $siteDir) {
+                $filesToDelete = [];
+                $dirsToDelete = [
+                    "{$pc->outerSitesSubDir}/$siteDir",
+                    "{$pc->publicHtmlDir}/sites/$siteDir",
+                ];
+
+                if ($siteDir === 'default') {
+                    /** @var \Symfony\Component\Finder\Finder $files */
+                    $files = Finder::create()
+                        ->in("{$pc->drupalRootDir}/sites/$siteDir")
+                        ->depth('== 0')
+                        ->notName('default.services.yml')
+                        ->notName('default.settings.php');
+                    foreach ($files as $file) {
+                        if ($file->isDir()) {
+                            $dirsToDelete[] = $file->getPathname();
+                        } else {
+                            $filesToDelete[] = $file->getPathname();
+                        }
                     }
+                } else {
+                    $dirsToDelete[] = "{$pc->drupalRootDir}/sites/$siteDir";
                 }
-            } else {
-                $dirsToDelete[] = "{$pc->drupalRootDir}/$rootSiteDir";
-            }
 
-            $this->_deleteDir(array_filter($dirsToDelete, 'is_dir'));
-            $this->_remove($filesToDelete);
+                $this->output()->writeln(print_r($dirsToDelete, true));
+                $this->output()->writeln(print_r($filesToDelete, true));
+
+                $this->_deleteDir(array_filter($dirsToDelete, 'is_dir'));
+                $this->_remove($filesToDelete);
+            }
 
             $projectConfigFileName = Utils::$projectConfigFileName;
             if (file_exists($projectConfigFileName)) {
@@ -770,7 +774,6 @@ class RoboFile extends Base\RoboFile
                 // @todo Error handling.
                 file_put_contents($projectConfigFileName, implode('', $lines));
             }
-
             unset($pc->sites[$siteId]);
 
             return 0;

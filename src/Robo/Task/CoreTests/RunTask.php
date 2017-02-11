@@ -21,9 +21,6 @@ class RunTask extends BaseTask
     }
 
     /**
-     *
-     * @param string $url
-     *
      * @return $this
      */
     public function setUrl(string $url)
@@ -46,8 +43,6 @@ class RunTask extends BaseTask
     }
 
     /**
-     * @param string $sqlite
-     *
      * @return $this
      */
     public function setSqlite(string $sqlite)
@@ -70,8 +65,6 @@ class RunTask extends BaseTask
     }
 
     /**
-     * @param bool $keepResultsTable
-     *
      * @return $this
      */
     public function setKeepResultsTable(bool $keepResultsTable)
@@ -94,8 +87,6 @@ class RunTask extends BaseTask
     }
 
     /**
-     * @param bool $keepResults
-     *
      * @return $this
      */
     public function setKeepResults(bool $keepResults)
@@ -118,8 +109,6 @@ class RunTask extends BaseTask
     }
 
     /**
-     * @param string $dbUrl
-     *
      * @return $this
      */
     public function setDbUrl(string $dbUrl)
@@ -142,8 +131,6 @@ class RunTask extends BaseTask
     }
 
     /**
-     * @param string $php
-     *
      * @return $this
      */
     public function setPhp(string $php)
@@ -166,8 +153,6 @@ class RunTask extends BaseTask
     }
 
     /**
-     * @param int $concurrency
-     *
      * @return $this
      */
     public function setConcurrency(int $concurrency)
@@ -190,8 +175,6 @@ class RunTask extends BaseTask
     }
 
     /**
-     * @param string $xml
-     *
      * @return $this
      */
     public function setXml(string $xml)
@@ -214,8 +197,6 @@ class RunTask extends BaseTask
     }
 
     /**
-     * @param bool $colorized
-     *
      * @return $this
      */
     public function setColorized(bool $colorized)
@@ -238,8 +219,6 @@ class RunTask extends BaseTask
     }
 
     /**
-     * @param bool $verbose
-     *
      * @return $this
      */
     public function setVerbose(bool $verbose)
@@ -262,8 +241,6 @@ class RunTask extends BaseTask
     }
 
     /**
-     * @param int $repeat
-     *
      * @return $this
      */
     public function setRepeat(int $repeat)
@@ -286,8 +263,6 @@ class RunTask extends BaseTask
     }
 
     /**
-     * @param bool $dieOnFail
-     *
      * @return $this
      */
     public function setDieOnFail(bool $dieOnFail)
@@ -310,8 +285,6 @@ class RunTask extends BaseTask
     }
 
     /**
-     * @param bool $browser
-     *
      * @return $this
      */
     public function setBrowser(bool $browser)
@@ -334,8 +307,6 @@ class RunTask extends BaseTask
     }
 
     /**
-     * @param bool $nonHtml
-     *
      * @return $this
      */
     public function setNonHtml(bool $nonHtml)
@@ -384,8 +355,6 @@ class RunTask extends BaseTask
     //endregion
 
     /**
-     * @param array $options
-     *
      * @return $this
      */
     public function setOptions(array $options)
@@ -512,9 +481,6 @@ class RunTask extends BaseTask
     }
 
     /**
-     * @param string $dir
-     * @param string $baseDir
-     *
      * @return $this
      */
     protected function prepareDirectory(string $dir, string $baseDir)

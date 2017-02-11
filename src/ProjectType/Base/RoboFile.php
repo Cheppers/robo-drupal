@@ -291,7 +291,11 @@ class RoboFile extends Tasks
     }
 
     //region Task builders.
-    protected function getTaskTestDrupalList()
+
+    /**
+     * @return \Cheppers\Robo\Drupal\Robo\Task\CoreTests\ListTask|\Robo\Collection\CollectionBuilder
+     */
+    protected function getTaskTestDrupalList(): CollectionBuilder
     {
         return $this
             ->taskDrupalCoreTestsList()

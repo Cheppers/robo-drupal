@@ -38,8 +38,6 @@ class SiteCreateTask extends BaseTask implements ContainerAwareInterface
     }
 
     /**
-     * @param string $projectRootDir
-     *
      * @return $this
      */
     public function setProjectRootDir(string $projectRootDir)
@@ -89,8 +87,6 @@ class SiteCreateTask extends BaseTask implements ContainerAwareInterface
     }
 
     /**
-     * @param string $siteBranch
-     *
      * @return $this
      */
     public function setSiteBranch(string $siteBranch)
@@ -113,8 +109,6 @@ class SiteCreateTask extends BaseTask implements ContainerAwareInterface
     }
 
     /**
-     * @param string $installProfile
-     *
      * @return $this
      */
     public function setInstallProfile(string $installProfile)
@@ -141,8 +135,6 @@ class SiteCreateTask extends BaseTask implements ContainerAwareInterface
     }
 
     /**
-     * @param string $machineNameLong
-     *
      * @return $this
      */
     public function setMachineNameLong(string $machineNameLong)
@@ -189,8 +181,6 @@ class SiteCreateTask extends BaseTask implements ContainerAwareInterface
     }
 
     /**
-     * @param \Cheppers\Robo\Drupal\ProjectType\Base\ProjectConfig $projectConfig
-     *
      * @return $this
      */
     public function setProjectConfig(ProjectConfig $projectConfig)
@@ -207,8 +197,6 @@ class SiteCreateTask extends BaseTask implements ContainerAwareInterface
     }
 
     /**
-     * @param array $options
-     *
      * @return $this
      */
     public function setOptions(array $options)
@@ -331,8 +319,6 @@ class SiteCreateTask extends BaseTask implements ContainerAwareInterface
     }
 
     /**
-     * @param \Cheppers\Robo\Drupal\Config\DatabaseServerConfig $db
-     *
      * @return $this
      */
     protected function createSiteVariant(DatabaseServerConfig $db)
@@ -380,8 +366,6 @@ class SiteCreateTask extends BaseTask implements ContainerAwareInterface
     }
 
     /**
-     * @param string $siteDir
-     *
      * @return $this
      */
     protected function dumpSettingsPhp(string $siteDir)
@@ -449,8 +433,6 @@ class SiteCreateTask extends BaseTask implements ContainerAwareInterface
     }
 
     /**
-     * @param string $siteDir
-     *
      * @return $this
      */
     protected function doTrustedHostPatterns(string $siteDir)
@@ -561,8 +543,6 @@ PHP;
     }
 
     /**
-     * @param string $siteDir
-     *
      * @return $this
      */
     protected function doFileTemporaryPath(string $siteDir)
@@ -589,8 +569,6 @@ PHP;
     }
 
     /**
-     * @param string $siteDir
-     *
      * @return $this
      */
     protected function doFilePrivatePath(string $siteDir)
@@ -612,8 +590,6 @@ PHP;
     }
 
     /**
-     * @param string $siteDir
-     *
      * @return $this
      */
     protected function doFilePublicPath(string $siteDir)
@@ -628,7 +604,14 @@ PHP;
         $replace = "\n\$settings['file_public_path'] = {$filePathSafe};\n";
         Utils::manipulateString($this->settingsPhp, $search, $replace);
 
+        $projectRootDir = $this->getProjectRootDir();
+        $relative = Path::makeRelative(
+            "$projectRootDir/{$pc->drupalRootDir}/sites/$siteDir/files",
+            "$projectRootDir/{$pc->publicHtmlDir}/sites/$siteDir"
+        );
+
         $this->fs->mkdir($filePathFull);
+        $this->fs->symlink($relative, "$projectRootDir/{$pc->publicHtmlDir}/sites/$siteDir/files");
 
         return $this;
     }
@@ -679,8 +662,6 @@ PHP;
     }
 
     /**
-     * @param string $siteDir
-     *
      * @return $this
      */
     protected function doConfigDirectories(string $siteDir)
@@ -707,8 +688,6 @@ PHP;
     }
 
     /**
-     * @param string $siteDir
-     *
      * @return $this
      */
     protected function doServicesYml(string $siteDir)
@@ -726,8 +705,6 @@ PHP;
     }
 
     /**
-     * @param string $siteDir
-     *
      * @return $this
      */
     protected function doHashSalt(string $siteDir)
@@ -748,9 +725,6 @@ PHP;
     }
 
     /**
-     * @param string $siteDir
-     * @param \Cheppers\Robo\Drupal\Config\DatabaseServerConfig $db
-     *
      * @return $this
      */
     protected function doDatabases(string $siteDir, DatabaseServerConfig $db)
@@ -852,8 +826,6 @@ PHP;
     }
 
     /**
-     * @param string $siteDir
-     *
      * @return $this
      */
     protected function createSiteDir(string $siteDir)
@@ -866,9 +838,6 @@ PHP;
     }
 
     /**
-     * @param string $fileName
-     * @param string $data
-     *
      * @return $this
      */
     protected function filePutContent(string $fileName, string $data)

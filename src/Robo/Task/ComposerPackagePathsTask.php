@@ -51,8 +51,6 @@ class ComposerPackagePathsTask extends BaseTask implements CommandInterface
     }
 
     /**
-     * @param string $workingDirectory
-     *
      * @return $this
      */
     public function setWorkingDirectory(string $workingDirectory)
@@ -75,8 +73,6 @@ class ComposerPackagePathsTask extends BaseTask implements CommandInterface
     }
 
     /**
-     * @param string $composerExecutable
-     *
      * @return $this
      */
     public function setComposerExecutable(string $composerExecutable)

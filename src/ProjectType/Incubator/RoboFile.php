@@ -17,7 +17,6 @@ use Cheppers\Robo\ESLint\ESLintTaskLoader;
 use Cheppers\Robo\Phpcs\PhpcsTaskLoader;
 use Cheppers\Robo\ScssLint\ScssLintTaskLoader;
 use Cheppers\Robo\TsLint\TsLintTaskLoader;
-use function GuzzleHttp\debug_resource;
 use Robo\Collection\CollectionBuilder;
 use Robo\Contract\TaskInterface;
 use Robo\Task\Filesystem\loadShortcuts as FilesystemShortcuts;
@@ -251,7 +250,7 @@ class RoboFile extends Base\RoboFile
             'yes' => false,
         ]
     ): ?CollectionBuilder {
-        $this->validateArgSiteId($siteId, true);
+        $siteId = $this->validateInputSiteId($siteId, true);
 
         // @todo Better description.
         $is_sure = $options['yes'] || $this->io()->confirm('Are you sure?', false);
@@ -265,9 +264,12 @@ class RoboFile extends Base\RoboFile
             ->addTask($this->getTaskDrupalRebuildSitesPhp());
     }
 
-    public function siteInstall(string $siteId = 'default'): CollectionBuilder
+    public function siteInstall(string $siteId = ''): CollectionBuilder
     {
-        $this->validateArgSiteId($siteId);
+        $siteId = $this->validateInputSiteId($siteId);
+        if (!$siteId) {
+            $siteId = $this->projectConfig->getDefaultSiteId();
+        }
 
         return $this
             ->collectionBuilder()
@@ -281,7 +283,7 @@ class RoboFile extends Base\RoboFile
     //region Lint.
     public function lint(array $extensionNames): CollectionBuilder
     {
-        $extensionNames = $this->validateArgExtensionNames($extensionNames);
+        $extensionNames = $this->validateInputExtensionNames($extensionNames);
         $managedDrupalExtensions = $this->getManagedDrupalExtensions();
 
         $cb = $this->collectionBuilder();
@@ -305,7 +307,7 @@ class RoboFile extends Base\RoboFile
 
     public function lintPhpcs(array $extensionNames): CollectionBuilder
     {
-        $extensionNames = $this->validateArgExtensionNames($extensionNames);
+        $extensionNames = $this->validateInputExtensionNames($extensionNames);
         $managedDrupalExtensions = $this->getManagedDrupalExtensions();
 
         $cb = $this->collectionBuilder();
@@ -320,7 +322,7 @@ class RoboFile extends Base\RoboFile
     public function lintScss(array $extensionNames): CollectionBuilder
     {
         // @todo Configurable directory for "css".
-        $extensionNames = $this->validateArgExtensionNames($extensionNames);
+        $extensionNames = $this->validateInputExtensionNames($extensionNames);
         $managedDrupalExtensions = $this->getManagedDrupalExtensions();
 
         $cb = $this->collectionBuilder();
@@ -337,7 +339,7 @@ class RoboFile extends Base\RoboFile
     public function lintTs(array $extensionNames): CollectionBuilder
     {
         // @todo Configurable directory for "js".
-        $extensionNames = $this->validateArgExtensionNames($extensionNames);
+        $extensionNames = $this->validateInputExtensionNames($extensionNames);
         $managedDrupalExtensions = $this->getManagedDrupalExtensions();
 
         $cb = $this->collectionBuilder();
@@ -354,7 +356,7 @@ class RoboFile extends Base\RoboFile
     public function lintEs(array $extensionNames): CollectionBuilder
     {
         // @todo Configurable directory for "js".
-        $extensionNames = $this->validateArgExtensionNames($extensionNames);
+        $extensionNames = $this->validateInputExtensionNames($extensionNames);
         $managedDrupalExtensions = $this->getManagedDrupalExtensions();
 
         $cb = $this->collectionBuilder();
@@ -381,6 +383,10 @@ class RoboFile extends Base\RoboFile
         $siteId = $this->validateInputSiteId($options['site']);
         $phpVariants = $this->validateInputPhpVariantIds($options['php']);
         $databaseServers = $this->validateInputDatabaseServerIds($options['db']);
+
+        if (!$siteId) {
+            $siteId = $this->projectConfig->getDefaultSiteId();
+        }
 
         $subjects = [];
         foreach ($args as $arg) {
@@ -433,10 +439,7 @@ class RoboFile extends Base\RoboFile
     //endregion
 
     //region Argument validators.
-    /**
-     * @return $this
-     */
-    protected function validateArgSiteId(string $siteId, bool $required = false)
+    protected function validateInputSiteId(string $siteId, bool $required = false): string
     {
         if (!$siteId && $required) {
             throw new \InvalidArgumentException('Site ID is required', 1);
@@ -447,10 +450,10 @@ class RoboFile extends Base\RoboFile
             throw new \InvalidArgumentException("Unknown site ID: '$siteId'", 1);
         }
 
-        return $this;
+        return $siteId;
     }
 
-    protected function validateArgExtensionNames(array $extensions): array
+    protected function validateInputExtensionNames(array $extensions): array
     {
         // @todo Show a an error message in case of duplicated items.
         $managedDrupalExtensions = $this->getManagedDrupalExtensions();
@@ -467,20 +470,6 @@ class RoboFile extends Base\RoboFile
         }
 
         return $extensions;
-    }
-
-    protected function validateInputSiteId(string $input): string
-    {
-        $pc = $this->projectConfig;
-        if ($input) {
-            if (!isset($pc->sites[$input])) {
-                throw new \InvalidArgumentException('@todo');
-            }
-
-            return $input;
-        }
-
-        return $pc->getDefaultSiteId();
     }
 
     /**

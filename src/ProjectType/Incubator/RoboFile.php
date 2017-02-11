@@ -955,37 +955,6 @@ class RoboFile extends Base\RoboFile
             ->setDrupalRoot($this->projectConfig->drupalRootDir);
     }
 
-    protected function getFallbackFileName(string $fileName, string $path): string
-    {
-        if (file_exists("$path/$fileName")) {
-            return '';
-        }
-
-        $paths = [
-            getcwd(),
-            $this->roboDrupalRoot,
-        ];
-
-        $root = [
-            'Gemfile',
-        ];
-        foreach ($paths as $path) {
-            if (strpos($fileName, 'node_modules/.bin/') === 0) {
-                if (file_exists("$path/$fileName")) {
-                    return "$path/$fileName";
-                }
-            } elseif (in_array($fileName, $root)) {
-                if (file_exists("$path/$fileName")) {
-                    return "$path/$fileName";
-                }
-            } elseif (file_exists("$path/src/$fileName")) {
-                return "$path/src/$fileName";
-            }
-        }
-
-        throw new \InvalidArgumentException("Has no fallback for file: '$fileName'");
-    }
-
     /**
      * @var null|array
      */

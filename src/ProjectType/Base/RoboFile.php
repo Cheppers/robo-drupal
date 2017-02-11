@@ -3,16 +3,19 @@
 namespace Cheppers\Robo\Drupal\ProjectType\Base;
 
 use Cheppers\LintReport\Reporter\BaseReporter;
+use Cheppers\Robo\Drupal\Robo\DrupalCoreTestsTaskLoader;
 use Cheppers\Robo\Drupal\Utils;
 use Cheppers\Robo\Git\GitTaskLoader;
 use Cheppers\Robo\Serialize\SerializeTaskLoader;
 use League\Container\ContainerInterface;
 use Robo\Collection\CollectionBuilder;
+use Robo\Contract\TaskInterface;
 use Robo\Tasks;
 use Webmozart\PathUtil\Path;
 
 class RoboFile extends Tasks
 {
+    use DrupalCoreTestsTaskLoader;
     use GitTaskLoader;
     use SerializeTaskLoader;
 
@@ -95,6 +98,11 @@ class RoboFile extends Tasks
     }
 
     //region Tasks.
+    public function testDrupalList(): TaskInterface
+    {
+        return $this->getTaskTestDrupalList();
+    }
+
     /**
      * Export the project configuration.
      *
@@ -121,6 +129,30 @@ class RoboFile extends Tasks
         return $this
             ->collectionBuilder()
             ->addCode($this->getTaskUnlockSettingsPhp());
+    }
+
+    public function publicHtmlUpdate(): TaskInterface
+    {
+        $dirsToSync = [
+            "{$this->projectConfig->drupalRootDir}/core",
+            "{$this->projectConfig->drupalRootDir}/libraries",
+            "{$this->projectConfig->drupalRootDir}/modules",
+            "{$this->projectConfig->drupalRootDir}/profiles",
+            "{$this->projectConfig->drupalRootDir}/themes",
+        ];
+        $includeFrom = Path::makeRelative(
+            $this->getFallbackFileName('rsync.public_html.include.txt', '.'),
+            getcwd()
+        );
+
+        return $this
+            ->taskRsync()
+            ->recursive()
+            ->delete()
+            ->option('prune-empty-dirs')
+            ->option('include-from', $includeFrom)
+            ->fromPath($dirsToSync)
+            ->toPath($this->projectConfig->publicHtmlDir);
     }
     //endregion
 
@@ -227,7 +259,45 @@ class RoboFile extends Tasks
         return getenv($this->getEnvName('phpdbg_executable')) ?: Path::join(PHP_BINDIR, 'phpdbg');
     }
 
+    protected function getFallbackFileName(string $fileName, string $path): string
+    {
+        if (file_exists("$path/$fileName")) {
+            return '';
+        }
+
+        $paths = [
+            getcwd(),
+            $this->roboDrupalRoot,
+        ];
+
+        $root = [
+            'Gemfile',
+        ];
+        foreach ($paths as $path) {
+            if (strpos($fileName, 'node_modules/.bin/') === 0) {
+                if (file_exists("$path/$fileName")) {
+                    return "$path/$fileName";
+                }
+            } elseif (in_array($fileName, $root)) {
+                if (file_exists("$path/$fileName")) {
+                    return "$path/$fileName";
+                }
+            } elseif (file_exists("$path/src/$fileName")) {
+                return "$path/src/$fileName";
+            }
+        }
+
+        throw new \InvalidArgumentException("Has no fallback for file: '$fileName'");
+    }
+
     //region Task builders.
+    protected function getTaskTestDrupalList()
+    {
+        return $this
+            ->taskDrupalCoreTestsList()
+            ->setDrupalRoot($this->projectConfig->drupalRootDir);
+    }
+
     protected function getTaskExportProjectConfig(array $options = []): CollectionBuilder
     {
         $options['subject'] = $this->projectConfig;

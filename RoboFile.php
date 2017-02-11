@@ -381,6 +381,7 @@ class RoboFile extends \Robo\Tasks
                     ->setIgnore([
                         '*/composer.json',
                         '*/.gitignore',
+                        '*.txt',
                         '*.yml',
                     ])
                     ->setAssetJar($assetJar)

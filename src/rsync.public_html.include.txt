@@ -1,0 +1,28 @@
++ *.css
++ *.js
++ *.png
++ *.jpg
++ *.jpeg
++ *.ico
++ *.ttf
++ *.otf
++ *.woff
++ *.eot
+
++ /core/modules/statistics/statistics.php
+
+# @todo Include these only in non-production mode.
++ /core/modules/system/tests/http.php
++ /core/modules/system/tests/https.php
++ /core/authorize.php
++ /core/install.php
++ /core/rebuild.php
+
+# @todo Exclude these in production mode.
+# - /core/tests/
+# - /core/modules/*/tests/
+# - /core/profiles/*/tests/
+# - /core/themes/*/tests/
+
++ */
+- *

@@ -25,6 +25,7 @@ abstract class BaseTask extends RoboBaseTask implements
      */
     protected $processClass = Process::class;
 
+    //region Options.
     //region Option - drupalRoot.
     /**
      * @var string
@@ -37,8 +38,6 @@ abstract class BaseTask extends RoboBaseTask implements
     }
 
     /**
-     * @param string $drupalRoot
-     *
      * @return $this
      */
     public function setDrupalRoot(string $drupalRoot)
@@ -61,8 +60,6 @@ abstract class BaseTask extends RoboBaseTask implements
     }
 
     /**
-     * @param string $phpExecutable
-     *
      * @return $this
      */
     public function setPhpExecutable(string $phpExecutable)
@@ -91,6 +88,7 @@ abstract class BaseTask extends RoboBaseTask implements
         return $this;
     }
     //endregion
+    //endregion
 
     public function __construct(array $options = [])
     {
@@ -98,8 +96,6 @@ abstract class BaseTask extends RoboBaseTask implements
     }
 
     /**
-     * @param array $options
-     *
      * @return $this
      */
     public function setOptions(array $options)

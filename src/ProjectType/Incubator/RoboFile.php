@@ -243,13 +243,21 @@ class RoboFile extends Base\RoboFile
     }
 
     /**
-     * @param string $siteId Directory name
-     *
      * @return \Robo\Collection\CollectionBuilder
      */
-    public function siteDelete(string $siteId = 'default'): CollectionBuilder
-    {
-        $this->validateArgSiteId($siteId);
+    public function siteDelete(
+        string $siteId,
+        array $options = [
+            'yes' => false,
+        ]
+    ): ?CollectionBuilder {
+        $this->validateArgSiteId($siteId, true);
+
+        // @todo Better description.
+        $is_sure = $options['yes'] || $this->io()->confirm('Are you sure?', false);
+        if (!$is_sure) {
+            return null;
+        }
 
         return $this
             ->collectionBuilder()
@@ -428,8 +436,12 @@ class RoboFile extends Base\RoboFile
     /**
      * @return $this
      */
-    protected function validateArgSiteId(string $siteId)
+    protected function validateArgSiteId(string $siteId, bool $required = false)
     {
+        if (!$siteId && $required) {
+            throw new \InvalidArgumentException('Site ID is required', 1);
+        }
+
         $pc = $this->projectConfig;
         if ($siteId && !array_key_exists($siteId, $pc->sites)) {
             throw new \InvalidArgumentException("Unknown site ID: '$siteId'", 1);
@@ -741,9 +753,6 @@ class RoboFile extends Base\RoboFile
                 } else {
                     $dirsToDelete[] = "{$pc->drupalRootDir}/sites/$siteDir";
                 }
-
-                $this->output()->writeln(print_r($dirsToDelete, true));
-                $this->output()->writeln(print_r($filesToDelete, true));
 
                 $this->_deleteDir(array_filter($dirsToDelete, 'is_dir'));
                 $this->_remove($filesToDelete);

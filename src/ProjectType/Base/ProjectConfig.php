@@ -46,6 +46,11 @@ class ProjectConfig extends BaseConfig
     public $defaultPhpVariant = '';
 
     /**
+     * @var bool[]
+     */
+    public $defaultDrupalTestSubjects = [];
+
+    /**
      * @var \Cheppers\Robo\Drupal\Config\PhpVariantConfig[]
      */
     public $phpVariants = [];

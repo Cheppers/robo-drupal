@@ -3,19 +3,24 @@
 namespace Cheppers\Robo\Drupal\ProjectType\Base;
 
 use Cheppers\LintReport\Reporter\BaseReporter;
+use Cheppers\Robo\Drupal\Config\DatabaseServerConfig;
+use Cheppers\Robo\Drupal\Config\PhpVariantConfig;
 use Cheppers\Robo\Drupal\Robo\DrupalCoreTestsTaskLoader;
 use Cheppers\Robo\Drupal\Utils;
+use Cheppers\Robo\Drush\DrushTaskLoader;
 use Cheppers\Robo\Git\GitTaskLoader;
 use Cheppers\Robo\Serialize\SerializeTaskLoader;
 use League\Container\ContainerInterface;
 use Robo\Collection\CollectionBuilder;
 use Robo\Contract\TaskInterface;
 use Robo\Tasks;
+use Symfony\Component\Filesystem\Filesystem;
 use Webmozart\PathUtil\Path;
 
 class RoboFile extends Tasks
 {
     use DrupalCoreTestsTaskLoader;
+    use DrushTaskLoader;
     use GitTaskLoader;
     use SerializeTaskLoader;
 
@@ -98,9 +103,74 @@ class RoboFile extends Tasks
     }
 
     //region Tasks.
-    public function testDrupalList(): TaskInterface
+    public function listDrupalTests(): TaskInterface
     {
-        return $this->getTaskTestDrupalList();
+        return $this->getTaskDrupalCoreTestsList();
+    }
+
+    public function testDrupal(
+        array $args,
+        array $options = [
+            'site' => '',
+            'php' => '',
+            'db' => '',
+        ]
+    ): CollectionBuilder {
+        $siteId = $this->validateInputSiteId($options['site']);
+        $phpVariants = $this->validateInputPhpVariantIds($options['php']);
+        $databaseServers = $this->validateInputDatabaseServerIds($options['db']);
+
+        $subjects = [];
+        foreach ($args as $arg) {
+            $subjects = array_merge($subjects, explode(',', $arg));
+        }
+
+        $pc = $this->projectConfig;
+        $cb = $this->collectionBuilder();
+
+        if (!$subjects) {
+            $subjects = Utils::filterDisabled($pc->defaultDrupalTestSubjects);
+        }
+
+        if (!$subjects) {
+            $cb->addCode(function () {
+                $this->yell('@todo Better error message. Subject is mandatory.', 40, 'red');
+
+                return 1;
+            });
+
+            return $cb;
+        }
+
+        $placeholders = [
+            '{php}' => '',
+            '{db}' => '',
+            '{siteBranch}' => $siteId,
+        ];
+        foreach ($databaseServers as $databaseServer) {
+            $tasks = [];
+            $placeholders['{db}'] = $databaseServer->id;
+            foreach ($phpVariants as $phpVariant) {
+                $placeholders['{php}'] = $phpVariant->id;
+                $url = $pc->getSiteVariantUrl($placeholders);
+
+                if (!$tasks) {
+                    $tasks['enable.simpletest'] = $this->getTaskDrushPmEnable($url, ['simpletest']);
+                }
+
+                $taskId = "run-tests.{$phpVariant->id}.{$databaseServer->id}";
+                $tasks[$taskId] = $this->getTaskDrupalCoreTestsRun($subjects, $siteId, $phpVariant, $databaseServer);
+            }
+
+            $cb->addTaskList($tasks);
+        }
+
+        return $cb;
+    }
+
+    public function cleanDrupalTests(): CollectionBuilder
+    {
+        return $this->getTaskDrupalCoreTestsClean();
     }
 
     /**
@@ -117,6 +187,9 @@ class RoboFile extends Tasks
         ]);
     }
 
+    /**
+     * Make all VCS tracked files and directories writable.
+     */
     public function writableWorkingCopy(): CollectionBuilder
     {
         return $this
@@ -131,8 +204,10 @@ class RoboFile extends Tasks
             ->addCode($this->getTaskUnlockSettingsPhp());
     }
 
-    public function publicHtmlUpdate(): TaskInterface
+    public function updatePublicHtml(): TaskInterface
     {
+        $cb = $this->collectionBuilder();
+
         $dirsToSync = [
             "{$this->projectConfig->drupalRootDir}/core",
             "{$this->projectConfig->drupalRootDir}/libraries",
@@ -145,14 +220,32 @@ class RoboFile extends Tasks
             getcwd()
         );
 
-        return $this
-            ->taskRsync()
-            ->recursive()
-            ->delete()
-            ->option('prune-empty-dirs')
-            ->option('include-from', $includeFrom)
-            ->fromPath($dirsToSync)
-            ->toPath($this->projectConfig->publicHtmlDir);
+        $cb->addTask(
+            $this
+                ->taskRsync()
+                ->recursive()
+                ->delete()
+                ->option('prune-empty-dirs')
+                ->option('include-from', $includeFrom)
+                ->fromPath($dirsToSync)
+                ->toPath($this->projectConfig->publicHtmlDir)
+        );
+
+        $cb->addCode(function () {
+            $files = [
+                '.htaccess',
+                'robots.txt',
+            ];
+            $fs = new Filesystem();
+            foreach ($files as $file) {
+                $fs->copy(
+                    "{$this->projectConfig->drupalRootDir}/$file",
+                    "{$this->projectConfig->publicHtmlDir}/$file"
+                );
+            }
+        });
+
+        return $cb;
     }
     //endregion
 
@@ -291,14 +384,65 @@ class RoboFile extends Tasks
     }
 
     //region Task builders.
+    protected function getTaskDrushPmEnable(string $uri, array $extensions): CollectionBuilder
+    {
+        $options = [
+            'root' => $this->projectConfig->drupalRootDir,
+            'uri' => $uri,
+            'yes' => true,
+        ];
+
+        return $this->taskDrush('pm-enable', $options, $extensions);
+    }
 
     /**
      * @return \Cheppers\Robo\Drupal\Robo\Task\CoreTests\ListTask|\Robo\Collection\CollectionBuilder
      */
-    protected function getTaskTestDrupalList(): CollectionBuilder
+    protected function getTaskDrupalCoreTestsList(): CollectionBuilder
     {
         return $this
             ->taskDrupalCoreTestsList()
+            ->setOutput($this->output())
+            ->setDrupalRoot($this->projectConfig->drupalRootDir);
+    }
+
+    /**
+     * @return \Cheppers\Robo\Drupal\Robo\Task\CoreTests\RunTask|\Robo\Collection\CollectionBuilder
+     */
+    protected function getTaskDrupalCoreTestsRun(
+        array $subjects,
+        string $siteId,
+        PhpVariantConfig $phpVariant,
+        DatabaseServerConfig $databaseServer
+    ): CollectionBuilder {
+        $pc = $this->projectConfig;
+        $url = $pc->getSiteVariantUrl([
+            '{siteBranch}' => $siteId,
+            '{php}' => $phpVariant->id,
+            '{db}' => $databaseServer->id,
+        ]);
+        $backToRootDir = $this->backToRootDir($pc->drupalRootDir);
+
+        // @todo Configurable protocol. HTTP vs HTTPS.
+        return $this
+            ->taskDrupalCoreTestsRun()
+            ->setDrupalRoot($this->projectConfig->drupalRootDir)
+            ->setUrl("http://$url")
+            ->setXml(Path::join($backToRootDir, $pc->reportsDir, 'tests'))
+            ->setColorized(true)
+            ->setNonHtml(true)
+            ->setPhpExecutable(PHP_BINARY)
+            ->setPhp($phpVariant->getPhpExecutable())
+            ->setArguments($subjects);
+    }
+
+    /**
+     * @return \Cheppers\Robo\Drupal\Robo\Task\CoreTests\CleanTask|\Robo\Collection\CollectionBuilder
+     */
+    protected function getTaskDrupalCoreTestsClean(): CollectionBuilder
+    {
+        return $this
+            ->taskDrupalCoreTestsClean()
             ->setDrupalRoot($this->projectConfig->drupalRootDir);
     }
 
@@ -346,18 +490,96 @@ class RoboFile extends Tasks
                 : $pc->sites;
 
             foreach ($sites as $site) {
-                $siteDir = "{$pc->drupalRootDir}/sites/{$site->id}";
-                if (file_exists($siteDir)) {
-                    $this->_chmod($siteDir, 0777, $mask);
+                foreach (array_unique($site->urls) as $siteDir) {
+                    $dir = "{$pc->drupalRootDir}/sites/{$siteDir}";
+                    if (file_exists($dir)) {
+                        $this->_chmod($dir, 0777, $mask);
 
-                    if (file_exists("$siteDir/settings.php")) {
-                        $this->_chmod("$siteDir/settings.php", 0666, $mask);
+                        if (file_exists("$dir/settings.php")) {
+                            $this->_chmod("$dir/settings.php", 0666, $mask);
+                        }
                     }
                 }
             }
 
             return 0;
         };
+    }
+    //endregion
+
+    //region Input validators.
+    protected function validateInputSiteId(string $siteId, bool $required = false): string
+    {
+        if (!$siteId) {
+            if ($required) {
+                throw new \InvalidArgumentException('Site ID is required', 1);
+            }
+
+            return $this->projectConfig->getDefaultSiteId();
+        }
+
+        $pc = $this->projectConfig;
+        if ($siteId && !array_key_exists($siteId, $pc->sites)) {
+            throw new \InvalidArgumentException("Unknown site ID: '$siteId'", 1);
+        }
+
+        return $siteId;
+    }
+
+    /**
+     * @param string $input
+     *
+     * @return PhpVariantConfig[]
+     */
+    protected function validateInputPhpVariantIds(string $input, bool $required = false): array
+    {
+        if (!$input && $required) {
+            throw new \InvalidArgumentException('@todo Line: ' . __LINE__);
+        }
+
+        return $this->validateInputIdList(
+            $input,
+            $this->projectConfig->phpVariants,
+            'Unknown PHP variant identifiers: "%s"'
+        );
+    }
+
+    /**
+     * @param string $input
+     *
+     * @return DatabaseServerConfig[]
+     */
+    protected function validateInputDatabaseServerIds(string $input, bool $required = false): array
+    {
+        if (!$input && $required) {
+            throw new \InvalidArgumentException('@todo Line: ' . __LINE__);
+        }
+
+        return $this->validateInputIdList(
+            $input,
+            $this->projectConfig->databaseServers,
+            'Unknown Database Server identifiers: "%s"'
+        );
+    }
+
+    /**
+     * @param string $input
+     *
+     * @return array
+     */
+    protected function validateInputIdList(string $input, array $available, string $errorMsgTpl): array
+    {
+        if (!$input) {
+            return $available;
+        }
+
+        $ids = explode(',', $input);
+        $missingIds = array_diff($ids, array_keys($available));
+        if ($missingIds) {
+            throw new \InvalidArgumentException(sprintf($errorMsgTpl, implode(', ', $missingIds)));
+        }
+
+        return array_intersect_key($available, array_flip($ids));
     }
     //endregion
 }

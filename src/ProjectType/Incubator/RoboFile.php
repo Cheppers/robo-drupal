@@ -12,7 +12,6 @@ use Cheppers\Robo\Drupal\Robo\ComposerTaskLoader;
 use Cheppers\Robo\Drupal\Robo\DrupalCoreTestsTaskLoader;
 use Cheppers\Robo\Drupal\Robo\DrupalTaskLoader;
 use Cheppers\Robo\Drupal\Utils;
-use Cheppers\Robo\Drush\DrushTaskLoader;
 use Cheppers\Robo\ESLint\ESLintTaskLoader;
 use Cheppers\Robo\Phpcs\PhpcsTaskLoader;
 use Cheppers\Robo\ScssLint\ScssLintTaskLoader;
@@ -33,7 +32,6 @@ class RoboFile extends Base\RoboFile
     use ComposerTaskLoader;
     use DrupalCoreTestsTaskLoader;
     use DrupalTaskLoader;
-    use DrushTaskLoader;
     use ESLintTaskLoader;
     use PhpcsTaskLoader;
     use ScssLintTaskLoader;
@@ -52,6 +50,7 @@ class RoboFile extends Base\RoboFile
      */
     protected $projectConfig;
 
+    //region Tasks.
     //region Self
 
     //region Self - Git hooks.
@@ -371,88 +370,16 @@ class RoboFile extends Base\RoboFile
     }
     //endregion
 
-    //region Test - Drupal.
-    public function testDrupal(
-        array $args,
-        array $options = [
-            'site' => '',
-            'php' => '',
-            'db' => '',
-        ]
-    ): CollectionBuilder {
-        $siteId = $this->validateInputSiteId($options['site']);
-        $phpVariants = $this->validateInputPhpVariantIds($options['php']);
-        $databaseServers = $this->validateInputDatabaseServerIds($options['db']);
-
-        if (!$siteId) {
-            $siteId = $this->projectConfig->getDefaultSiteId();
-        }
-
-        $subjects = [];
-        foreach ($args as $arg) {
-            $subjects = array_merge($subjects, explode(',', $arg));
-        }
-
-        $cb = $this->collectionBuilder();
-
-        if (!$subjects) {
-            $cb->addCode(function () {
-                $this->yell('@todo Better error message. Subject is mandatory.', 40, 'red');
-
-                return 1;
-            });
-
-            return $cb;
-        }
-
-        $pc = $this->projectConfig;
-        $placeholders = [
-            '{php}' => '',
-            '{db}' => '',
-            '{siteBranch}' => $siteId,
-        ];
-        foreach ($databaseServers as $databaseServer) {
-            $tasks = [];
-            $placeholders['{db}'] = $databaseServer->id;
-            foreach ($phpVariants as $phpVariant) {
-                $placeholders['{php}'] = $phpVariant->id;
-                $url = $pc->getSiteVariantUrl($placeholders);
-
-                if (!$tasks) {
-                    $tasks['enable.simpletest'] = $this->getTaskDrushPmEnable($url, ['simpletest']);
-                }
-
-                $taskId = "run-tests.{$phpVariant->id}.{$databaseServer->id}";
-                $tasks[$taskId] = $this->getTaskDrupalCoreTestsRun($subjects, $siteId, $phpVariant, $databaseServer);
-            }
-
-            $cb->addTaskList($tasks);
-        }
-
-        return $cb;
-    }
-
-    public function testDrupalClean(): CollectionBuilder
+    /**
+     * Rebuild DRUPAL_ROOT/sites/sites.php.
+     */
+    public function rebuildSitesPhp(): TaskInterface
     {
-        return $this->getTaskDrupalCoreTestsClean();
+        return $this->getTaskDrupalRebuildSitesPhp();
     }
     //endregion
 
-    //region Argument validators.
-    protected function validateInputSiteId(string $siteId, bool $required = false): string
-    {
-        if (!$siteId && $required) {
-            throw new \InvalidArgumentException('Site ID is required', 1);
-        }
-
-        $pc = $this->projectConfig;
-        if ($siteId && !array_key_exists($siteId, $pc->sites)) {
-            throw new \InvalidArgumentException("Unknown site ID: '$siteId'", 1);
-        }
-
-        return $siteId;
-    }
-
+    //region Input validators.
     protected function validateInputExtensionNames(array $extensions): array
     {
         // @todo Show a an error message in case of duplicated items.
@@ -471,64 +398,9 @@ class RoboFile extends Base\RoboFile
 
         return $extensions;
     }
-
-    /**
-     * @param string $input
-     *
-     * @return PhpVariantConfig[]
-     */
-    protected function validateInputPhpVariantIds(string $input): array
-    {
-        return $this->validateInputIdList(
-            $input,
-            $this->projectConfig->phpVariants,
-            'Unknown PHP variant identifiers: "%s"'
-        );
-    }
-
-    /**
-     * @param string $input
-     *
-     * @return DatabaseServerConfig[]
-     */
-    protected function validateInputDatabaseServerIds(string $input): array
-    {
-        return $this->validateInputIdList(
-            $input,
-            $this->projectConfig->databaseServers,
-            'Unknown Database Server identifiers: "%s"'
-        );
-    }
-
-    /**
-     * @param string $input
-     *
-     * @return array
-     */
-    protected function validateInputIdList(string $input, array $available, string $errorMsgTpl): array
-    {
-        if (!$input) {
-            return $available;
-        }
-
-        $ids = explode(',', $input);
-        $missingIds = array_diff($ids, array_keys($available));
-        if ($missingIds) {
-            throw new \InvalidArgumentException(sprintf($errorMsgTpl, implode(', ', $missingIds)));
-        }
-
-        return array_intersect_key($available, array_flip($ids));
-    }
     //endregion
 
-    /**
-     * Rebuild DRUPAL_ROOT/sites/sites.php.
-     */
-    public function rebuildSitesPhp(): TaskInterface
-    {
-        return $this->getTaskDrupalRebuildSitesPhp();
-    }
-
+    //region Task builders.
     protected function getTaskPhpcsLintDrupalExtension(DrupalExtensionConfig $extension): TaskInterface
     {
         $options = [
@@ -838,16 +710,6 @@ class RoboFile extends Base\RoboFile
         };
     }
 
-    protected function getTaskDrushPmEnable(string $uri, array $extensions): CollectionBuilder
-    {
-        $options = [
-            'root' => $this->projectConfig->drupalRootDir,
-            'uri' => $uri,
-        ];
-
-        return $this->taskDrush('pm-enable', $options, $extensions);
-    }
-
     protected function getTaskGitHookInstall(DrupalExtensionConfig $extension): \Closure
     {
         return function () use ($extension) {
@@ -902,59 +764,7 @@ class RoboFile extends Base\RoboFile
             return 0;
         };
     }
-
-    /**
-     * @param string[] $subjects
-     *
-     * @return \Cheppers\Robo\Drupal\Robo\Task\CoreTests\RunTask|\Robo\Collection\CollectionBuilder
-     */
-    protected function getTaskDrupalCoreTestsRun(
-        array $subjects,
-        string $siteId,
-        PhpVariantConfig $phpVariant,
-        DatabaseServerConfig $databaseServer
-    ): CollectionBuilder {
-        $pc = $this->projectConfig;
-        $url = $pc->getSiteVariantUrl([
-            '{siteBranch}' => $siteId,
-            '{php}' => $phpVariant->id,
-            '{db}' => $databaseServer->id,
-        ]);
-        $backToRootDir = $this->backToRootDir($pc->drupalRootDir);
-
-        // @todo Configurable protocol. HTTP vs HTTPS.
-        return $this
-            ->taskDrupalCoreTestsRun()
-            ->setDrupalRoot($this->projectConfig->drupalRootDir)
-            ->setUrl("http://$url")
-            ->setXml(Path::join($backToRootDir, $pc->reportsDir, 'tests'))
-            ->setColorized(true)
-            ->setNonHtml(true)
-            ->setPhpExecutable(PHP_BINARY)
-            ->setPhp($phpVariant->getPhpExecutable())
-            ->setArguments($subjects);
-    }
-
-    /**
-     * @return \Cheppers\Robo\Drupal\Robo\Task\CoreTests\CleanTask|\Robo\Collection\CollectionBuilder
-     */
-    protected function getTaskDrupalCoreTestsClean(): CollectionBuilder
-    {
-        return $this
-            ->taskDrupalCoreTestsClean()
-            ->setDrupalRoot($this->projectConfig->drupalRootDir);
-    }
-
-    /**
-     * @return \Cheppers\Robo\Drupal\Robo\Task\CoreTests\ListTask|\Robo\Collection\CollectionBuilder
-     */
-    protected function getTaskDrupalCoreTestsList(): CollectionBuilder
-    {
-        return $this
-            ->taskDrupalCoreTestsList()
-            ->setOutput($this->output())
-            ->setDrupalRoot($this->projectConfig->drupalRootDir);
-    }
+    //endregion
 
     /**
      * @var null|array

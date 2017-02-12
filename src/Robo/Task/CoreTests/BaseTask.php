@@ -9,7 +9,7 @@ use Robo\Common\OutputAwareTrait;
 use Robo\Contract\CommandInterface;
 use Robo\Contract\OutputAwareInterface;
 use Robo\Result;
-use Robo\Task\BaseTask as RoboBaseTask;
+use Cheppers\Robo\Drupal\Robo\Task\BaseTask as RoboBaseTask;
 use Symfony\Component\Process\Process;
 
 abstract class BaseTask extends RoboBaseTask implements
@@ -24,6 +24,11 @@ abstract class BaseTask extends RoboBaseTask implements
      * @var \Symfony\Component\Process\Process
      */
     protected $processClass = Process::class;
+
+    /**
+     * @var array
+     */
+    protected $assets = [];
 
     //region Options.
     //region Option - drupalRoot.
@@ -88,6 +93,26 @@ abstract class BaseTask extends RoboBaseTask implements
         return $this;
     }
     //endregion
+
+    /**
+     * @var bool
+     */
+    protected $quiet = false;
+
+    public function isQuiet(): bool
+    {
+        return $this->quiet;
+    }
+
+    /**
+     * @return $this
+     */
+    public function setQuiet(bool $quiet)
+    {
+        $this->quiet = $quiet;
+
+        return $this;
+    }
     //endregion
 
     public function __construct(array $options = [])
@@ -102,6 +127,14 @@ abstract class BaseTask extends RoboBaseTask implements
     {
         foreach ($options as $name => $value) {
             switch ($name) {
+                case 'assetJar':
+                    $this->setAssetJar($value);
+                    break;
+
+                case 'assetJarMapping':
+                    $this->setAssetJarMapping($value);
+                    break;
+
                 case 'drupalRoot':
                     $this->setDrupalRoot($value);
                     break;
@@ -112,6 +145,10 @@ abstract class BaseTask extends RoboBaseTask implements
 
                 case 'arguments':
                     $this->setArguments($value);
+                    break;
+
+                case 'quiet':
+                    $this->setQuiet($value);
                     break;
             }
         }
@@ -135,7 +172,9 @@ abstract class BaseTask extends RoboBaseTask implements
             $this->runCallback($type, $data);
         });
 
-        return new Result($this, $exitCode, $process->getErrorOutput());
+        $this->runReleaseAssets();
+
+        return new Result($this, $exitCode, $process->getErrorOutput(), $this->assets);
     }
 
     /**
@@ -201,16 +240,40 @@ abstract class BaseTask extends RoboBaseTask implements
         return [];
     }
 
-    protected function runCallback($type, $data): void
+    protected function runCallback(string $type, string $data): void
     {
         switch ($type) {
             case Process::OUT:
-                $this->output()->write($data);
+                if (!$this->isQuiet()) {
+                    $this->output()->write($data);
+                }
                 break;
 
             case Process::ERR:
                 $this->printTaskError($data);
                 break;
         }
+    }
+
+    /**
+     * @return $this
+     */
+    protected function runReleaseAssets()
+    {
+        if (!$this->hasAssetJar()) {
+            return $this;
+        }
+
+        $assetJar = $this->getAssetJar();
+        foreach ($this->assets as $name => $value) {
+            if ($this->assetJarMapping) {
+                $parents = $this->getAssetJarMap($name);
+                if ($parents) {
+                    $assetJar->setValue($parents, $value);
+                }
+            }
+        }
+
+        return $this;
     }
 }

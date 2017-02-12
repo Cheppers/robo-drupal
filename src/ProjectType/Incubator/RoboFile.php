@@ -4,9 +4,7 @@ namespace Cheppers\Robo\Drupal\ProjectType\Incubator;
 
 use Cheppers\AssetJar\AssetJar;
 use Cheppers\LintReport\Reporter\CheckstyleReporter;
-use Cheppers\Robo\Drupal\Config\DatabaseServerConfig;
 use Cheppers\Robo\Drupal\Config\DrupalExtensionConfig;
-use Cheppers\Robo\Drupal\Config\PhpVariantConfig;
 use Cheppers\Robo\Drupal\ProjectType\Base as Base;
 use Cheppers\Robo\Drupal\Robo\ComposerTaskLoader;
 use Cheppers\Robo\Drupal\Robo\DrupalCoreTestsTaskLoader;

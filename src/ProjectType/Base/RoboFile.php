@@ -527,8 +527,6 @@ class RoboFile extends Tasks
     }
 
     /**
-     * @param string $input
-     *
      * @return PhpVariantConfig[]
      */
     protected function validateInputPhpVariantIds(string $input, bool $required = false): array
@@ -545,8 +543,6 @@ class RoboFile extends Tasks
     }
 
     /**
-     * @param string $input
-     *
      * @return DatabaseServerConfig[]
      */
     protected function validateInputDatabaseServerIds(string $input, bool $required = false): array
@@ -563,8 +559,6 @@ class RoboFile extends Tasks
     }
 
     /**
-     * @param string $input
-     *
      * @return array
      */
     protected function validateInputIdList(string $input, array $available, string $errorMsgTpl): array

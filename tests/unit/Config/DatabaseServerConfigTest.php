@@ -4,12 +4,12 @@ namespace Cheppers\Robo\Drupal\Tests\Unit\Config;
 
 use Cheppers\Robo\Drupal\Config\DatabaseServerConfig;
 
-class DatabaseServerConfigTest extends \Codeception\Test\Unit
+class DatabaseServerConfigTest extends BaseConfigTest
 {
     /**
-     * @var \UnitTester
+     * {@inheritdoc}
      */
-    protected $tester;
+    protected $className = DatabaseServerConfig::class;
 
     /**
      * @return array

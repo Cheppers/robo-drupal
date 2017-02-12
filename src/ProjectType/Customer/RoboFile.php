@@ -35,16 +35,7 @@ class RoboFile extends Base\RoboFile
             'lintVerboseReporter' => null,
         ];
 
-        $phpcsConfig->filesGitStaged += [
-            '*.php' => true,
-            '*.inc' => true,
-            '*.profile' => true,
-            '*.module' => true,
-            '*.install' => true,
-            '*.theme' => true,
-            '*.engine' => true,
-        ];
-
+        $phpcsConfig->filesGitStaged += Utils::phpFileExtensionPatterns('*.', '');
         $phpcsConfig->files += [
             'RoboFile.php' => true,
             Utils::$projectConfigFileName => file_exists(Utils::$projectConfigFileName),

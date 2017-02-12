@@ -130,6 +130,7 @@ class ProjectConfig extends BaseConfig
             ],
             'defaultDatabaseServer' => 'defaultDatabaseServer',
             'defaultPhpVariant' => 'defaultPhpVariant',
+            'defaultDrupalTestSubjects' => 'defaultDrupalTestSubjects',
             'defaultSiteId' => 'defaultSiteId',
             'drupalRootDir' => 'drupalRootDir',
             'environment' => 'environment',

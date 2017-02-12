@@ -17,6 +17,19 @@ class Utils
     public static $projectConfigFileName = 'ProjectConfig.php';
 
     /**
+     * @var bool[]
+     */
+    public static $phpFileExtensions = [
+        'php' => true,
+        'inc' => true,
+        'profile' => true,
+        'module' => true,
+        'install' => true,
+        'theme' => true,
+        'engine' => true,
+    ];
+
+    /**
      * Drupal related composer package types.
      *
      * @var string[]
@@ -27,6 +40,19 @@ class Utils
         'drupal-module',
         'drupal-theme',
     ];
+
+    /**
+     * @return bool[]
+     */
+    public static function phpFileExtensionPatterns(string $prefix, string $suffix): array
+    {
+        $patterns = [];
+        foreach (static::$phpFileExtensions as $phpFileExtension => $status) {
+            $patterns["{$prefix}{$phpFileExtension}{$suffix}"] = $status;
+        }
+
+        return $patterns;
+    }
 
     /**
      * Get the root directory of the "cheppers/robo-drupal" package.

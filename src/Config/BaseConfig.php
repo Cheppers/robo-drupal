@@ -24,6 +24,7 @@ class BaseConfig
         $this->data = $data;
         $this
             ->initPropertyMapping()
+            ->expandPropertyMappingShortCuts()
             ->populateProperties();
     }
 
@@ -40,13 +41,9 @@ class BaseConfig
     /**
      * @return $this
      */
-    protected function populateProperties()
+    protected function expandPropertyMappingShortCuts()
     {
         foreach ($this->propertyMapping as $src => $handler) {
-            if (!array_key_exists($src, $this->data)) {
-                continue;
-            }
-
             if (is_string($handler)) {
                 $handler = [
                     'type' => 'set',
@@ -54,7 +51,21 @@ class BaseConfig
                 ];
             }
 
-            $handler += ['destination' => $src];
+            $this->propertyMapping[$src] = $handler + ['destination' => $src];
+        }
+
+        return $this;
+    }
+
+    /**
+     * @return $this
+     */
+    protected function populateProperties()
+    {
+        foreach ($this->propertyMapping as $src => $handler) {
+            if (!array_key_exists($src, $this->data)) {
+                continue;
+            }
 
             switch ($handler['type']) {
                 case 'set':

@@ -15,7 +15,7 @@ class ScriptsTest extends Unit
     /**
      * @var string
      */
-    protected $class = Scripts::class;
+    protected $className = Scripts::class;
 
     //region ::renamePackageComposer()
     public function casesRenamePackageComposer(): array
@@ -77,8 +77,8 @@ class ScriptsTest extends Unit
      */
     public function testRenamePackageComposer(array $expected, array $innerState): void
     {
-        $class = $this->class;
-        $instance = new $class();
+        $className = $this->className;
+        $instance = new $className();
         $properties = $this->initInnerState($innerState);
         $method = $this->getProtectedMethod('renamePackageComposer');
         $method->invokeArgs($instance, []);
@@ -371,8 +371,8 @@ class ScriptsTest extends Unit
      */
     public function testRemovePostCreateProjectCmdScript(array $expected, array $innerState): void
     {
-        $class = $this->class;
-        $instance = new $class();
+        $className = $this->className;
+        $instance = new $className();
         $properties = $this->initInnerState($innerState);
         $method = $this->getProtectedMethod('removePostCreateProjectCmdScript');
         $method->invokeArgs($instance, []);
@@ -383,8 +383,8 @@ class ScriptsTest extends Unit
 
     protected function callProtectedMethod(string $methodName, ...$args)
     {
-        $class = $this->class;
-        $instance = new $class();
+        $className = $this->className;
+        $instance = new $className();
 
         return $this
             ->getProtectedMethod($methodName)
@@ -393,7 +393,7 @@ class ScriptsTest extends Unit
 
     protected function getProtectedMethod(string $methodName): \ReflectionMethod
     {
-        $reflection = new \ReflectionClass($this->class);
+        $reflection = new \ReflectionClass($this->className);
         $method = $reflection->getMethod($methodName);
         $method->setAccessible(true);
 
@@ -406,7 +406,7 @@ class ScriptsTest extends Unit
     protected function getProtectedProperties(array $propertyNames): array
     {
         $properties = [];
-        $reflection = new \ReflectionClass($this->class);
+        $reflection = new \ReflectionClass($this->className);
         foreach ($propertyNames as $propertyName) {
             $properties[$propertyName] = $reflection->getProperty($propertyName);
             $properties[$propertyName]->setAccessible(true);
@@ -420,10 +420,11 @@ class ScriptsTest extends Unit
      */
     protected function initInnerState(array $innerState): array
     {
+        /** @var \ReflectionProperty[] $properties */
         $properties = $this->getProtectedProperties(array_keys($innerState));
 
-        $class = $this->class;
-        $instance = new $class();
+        $className = $this->className;
+        $instance = new $className();
         foreach ($properties as $propertyName => $property) {
             $property->setValue($instance, $innerState[$propertyName]);
         }

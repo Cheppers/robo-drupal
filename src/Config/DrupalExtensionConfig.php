@@ -65,10 +65,14 @@ class DrupalExtensionConfig extends BaseConfig
         $this->propertyMapping['path'] = 'path';
         $this->propertyMapping['packageVendor'] = 'packageVendor';
         $this->propertyMapping['packageName'] = 'packageName';
+        $this->propertyMapping['hasGit'] = 'hasGit';
         $this->propertyMapping['phpcs'] = [
             'type' => 'subConfig',
             'class' => PhpcsConfig::class,
         ];
+        $this->propertyMapping['hasTypeScript'] = 'hasTypeScript';
+        $this->propertyMapping['hasSCSS'] = 'hasSCSS';
+        $this->propertyMapping['scssLint'] = 'scssLint';
 
         return $this;
     }

@@ -63,6 +63,9 @@ class PhpVariantConfig extends BaseConfig
      */
     public $ignoreTesting = false;
 
+    /**
+     * {@inheritdoc}
+     */
     protected function initPropertyMapping()
     {
         parent::initPropertyMapping();

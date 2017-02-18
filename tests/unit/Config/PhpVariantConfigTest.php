@@ -4,12 +4,12 @@ namespace Cheppers\Robo\Drupal\Tests\Unit\Config;
 
 use Cheppers\Robo\Drupal\Config\PhpVariantConfig;
 
-class PhpVariantConfigTest extends \Codeception\Test\Unit
+class PhpVariantConfigTest extends BaseConfigTest
 {
     /**
-     * @var \UnitTester
+     * {@inheritdoc}
      */
-    protected $tester;
+    protected $className = PhpVariantConfig::class;
     
     public function casesGetPhpExecutable(): array
     {

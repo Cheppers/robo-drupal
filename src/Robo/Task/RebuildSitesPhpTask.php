@@ -6,6 +6,7 @@ use Cheppers\Robo\Drupal\ProjectType\Base\ProjectConfig;
 use Cheppers\Robo\Drupal\VarExport;
 use Robo\Result;
 use Robo\Task\BaseTask;
+use Symfony\Component\Filesystem\Exception\IOException;
 use Symfony\Component\Filesystem\Filesystem;
 use Webmozart\PathUtil\Path;
 
@@ -67,13 +68,19 @@ class RebuildSitesPhpTask extends BaseTask
         $dst = Path::join($pc->drupalRootDir, 'sites', 'sites.php');
         $content = (file_exists($src) ? file_get_contents($src) : "<?php\n\n");
 
-        (new Filesystem())->mkdir(Path::join($pc->drupalRootDir, 'sites'));
-        $writtenBytes = file_put_contents($dst, $content . $sites);
+        $exitCode = 0;
+        $message = '';
+        try {
+            (new Filesystem())->dumpFile($dst, $content . $sites);
+        } catch (IOException $e) {
+            $exitCode = 1;
+            $message = $e->getMessage();
+        }
 
         return new Result(
             $this,
-            ($writtenBytes === false ? 1 : 0),
-            '',
+            $exitCode,
+            $message,
             [
                 'projectUrls' => $projectUrls,
             ]

@@ -12,9 +12,14 @@ abstract class BaseTask extends RoboBaseTask implements AssetJarAwareInterface
 {
     use AssetJarAware;
 
+    /**
+     * @var string
+     */
+    protected $taskName = '';
+
     public function getTaskName(): string
     {
-        return TaskInfo::formatTaskName($this);
+        return $this->taskName ?: TaskInfo::formatTaskName($this);
     }
 
     /**

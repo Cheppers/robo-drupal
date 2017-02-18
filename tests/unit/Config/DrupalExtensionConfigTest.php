@@ -4,12 +4,12 @@ namespace Cheppers\Robo\Drupal\Tests\Unit\Config;
 
 use Cheppers\Robo\Drupal\Config\DrupalExtensionConfig;
 
-class DrupalExtensionConfigTest extends \Codeception\Test\Unit
+class DrupalExtensionConfigTest extends BaseConfigTest
 {
     /**
-     * @var \UnitTester
+     * {@inheritdoc}
      */
-    protected $tester;
+    protected $className = DrupalExtensionConfig::class;
 
     /**
      * @return array

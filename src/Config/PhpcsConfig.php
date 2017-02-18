@@ -6,6 +6,9 @@ class PhpcsConfig extends BaseConfig
 {
     public $files = [];
 
+    /**
+     * @var bool[]
+     */
     public $filesGitStaged = [];
 
     public $exclude = [];
@@ -16,6 +19,9 @@ class PhpcsConfig extends BaseConfig
 
     public $lintReporters = [];
 
+    /**
+     * @todo Use \Cheppers\Robo\Drupal\Utils::phpFileExtensionPatterns().
+     */
     public $extensions = [
         'php/PHP' => true,
         'inc/PHP' => true,
@@ -36,9 +42,14 @@ class PhpcsConfig extends BaseConfig
     {
         parent::initPropertyMapping();
 
-        $this->propertyMapping['paths'] = 'paths';
+        $this->propertyMapping['files'] = 'files';
+        $this->propertyMapping['filesGitStaged'] = 'filesGitStaged';
         $this->propertyMapping['exclude'] = 'exclude';
         $this->propertyMapping['standard'] = 'standard';
+        $this->propertyMapping['failOn'] = 'failOn';
+        $this->propertyMapping['lintReporters'] = 'lintReporters';
+        $this->propertyMapping['extensions'] = 'extensions';
+        $this->propertyMapping['ignore'] = 'ignore';
 
         return $this;
     }

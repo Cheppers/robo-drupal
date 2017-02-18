@@ -8,6 +8,9 @@ use Cheppers\Robo\Drupal\Utils;
 
 use Stringy\StaticStringy;
 
+/**
+ * @todo Abstract?
+ */
 class ProjectConfig extends BaseConfig
 {
     /**
@@ -44,6 +47,11 @@ class ProjectConfig extends BaseConfig
      * @var string
      */
     public $defaultPhpVariant = '';
+
+    /**
+     * @var bool[]
+     */
+    public $defaultDrupalTestSubjects = [];
 
     /**
      * @var \Cheppers\Robo\Drupal\Config\PhpVariantConfig[]
@@ -125,6 +133,7 @@ class ProjectConfig extends BaseConfig
             ],
             'defaultDatabaseServer' => 'defaultDatabaseServer',
             'defaultPhpVariant' => 'defaultPhpVariant',
+            'defaultDrupalTestSubjects' => 'defaultDrupalTestSubjects',
             'defaultSiteId' => 'defaultSiteId',
             'drupalRootDir' => 'drupalRootDir',
             'environment' => 'environment',

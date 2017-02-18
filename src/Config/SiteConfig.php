@@ -2,11 +2,6 @@
 
 namespace Cheppers\Robo\Drupal\Config;
 
-/**
- * Class Site.
- *
- * @package Cheppers\Drupal\Project\Config
- */
 class SiteConfig extends BaseConfig
 {
     /**
@@ -38,4 +33,19 @@ class SiteConfig extends BaseConfig
      * @var bool[]
      */
     public $configSkipModules;
+
+    /**
+     * {@inheritdoc}
+     */
+    protected function initPropertyMapping()
+    {
+        parent::initPropertyMapping();
+
+        $this->propertyMapping['urls'] = 'urls';
+        $this->propertyMapping['drushAliasLocal'] = 'drushAliasLocal';
+        $this->propertyMapping['installProfileName'] = 'installProfileName';
+        $this->propertyMapping['configSkipModules'] = 'configSkipModules';
+
+        return $this;
+    }
 }

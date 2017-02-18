@@ -126,6 +126,9 @@ class Scripts
         return true;
     }
 
+    /**
+     * Composer script event handler.
+     */
     public static function postCreateProjectCmd(Event $event): bool
     {
         static::$event = $event;

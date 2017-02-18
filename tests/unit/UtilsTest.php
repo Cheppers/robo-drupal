@@ -16,6 +16,41 @@ class UtilsTest extends \Codeception\Test\Unit
      */
     protected $tester;
 
+    public function casesPhpFileExtensionPatterns(): array
+    {
+        return [
+            'basic' => [
+                [
+                    '*.a' => true,
+                    '*.b' => false,
+                ],
+                [
+                    'a' => true,
+                    'b' => false,
+                ],
+                '*.',
+                '',
+            ],
+        ];
+    }
+
+    /**
+     * @dataProvider casesPhpFileExtensionPatterns
+     */
+    public function testPhpFileExtensionPatterns(
+        array $expected,
+        array $extensions,
+        string $prefix,
+        string $suffix
+    ): void {
+        $backup = Utils::$phpFileExtensions;
+        Utils::$phpFileExtensions = $extensions;
+
+        $this->tester->assertEquals($expected, Utils::phpFileExtensionPatterns($prefix, $suffix));
+
+        Utils::$phpFileExtensions = $backup;
+    }
+
     public function casesIsDefaultHttpPort(): array
     {
         return [
@@ -388,5 +423,30 @@ class UtilsTest extends \Codeception\Test\Unit
     public function testFilterDisabled(array $expected, array $items, string $property = 'enabled'): void
     {
         $this->tester->assertEquals($expected, Utils::filterDisabled($items, $property));
+    }
+
+    public function casesGetCustomDrupalProfiles(): array
+    {
+        $fixturesDir = codecept_data_dir('fixtures');
+
+        return [
+            'basic' => [
+                [
+                    'c' => "$fixturesDir/drupal_root/01/profiles/custom/c",
+                ],
+                "$fixturesDir/drupal_root/01",
+            ],
+        ];
+    }
+
+    /**
+     * @dataProvider casesGetCustomDrupalProfiles
+     */
+    public function testGetCustomDrupalProfiles(array $expected, string $drupalRoot): void
+    {
+        $this->tester->assertEquals(
+            $expected,
+            Utils::getCustomDrupalProfiles($drupalRoot)
+        );
     }
 }

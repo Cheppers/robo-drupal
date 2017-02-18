@@ -1,14 +1,17 @@
 + *.css
 + *.js
-+ *.png
+
++ *.gif
++ *.ico
 + *.jpg
 + *.jpeg
-+ *.ico
++ *.png
 + *.svg
-+ *.ttf
-+ *.otf
-+ *.woff
+
 + *.eot
++ *.otf
++ *.ttf
++ *.woff
 
 + /core/modules/statistics/statistics.php
 

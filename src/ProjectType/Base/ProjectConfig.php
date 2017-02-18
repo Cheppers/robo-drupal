@@ -8,6 +8,9 @@ use Cheppers\Robo\Drupal\Utils;
 
 use Stringy\StaticStringy;
 
+/**
+ * @todo Abstract?
+ */
 class ProjectConfig extends BaseConfig
 {
     /**

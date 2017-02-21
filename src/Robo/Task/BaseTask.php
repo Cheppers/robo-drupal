@@ -4,8 +4,7 @@ namespace Cheppers\Robo\Drupal\Robo\Task;
 
 use Cheppers\AssetJar\AssetJarAware;
 use Cheppers\AssetJar\AssetJarAwareInterface;
-use Robo\Contract\TaskInterface;
-use \Robo\Task\BaseTask as RoboBaseTask;
+use Robo\Task\BaseTask as RoboBaseTask;
 use Robo\TaskInfo;
 
 abstract class BaseTask extends RoboBaseTask implements AssetJarAwareInterface

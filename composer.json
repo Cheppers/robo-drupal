@@ -21,6 +21,10 @@
             "type": "path",
             "url": "../lint-report"
         },
+        "local:cheppers/robo-bundler": {
+            "type": "path",
+            "url": "../robo-bundler"
+        },
         "local:cheppers/robo-drush": {
             "type": "path",
             "url": "../robo-drush"
@@ -55,6 +59,7 @@
         "cheppers/asset-jar": "^0.0",
         "cheppers/git-hooks": "dev-master",
         "cheppers/lint-report": "^0.0",
+        "cheppers/robo-bundler": "dev-master",
         "cheppers/robo-drush": "dev-master",
         "cheppers/robo-eslint": "dev-master",
         "cheppers/robo-git": "dev-master",

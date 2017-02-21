@@ -2,6 +2,7 @@
 
 namespace Cheppers\Robo\Drupal;
 
+use Symfony\Component\Filesystem\Filesystem;
 use Symfony\Component\Finder\Finder;
 use Webmozart\PathUtil\Path;
 
@@ -188,7 +189,7 @@ class Utils
             $root = "$drupalRoot/profiles";
         }
 
-        /** @var \Symfony\Component\Finder\Finder $dirs */
+        /** @var Finder $dirs */
         $dirs = (new Finder())
             ->in($root)
             ->directories()
@@ -198,5 +199,59 @@ class Utils
         }
 
         return $profiles;
+    }
+
+    public static function filterFileNames(array $fileNames, array $excludePatterns, array $includePatterns): array
+    {
+        $return = [];
+        foreach ($fileNames as $fileName) {
+            if (!static::fileNameMatch($fileName, $excludePatterns)
+                || static::fileNameMatch($fileName, $includePatterns)
+            ) {
+                $return[] = $fileName;
+            }
+        }
+
+        return $return;
+    }
+
+    public static function fileNameMatch(string $fileName, array $patterns): bool
+    {
+        foreach ($patterns as $pattern) {
+            if (fnmatch($pattern, $fileName)) {
+                return true;
+            }
+
+            if (preg_match('@/$@u', $pattern) && strpos($fileName, $pattern) === 0) {
+                return true;
+            }
+
+            if (strpos($pattern, '**/') === 0
+                && strpos($fileName, '/') === false
+                && fnmatch($pattern, "a/$fileName")
+            ) {
+                return true;
+            }
+
+            if ($fileName === $pattern) {
+                return true;
+            }
+        }
+
+        return false;
+    }
+
+    public static function cleanDirectory(string $dir): void
+    {
+        (new Filesystem())->remove(static::directDirectoryDescendants($dir));
+    }
+
+    public static function directDirectoryDescendants(string $dir): Finder
+    {
+        $files = new Finder();
+
+        return $files
+            ->in($dir)
+            ->depth('== 0');
     }
 }

@@ -4,7 +4,7 @@
         "Read more about it at https://getcomposer.org/doc/01-basic-usage.md#composer-lock-the-lock-file",
         "This file is @generated automatically"
     ],
-    "content-hash": "b8afed3868856bf50feaae71617ac0c7",
+    "content-hash": "b888fa6eb9d7f15962d5774e7692322c",
     "packages": [
         {
             "name": "cheppers/asset-jar",
@@ -117,6 +117,55 @@
             ],
             "description": "Generate reports from lint results",
             "time": "2016-12-14T21:09:07+00:00"
+        },
+        {
+            "name": "cheppers/robo-bundler",
+            "version": "dev-master",
+            "dist": {
+                "type": "path",
+                "url": "../robo-bundler",
+                "reference": "c184e63e9c31379c9ab2292713f3401f41626dba",
+                "shasum": null
+            },
+            "require": {
+                "cheppers/asset-jar": "^0.0.1",
+                "consolidation/robo": "^1.0",
+                "php": ">=7.1"
+            },
+            "require-dev": {
+                "cheppers/git-hooks": "^0.0",
+                "cheppers/robo-git": "^0.0.3",
+                "cheppers/robo-phpcs": "^0.0.12",
+                "codeception/codeception": "^2.2",
+                "danielstjules/stringy": "^2.3",
+                "symfony/finder": "^3.2",
+                "webmozart/path-util": "^2.3"
+            },
+            "type": "library",
+            "autoload": {
+                "psr-4": {
+                    "Cheppers\\Robo\\Bundler\\": "src/"
+                }
+            },
+            "autoload-dev": {
+                "psr-4": {
+                    "Cheppers\\Robo\\Bundler\\Test\\Helper\\": "tests/_support/Helper/",
+                    "Cheppers\\Robo\\Bundler\\Tests\\Acceptance\\": "tests/acceptance/",
+                    "Cheppers\\Robo\\Bundler\\Tests\\Unit\\": "tests/unit/"
+                }
+            },
+            "scripts": {
+                "post-install-cmd": [
+                    "\\Cheppers\\Robo\\Bundler\\Composer\\Scripts::postInstallCmd"
+                ],
+                "post-update-cmd": [
+                    "\\Cheppers\\Robo\\Bundler\\Composer\\Scripts::postUpdateCmd"
+                ]
+            },
+            "license": [
+                "GPL-2.0"
+            ],
+            "description": "Robo task wrapper for Bundler."
         },
         {
             "name": "cheppers/robo-drush",
@@ -3434,6 +3483,7 @@
     "minimum-stability": "dev",
     "stability-flags": {
         "cheppers/git-hooks": 20,
+        "cheppers/robo-bundler": 20,
         "cheppers/robo-drush": 20,
         "cheppers/robo-eslint": 20,
         "cheppers/robo-git": 20,

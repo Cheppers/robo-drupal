@@ -53,6 +53,11 @@ class RoboFile extends Tasks
     /**
      * @var string
      */
+    protected $vendorDir = 'vendor';
+
+    /**
+     * @var string
+     */
     protected $envNamePrefix = '';
 
     /**
@@ -256,11 +261,29 @@ chdir($drupalRootSafe);
 require_once 'index.php';
 
 PHP;
-
         $cb->addTask(
             $this
                 ->taskWriteToFile($indexPhpName)
                 ->text($indexPhpContent)
+        );
+
+        $pathToVendorAutoload = Path::join(
+            $this->backToRootDir($this->projectConfig->publicHtmlDir),
+            $this->vendorDir,
+            'autoload.php'
+        );
+        $pathToVendorAutoloadSafe = VarExport::string("/$pathToVendorAutoload");
+        $autoloadPhpName = Path::join($this->projectConfig->publicHtmlDir, 'autoload.php');
+        $autoloadPhpContent = <<< PHP
+<?php
+
+return require __DIR__ . $pathToVendorAutoloadSafe;
+
+PHP;
+        $cb->addTask(
+            $this
+                ->taskWriteToFile($autoloadPhpName)
+                ->text($autoloadPhpContent)
         );
 
         return $cb;
@@ -299,6 +322,10 @@ PHP;
 
         if (!empty($this->composerInfo['config']['bin-dir'])) {
             $this->binDir = $this->composerInfo['config']['bin-dir'];
+        }
+
+        if (!empty($this->composerInfo['config']['vendor-dir'])) {
+            $this->vendorDir = $this->composerInfo['config']['vendor-dir'];
         }
 
         return $this;

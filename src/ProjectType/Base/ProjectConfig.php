@@ -68,7 +68,7 @@ class ProjectConfig extends BaseConfig
      *
      * @var string
      */
-    public $reportsDir = 'reports';
+    public $reportDir = 'report';
 
     /**
      * Drupal root.
@@ -141,7 +141,7 @@ class ProjectConfig extends BaseConfig
             'outerSitesSubDir' => 'outerSitesSubDir',
             'phpVariants' => 'phpVariants',
             'publicHtmlDir' => 'publicHtmlDir',
-            'reportsDir' => 'reportsDir',
+            'reportDir' => 'reportDir',
             'sites' => [
                 'type' => 'subConfigs',
                 'class' => '\Cheppers\Robo\Drupal\Config\SiteConfig',

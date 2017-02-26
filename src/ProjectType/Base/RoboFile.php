@@ -7,6 +7,7 @@ use Cheppers\Robo\Drupal\Config\DatabaseServerConfig;
 use Cheppers\Robo\Drupal\Config\PhpVariantConfig;
 use Cheppers\Robo\Drupal\Robo\DrupalCoreTestsTaskLoader;
 use Cheppers\Robo\Drupal\Utils;
+use Cheppers\Robo\Drupal\VarExport;
 use Cheppers\Robo\Drush\DrushTaskLoader;
 use Cheppers\Robo\Git\GitTaskLoader;
 use Cheppers\Robo\Serialize\SerializeTaskLoader;
@@ -245,6 +246,23 @@ class RoboFile extends Tasks
             }
         });
 
+        $drupalRoot = Path::makeRelative($this->projectConfig->drupalRootDir, $this->projectConfig->publicHtmlDir);
+        $drupalRootSafe = VarExport::string($drupalRoot);
+        $indexPhpName = "{$this->projectConfig->publicHtmlDir}/index.php";
+        $indexPhpContent = <<< PHP
+<?php
+
+chdir($drupalRootSafe);
+require_once 'index.php';
+
+PHP;
+
+        $cb->addTask(
+            $this
+                ->taskWriteToFile($indexPhpName)
+                ->text($indexPhpContent)
+        );
+
         return $cb;
     }
     //endregion
@@ -428,7 +446,7 @@ class RoboFile extends Tasks
             ->taskDrupalCoreTestsRun()
             ->setDrupalRoot($this->projectConfig->drupalRootDir)
             ->setUrl("http://$url")
-            ->setXml(Path::join($backToRootDir, $pc->reportsDir, 'tests'))
+            ->setXml(Path::join($backToRootDir, $pc->reportDir, 'tests'))
             ->setColorized(true)
             ->setNonHtml(true)
             ->setPhpExecutable(PHP_BINARY)

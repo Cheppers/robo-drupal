@@ -2,11 +2,6 @@
 
 namespace Cheppers\Robo\Drupal\Config;
 
-/**
- * Class DatabaseServer.
- *
- * @package Cheppers\Robo\Drupal\Config
- */
 class DatabaseServerConfig extends BaseConfig
 {
     /**

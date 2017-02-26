@@ -20,4 +20,20 @@ class ProjectConfig extends Base\ProjectConfig
      * {@inheritdoc}
      */
     public $siteVariantUrlPattern = '{siteBranch}.{baseHost}';
+
+    /**
+     * @var string
+     */
+    public $releaseDir = 'release';
+
+    /**
+     * {@inheritdoc}
+     */
+    protected function initPropertyMapping()
+    {
+        parent::initPropertyMapping();
+        $this->propertyMapping += ['releaseDir' => 'releaseDir'];
+
+        return $this;
+    }
 }

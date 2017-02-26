@@ -6,6 +6,7 @@ use Cheppers\AssetJar\AssetJar;
 use Cheppers\LintReport\Reporter\CheckstyleReporter;
 use Cheppers\Robo\Drupal\Config\PhpcsConfig;
 use Cheppers\Robo\Drupal\ProjectType\Base as Base;
+use Cheppers\Robo\Drupal\Robo\GeneralReleaseTaskLoader;
 use Cheppers\Robo\Drupal\Utils;
 use Cheppers\Robo\Phpcs\PhpcsTaskLoader;
 use Robo\Collection\CollectionBuilder;
@@ -14,6 +15,7 @@ use Robo\Contract\TaskInterface;
 class RoboFile extends Base\RoboFile
 {
     use PhpcsTaskLoader;
+    use GeneralReleaseTaskLoader;
 
     /**
      * {@inheritdoc}
@@ -92,17 +94,33 @@ class RoboFile extends Base\RoboFile
     }
     //endregion
 
+    public function bundleCheckOrInstall()
+    {
+        return $this->getTaskBundleCheckOrInstall();
+    }
+
+    public function release()
+    {
+        $task = $this
+            ->taskGeneralRelease()
+            ->setReleaseDir("{$this->projectConfig->releaseDir}/general")
+            ->setProjectConfig($this->projectConfig)
+            ->setGitLocalBranch('production');
+
+        return $task;
+    }
+
     /**
      * @return \Robo\Contract\TaskInterface|\Robo\Collection\CollectionBuilder
      */
     protected function getTaskPhpcsLint(PhpcsConfig $phpcsConfig): TaskInterface
     {
         $env = $this->getEnvironment();
-        $reports_dir = $this->projectConfig->reportsDir;
+        $reportDir = $this->projectConfig->reportDir;
 
         if ($env === 'ci') {
             $checkstyleLintReporter = new CheckstyleReporter();
-            $checkstyleLintReporter->setDestination("$reports_dir/checkstyle/phpcs.{$phpcsConfig->standard}.xml");
+            $checkstyleLintReporter->setDestination("$reportDir/checkstyle/phpcs.{$phpcsConfig->standard}.xml");
             $phpcsConfig->lintReporters['lintCheckstyleReporter'] = $checkstyleLintReporter;
         }
 
@@ -129,5 +147,36 @@ class RoboFile extends Base\RoboFile
                     ->setAssetJarMap('files', ['files'])
                     ->setAssetJarMap('report', ['report']),
             ]);
+    }
+
+    protected function getTaskBundleCheckOrInstall(): \Closure
+    {
+        return function () {
+            $gemFiles = $this->getGemFiles();
+            $this->output()->writeln(print_r($gemFiles));
+
+            return 0;
+        };
+    }
+
+    /**
+     * @return string[]
+     */
+    protected function getGemFiles(): array
+    {
+        $result = $this
+            ->taskGitListFiles()
+            ->setPaths(['Gemfile*'])
+            ->run()
+            ->stopOnFail();
+
+        $gemFiles = [];
+        foreach ($result['files'] as $file) {
+            if (!fnmatch('*.lock', $file)) {
+                $gemFiles[] = $file;
+            }
+        }
+
+        return $gemFiles;
     }
 }

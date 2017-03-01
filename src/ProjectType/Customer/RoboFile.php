@@ -4,6 +4,7 @@ namespace Cheppers\Robo\Drupal\ProjectType\Customer;
 
 use Cheppers\AssetJar\AssetJar;
 use Cheppers\LintReport\Reporter\CheckstyleReporter;
+use Cheppers\Robo\Bundler\BundlerTaskLoader;
 use Cheppers\Robo\Drupal\Config\PhpcsConfig;
 use Cheppers\Robo\Drupal\ProjectType\Base as Base;
 use Cheppers\Robo\Drupal\Robo\GeneralReleaseTaskLoader;
@@ -14,6 +15,7 @@ use Robo\Contract\TaskInterface;
 
 class RoboFile extends Base\RoboFile
 {
+    use BundlerTaskLoader;
     use PhpcsTaskLoader;
     use GeneralReleaseTaskLoader;
 
@@ -96,7 +98,9 @@ class RoboFile extends Base\RoboFile
 
     public function bundleCheckOrInstall()
     {
-        return $this->getTaskBundleCheckOrInstall();
+        return $this
+            ->collectionBuilder()
+            ->addCode($this->getTaskBundleCheckOrInstall());
     }
 
     public function release()
@@ -152,8 +156,20 @@ class RoboFile extends Base\RoboFile
     protected function getTaskBundleCheckOrInstall(): \Closure
     {
         return function () {
-            $gemFiles = $this->getGemFiles();
-            $this->output()->writeln(print_r($gemFiles));
+            foreach ($this->getGemFiles() as $gemFile) {
+                $checkResult = $this
+                    ->taskBundleCheck()
+                    ->setOutput($this->output())
+                    ->setGemFile($gemFile)
+                    ->run();
+                if (!$checkResult->wasSuccessful()) {
+                    $this
+                        ->taskBundleInstall()
+                        ->setGemFile($gemFile)
+                        ->run()
+                        ->stopOnFail();
+                }
+            }
 
             return 0;
         };
@@ -166,14 +182,15 @@ class RoboFile extends Base\RoboFile
     {
         $result = $this
             ->taskGitListFiles()
-            ->setPaths(['Gemfile*'])
+            ->setPaths(['Gemfile*', '*/Gemfile*'])
             ->run()
             ->stopOnFail();
 
         $gemFiles = [];
+        /** @var \Cheppers\Robo\Git\ListFilesItem $file */
         foreach ($result['files'] as $file) {
-            if (!fnmatch('*.lock', $file)) {
-                $gemFiles[] = $file;
+            if (!fnmatch('*.lock', $file->fileName)) {
+                $gemFiles[] = $file->fileName;
             }
         }
 

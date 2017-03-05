@@ -822,6 +822,12 @@ PHP;
 PHP;
         Utils::manipulateString($this->projectConfigPhp, $search, $replace, 'before');
 
+        $search = "use Cheppers\\Robo\\Drupal\\Config\\PhpVariantConfig;\n";
+        $replace = "use Cheppers\\Robo\\Drupal\\Config\\SiteConfig;\n";
+        if (strpos($this->projectConfigPhp, $replace) === false) {
+            Utils::manipulateString($this->projectConfigPhp, $search, $replace, 'after');
+        }
+
         return $this;
     }
 

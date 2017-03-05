@@ -5,6 +5,7 @@ namespace Cheppers\Robo\Drupal\ProjectType\Customer;
 use Cheppers\Robo\Drupal\ProjectType\Base as Base;
 use Cheppers\Robo\Drupal\ProjectType\Incubator as Incubator;
 use Robo\Robo;
+use Stringy\StaticStringy;
 
 class Scripts extends Base\Scripts
 {
@@ -39,12 +40,23 @@ class Scripts extends Base\Scripts
     protected static $inputSiteMachineNameShort = '';
 
     /**
+     * @var string
+     */
+    protected static $inputThemeFrontendMachineName = '';
+
+    /**
+     * @var string
+     */
+    protected static $inputThemeBackendMachineName = '';
+
+    /**
      * {@inheritdoc}
      */
     protected static function oneTimeMain(): void
     {
         parent::oneTimeMain();
         static::siteCreate();
+        static::themeCreate();
     }
 
     protected static function siteCreate(): void
@@ -55,73 +67,85 @@ class Scripts extends Base\Scripts
 
     protected static function siteCreateInput(): void
     {
-        if (!static::$event->getIO()->isInteractive()) {
-            // @todo Provide default values or use the CLI arguments.
-            return;
-        }
+        $defaults = static::getEnvVars([
+            'siteBranch' => static::$inputSiteBranch,
+            'siteProfile' => static::$inputSiteProfile,
+            'siteMachineNameLong' => StaticStringy::underscored(static::$inputNewNameMachine),
+            'siteMachineNameShort' => StaticStringy::underscored(static::$inputNewNameMachine),
+        ]);
 
         $pc = static::$projectConfig;
 
-        $question = static::ioAskQuestion(
-            'Name of the directory under DRUPAL_ROOT/sites/',
-            static::$inputSiteBranch,
-            'Only lower case letters, numbers and "._-" characters are allowed'
-        );
+        if ($defaults['siteBranch']) {
+            $default = $defaults['siteBranch'];
+        } else {
+            $default = static::$inputSiteBranch;
+        }
         static::$inputSiteBranch = static::$event->getIO()->askAndValidate(
-            $question,
+            static::ioAskQuestion(
+                'Name of the directory under DRUPAL_ROOT/sites/',
+                $default,
+                'drupal_site_dir'
+            ),
             function (?string $input) {
                 return static::validateSiteBranch($input);
             },
             static::$ioAttempts,
-            static::$inputSiteBranch
+            $default
         );
 
-        $question = static::ioAskQuestion(
-            'Select an installation profile',
-            static::$inputSiteProfile
-        );
         $profiles = static::ioSelectDrupalProfileChoices($pc->drupalRootDir, false);
-        $profiles['new'] = 'Create a new profile';
+        if ($defaults['siteProfile']) {
+            $default = $defaults['siteProfile'];
+        } elseif (isset($profiles[static::$inputSiteBranch])) {
+            $default = static::$inputSiteBranch;
+        } else {
+            $default = static::$inputSiteProfile;
+        }
+
         static::$inputSiteProfile = static::$event->getIO()->select(
-            $question,
-            $profiles,
-            static::$inputSiteProfile,
+            static::ioAskQuestion(
+                'Select an installation profile',
+                $default
+            ),
+            $profiles + ['new' => 'Create a new profile'],
+            $default,
             static::$ioAttempts
         );
 
-        if (static::$inputSiteBranch !== 'default') {
+        if ($defaults['siteMachineNameLong']) {
+            $default = $defaults['siteMachineNameLong'];
+        } elseif (static::$inputSiteBranch !== 'default') {
             $default = static::$inputSiteBranch;
         } elseif (static::$inputSiteProfile === 'new') {
             $default = static::$inputNewNameMachine;
-        } elseif (static::$inputSiteProfile !== 'standard') {
-            $default = static::$inputSiteProfile;
         } else {
-            $default = '';
+            $default = static::$inputSiteProfile;
         }
-        $default = preg_replace('/[\.-]/', '_', $default);
+        $default = preg_replace('/[\.-]+/', '_', $default);
 
-        $question = static::ioAskQuestion(
-            'Long version of the machine-name',
-            $default
-        );
         static::$inputSiteMachineNameLong = static::$event->getIO()->askAndValidate(
-            $question,
+            static::ioAskQuestion(
+                'Long version of the machine-name',
+                $default,
+                'drupal_extension'
+            ),
             function (?string $input) {
-                return static::validateDrupalExtensionMachineName($input);
+                return static::validateDrupalExtensionMachineName($input, true);
             },
             static::$ioAttempts,
             $default
         );
 
-        $default = static::$inputSiteMachineNameLong;
-        $question = static::ioAskQuestion(
-            'Short version of the machine-name',
-            $default
-        );
+        $default = $defaults['siteMachineNameShort'] ?: static::$inputSiteMachineNameLong;
         static::$inputSiteMachineNameShort = static::$event->getIO()->askAndValidate(
-            $question,
+            static::ioAskQuestion(
+                'Short version of the machine-name',
+                $default,
+                'drupal_extension'
+            ),
             function (?string $input) {
-                return static::validateDrupalExtensionMachineName($input);
+                return static::validateDrupalExtensionMachineName($input, true);
             },
             static::$ioAttempts,
             $default
@@ -157,5 +181,69 @@ class Scripts extends Base\Scripts
         if ($statusCode !== 0) {
             throw new \Exception('@todo');
         }
+    }
+
+    protected static function themeCreate(): void
+    {
+        static::themeCreateInput();
+        static::themeCreateMain();
+    }
+
+    protected static function themeCreateInput(): void
+    {
+        $defaults = static::getEnvVars([
+            'themeFrontendMachineName' => null,
+            'themeBackendMachineName' => null,
+        ]);
+
+        $default = $defaults['themeFrontendMachineName'] ?: static::$inputSiteMachineNameShort . 'f';
+        static::$inputThemeFrontendMachineName = static::$event->getIO()->askAndValidate(
+            static::ioAskQuestion(
+                'Machine name of the front-end theme',
+                $default,
+                'drupal_extension'
+            ),
+            function (?string $input) {
+                return static::validateDrupalExtensionMachineName($input, false);
+            },
+            static::$ioAttempts,
+            $default
+        );
+
+        if ($defaults['themeFrontendMachineName']) {
+            $default = $defaults['themeFrontendMachineName'];
+        } elseif (preg_match('/f$/', static::$inputThemeFrontendMachineName)) {
+            $default = preg_replace('/f$/', 'b', static::$inputThemeFrontendMachineName);
+        } elseif (static::$inputThemeFrontendMachineName) {
+            $default = static::$inputThemeFrontendMachineName . 'b';
+        } else {
+            $default = '';
+        }
+        static::$inputThemeBackendMachineName = static::$event->getIO()->askAndValidate(
+            static::ioAskQuestion(
+                'Machine name of the back-end theme',
+                $default,
+                'drupal_extension'
+            ),
+            function (?string $input) {
+                return static::validateDrupalExtensionMachineName($input, false);
+            },
+            static::$ioAttempts,
+            $default
+        );
+    }
+
+    protected static function themeCreateMain(): void
+    {
+        if (!static::$inputThemeFrontendMachineName && !static::$inputThemeBackendMachineName) {
+            return;
+        }
+
+        static::initPatternLab();
+    }
+
+    protected static function initPatternLab(): void
+    {
+        // @todo
     }
 }

@@ -279,46 +279,47 @@ class ScriptsTest extends Unit
     public function casesValidateDrupalExtensionMachineNamePass(): array
     {
         return [
-            'null' => [null, null],
-            'a' => ['a', 'a'],
-            'a_' => ['a', 'a_'],
-            'a__' => ['a', 'a__'],
-            'a_b' => ['a_b', 'a_b'],
-            'a__b' => ['a_b', 'a__b'],
-            'a___b' => ['a_b', 'a___b'],
+            'null' => [null, null, false],
+            'empty' => ['', null, false],
+            'a' => ['a', 'a', true],
+            'a_' => ['a', 'a_', true],
+            'a__' => ['a', 'a__', true],
+            'a_b' => ['a_b', 'a_b', true],
+            'a__b' => ['a_b', 'a__b', true],
+            'a___b' => ['a_b', 'a___b', true],
         ];
     }
 
     /**
      * @dataProvider casesValidateDrupalExtensionMachineNamePass
      */
-    public function testValidateDrupalExtensionMachineNamePass(?string $expected, ?string $input): void
+    public function testValidateDrupalExtensionMachineNamePass(?string $expected, ?string $input, bool $required): void
     {
         $this->tester->assertEquals(
             $expected,
-            $this->callProtectedMethod('validateDrupalExtensionMachineName', $input)
+            $this->callProtectedMethod('validateDrupalExtensionMachineName', $input, $required)
         );
     }
 
     public function casesValidateDrupalExtensionMachineNameFail(): array
     {
         return [
-            'empty' => [''],
-            'space' => [' '],
-            'starts with 0' => ['0a'],
-            'starts with 1' => ['1a'],
-            'contains .' => ['a.b'],
-            'contains -' => ['a-b'],
+            'empty' => ['', true],
+            'space' => [' ', true],
+            'starts with 0' => ['0a', false],
+            'starts with 1' => ['1a', false],
+            'contains .' => ['a.b', false],
+            'contains -' => ['a-b', false],
         ];
     }
 
     /**
      * @dataProvider casesValidateDrupalExtensionMachineNameFail
      */
-    public function testValidateDrupalExtensionMachineNameFail($input): void
+    public function testValidateDrupalExtensionMachineNameFail(?string $input, bool $required): void
     {
         try {
-            $this->callProtectedMethod('validateDrupalExtensionMachineName', $input);
+            $this->callProtectedMethod('validateDrupalExtensionMachineName', $input, $required);
             $this->tester->fail('@todo Error message. Where is the exception?');
         } catch (\InvalidArgumentException $e) {
             $this->tester->assertTrue(true, $e->getMessage());

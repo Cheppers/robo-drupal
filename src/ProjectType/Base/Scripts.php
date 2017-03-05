@@ -95,6 +95,11 @@ class Scripts
     protected static $inputNewNameNamespace = '';
 
     /**
+     * @var string
+     */
+    protected static $envNamePrefix = '';
+
+    /**
      * Composer script event handler.
      */
     public static function postInstallCmd(Event $event): bool
@@ -284,79 +289,92 @@ class Scripts
     protected static function renamePackageInput(): void
     {
         $cwd = static::$packageRootDir === '.' ? getcwd() : static::$packageRootDir;
-        $cwdParts = explode('/', $cwd);
+        $cwdParts = explode(DIRECTORY_SEPARATOR, $cwd);
 
-        $defaultNewNameMachine = array_pop($cwdParts);
-        $defaultNewVendorMachine = array_pop($cwdParts);
+        $cwdPartNameMachine = array_pop($cwdParts);
+        $cwdPartVendorMachine = array_pop($cwdParts);
 
-        $questionPatternMachine = implode("\n", [
-            '<question>Rename the package (%d/4) - %s:</question>',
-            '<question>Only lower case letters, numbers and "-" are allowed</question>',
-            'Default: "<info>%s</info>"',
-            '',
+        $defaults = static::getEnvVars([
+            'vendorMachine' => $cwdPartVendorMachine,
+            'vendorNamespace' => null,
+            'nameMachine' => $cwdPartNameMachine,
+            'nameNamespace' => null,
         ]);
 
-        $questionPatternNamespace = implode("\n", [
-            '<question>Rename the package (%d/4) - %s:</question>',
-            '<question>Capital camel case format is allowed</question>',
-            'Default: "<info>%s</info>"',
-            '',
-        ]);
+        $questionPattern = 'Rename the package ({current}/4) - {title}:</question>';
 
-        static::$inputNewVendorMachine = static::$event->getIO()->askAndValidate(
-            sprintf(
-                $questionPatternMachine,
-                1,
-                'vendor as machine-name',
-                $defaultNewVendorMachine
+        $io = static::$event->getIO();
+
+        $default = $defaults['vendorMachine'] ?: $cwdPartVendorMachine;
+        static::$inputNewVendorMachine = $io->askAndValidate(
+            static::ioAskQuestion(
+                $questionPattern,
+                $default,
+                'composer_name_part',
+                [
+                    '{current}' => 1,
+                    '{title}' => 'vendor as machine-name',
+                ]
             ),
             function (?string $input) {
                 return static::validatePackageNameMachine($input);
             },
-            3,
-            $defaultNewVendorMachine
+            static::$ioAttempts,
+            $default
         );
 
-        static::$inputNewVendorNamespace = static::$event->getIO()->askAndValidate(
-            sprintf(
-                $questionPatternNamespace,
-                2,
-                'vendor as namespace',
-                StaticStringy::upperCamelize(static::$inputNewVendorMachine)
+        $default = $defaults['vendorNamespace'] ?: StaticStringy::upperCamelize(static::$inputNewVendorMachine);
+        static::$inputNewVendorNamespace = $io->askAndValidate(
+            static::ioAskQuestion(
+                $questionPattern,
+                $default,
+                'php_namespace',
+                [
+                    '{current}' => 2,
+                    '{title}' => 'vendor as namespace',
+                ]
             ),
             function (?string $input) {
                 return static::validatePackageNameNamespace($input);
             },
-            3,
-            StaticStringy::upperCamelize(static::$inputNewVendorMachine)
+            static::$ioAttempts,
+            $default
         );
 
-        static::$inputNewNameMachine = static::$event->getIO()->askAndValidate(
-            sprintf(
-                $questionPatternMachine,
-                3,
-                'name as machine-name',
-                $defaultNewNameMachine
+        $default = $defaults['nameMachine'] ?: $cwdPartNameMachine;
+        static::$inputNewNameMachine = $io->askAndValidate(
+            static::ioAskQuestion(
+                $questionPattern,
+                $default,
+                'composer_name_part',
+                [
+                    '{current}' => 3,
+                    '{title}' => 'name as machine-name',
+                ]
             ),
             function (?string $input) {
                 return static::validatePackageNameMachine($input);
             },
-            3,
-            $defaultNewNameMachine
+            static::$ioAttempts,
+            $default
         );
 
-        static::$inputNewNameNamespace = static::$event->getIO()->askAndValidate(
-            sprintf(
-                $questionPatternNamespace,
-                4,
-                'name as namespace',
-                StaticStringy::upperCamelize(static::$inputNewNameMachine)
+        $default = $defaults['nameNamespace'] ?: StaticStringy::upperCamelize(static::$inputNewNameMachine);
+        static::$inputNewNameNamespace = $io->askAndValidate(
+            static::ioAskQuestion(
+                $questionPattern,
+                $default,
+                'php_namespace',
+                [
+                    '{current}' => 2,
+                    '{title}' => 'name as namespace',
+                ]
             ),
             function (?string $input) {
                 return static::validatePackageNameNamespace($input);
             },
-            3,
-            StaticStringy::upperCamelize(static::$inputNewNameMachine)
+            static::$ioAttempts,
+            $default
         );
     }
 
@@ -567,8 +585,12 @@ class Scripts
         return $config->get('vendor-dir') . '/cheppers/robo-drupal';
     }
 
-    protected static function ioAskQuestion(string $question, string $default, string $description = ''): string
-    {
+    protected static function ioAskQuestion(
+        string $question,
+        string $default,
+        string $description = '',
+        array $replacements = []
+    ): string {
         $pattern = [
             '<question>{question}</question>',
         ];
@@ -580,13 +602,25 @@ class Scripts
         $pattern[] = 'Default: "<info>{default}</info>"';
         $pattern[] = ': ';
 
-        $replacements = [
+        $descriptions = static::ioAskQuestionDescriptions();
+
+        $replacements += [
             '{question}' => $question,
-            '{description}' => $description,
+            '{description}' => $descriptions[$description] ?? $description,
             '{default}' => $default,
         ];
 
         return strtr(implode("\n", $pattern), $replacements);
+    }
+
+    protected static function ioAskQuestionDescriptions(): array
+    {
+        return [
+            'php_namespace' => 'Camel case',
+            'composer_name_part' => 'Only lower case letters, numbers and "-" characters are allowed',
+            'drupal_site_dir' => 'Only lower case letters, numbers and "._-" characters are allowed',
+            'drupal_extension' => 'Only lower case letters, numbers and "_" characters are allowed',
+        ];
     }
 
     protected static function ioSelectDrupalProfileChoices(string $drupalRoot, bool $withHiddenOnes = false): array
@@ -625,8 +659,12 @@ class Scripts
         return $input;
     }
 
-    protected static function validateDrupalExtensionMachineName(?string $input): ?string
+    protected static function validateDrupalExtensionMachineName(?string $input, bool $required): ?string
     {
+        if ($required && trim($input) === '') {
+            throw new \InvalidArgumentException('Required');
+        }
+
         if ($input !== null) {
             if (!preg_match('/^[a-z][a-z0-9_]*$/', $input)) {
                 throw new \InvalidArgumentException('Invalid characters');
@@ -643,5 +681,39 @@ class Scripts
     {
         // @todo
         return $input;
+    }
+
+    protected static function getEnvVars(array $vars): array
+    {
+        foreach ($vars as $name => $default) {
+            $vars[$name] = static::getEnvVar($name, $default);
+        }
+
+        return $vars;
+    }
+
+    protected static function getEnvVar(string $name, $default): string
+    {
+        $value = getenv(static::getEnvNamePrefix() . '_' . static::toEnvName($name));
+
+        return $value === false ? $default : $value;
+    }
+
+    protected static function getEnvNamePrefix(): string
+    {
+        if (!static::$envNamePrefix) {
+            /** @var \Composer\Package\Package $package */
+            $package = static::$event->getComposer()->getPackage();
+            list(, $name) = explode('/', $package->getName());
+
+            static::$envNamePrefix = static::toEnvName($name);
+        }
+
+        return static::$envNamePrefix;
+    }
+
+    protected static function toEnvName(string $name): string
+    {
+        return StaticStringy::toUpperCase(StaticStringy::underscored($name));
     }
 }

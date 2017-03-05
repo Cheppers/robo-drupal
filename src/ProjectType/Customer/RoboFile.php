@@ -76,6 +76,7 @@ class RoboFile extends Base\RoboFile
             ->collectionBuilder()
             ->addTaskList([
                 'lint.phpcs.Drupal' => $this->getTaskPhpcsLint($this->getPhpcsConfigDrupal()),
+                'lint.composer.lock' => $this->taskComposerValidate(),
             ]);
     }
     //endregion
@@ -97,6 +98,11 @@ class RoboFile extends Base\RoboFile
     public function lintPhpcs(): TaskInterface
     {
         return $this->getTaskPhpcsLint($this->getPhpcsConfigDrupal());
+    }
+
+    public function lintComposerValidate(): TaskInterface
+    {
+        return $this->taskComposerValidate();
     }
     //endregion
 

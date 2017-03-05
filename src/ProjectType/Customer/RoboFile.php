@@ -5,19 +5,23 @@ namespace Cheppers\Robo\Drupal\ProjectType\Customer;
 use Cheppers\AssetJar\AssetJar;
 use Cheppers\LintReport\Reporter\CheckstyleReporter;
 use Cheppers\Robo\Bundler\BundlerTaskLoader;
+use Cheppers\Robo\Compass\CompassTaskLoader;
 use Cheppers\Robo\Drupal\Config\PhpcsConfig;
 use Cheppers\Robo\Drupal\ProjectType\Base as Base;
 use Cheppers\Robo\Drupal\Robo\GeneralReleaseTaskLoader;
 use Cheppers\Robo\Drupal\Utils;
 use Cheppers\Robo\Phpcs\PhpcsTaskLoader;
+use Cheppers\Robo\Yarn\YarnTaskLoader;
 use Robo\Collection\CollectionBuilder;
 use Robo\Contract\TaskInterface;
 
 class RoboFile extends Base\RoboFile
 {
     use BundlerTaskLoader;
-    use PhpcsTaskLoader;
     use GeneralReleaseTaskLoader;
+    use CompassTaskLoader;
+    use PhpcsTaskLoader;
+    use YarnTaskLoader;
 
     /**
      * {@inheritdoc}
@@ -96,11 +100,45 @@ class RoboFile extends Base\RoboFile
     }
     //endregion
 
-    public function bundleCheckOrInstall()
+    public function build(): CollectionBuilder
+    {
+        return $this
+            ->collectionBuilder()
+            ->addCode($this->getTaskYarnInstall())
+            ->addCode($this->getTaskBundleCheckOrInstall())
+            ->addCode($this->getTaskCompassClean())
+            ->addCode($this->getTaskCompassCompile());
+    }
+
+    public function bundleCheckOrInstall(): CollectionBuilder
     {
         return $this
             ->collectionBuilder()
             ->addCode($this->getTaskBundleCheckOrInstall());
+    }
+
+    public function compassCompile(
+        array $options = [
+            'environment' => ''
+        ]
+    ): CollectionBuilder {
+        return $this
+            ->collectionBuilder()
+            ->addCode($this->getTaskCompassCompile($options));
+    }
+
+    public function compassClean(): CollectionBuilder
+    {
+        return $this
+            ->collectionBuilder()
+            ->addCode($this->getTaskCompassClean());
+    }
+
+    public function yarnInstall(): CollectionBuilder
+    {
+        return $this
+            ->collectionBuilder()
+            ->addCode($this>getTaskYarnInstall());
     }
 
     public function release()
@@ -195,5 +233,105 @@ class RoboFile extends Base\RoboFile
         }
 
         return $gemFiles;
+    }
+
+    protected function getTaskCompassCompile(array $options = []): \Closure
+    {
+        return function () use ($options) {
+            foreach ($this->getCompassConfigFiles() as $configFile) {
+                $wd = pathinfo($configFile, PATHINFO_DIRNAME);
+                $wd = $wd === '.' ? '' : $wd;
+
+                $fileName = pathinfo($configFile, PATHINFO_BASENAME);
+                $fileName = $fileName === 'config.rb' ? '' : $fileName;
+
+                $this
+                    ->taskCompassCompile($options)
+                    ->setOutput($this->output())
+                    ->setWorkingDirectory($wd)
+                    ->setConfigFile($fileName)
+                    ->run()
+                    ->stopOnFail();
+            }
+
+            return 0;
+        };
+    }
+
+    protected function getTaskCompassClean(array $options = []): \Closure
+    {
+        return function () use ($options) {
+            foreach ($this->getCompassConfigFiles() as $configFile) {
+                $wd = pathinfo($configFile, PATHINFO_DIRNAME);
+                $wd = $wd === '.' ? '' : $wd;
+
+                $fileName = pathinfo($configFile, PATHINFO_BASENAME);
+                $fileName = $fileName === 'config.rb' ? '' : $fileName;
+
+                $this
+                    ->taskCompassCompile($options)
+                    ->setOutput($this->output())
+                    ->setWorkingDirectory($wd)
+                    ->setConfigFile($fileName)
+                    ->setEnvironment('development')
+                    ->run()
+                    ->stopOnFail();
+            }
+
+            return 0;
+        };
+    }
+
+    /**
+     * @return string[]
+     */
+    protected function getCompassConfigFiles(): array
+    {
+        $result = $this
+            ->taskGitListFiles()
+            ->setPaths(['config.rb', '*/config.rb'])
+            ->run()
+            ->stopOnFail();
+
+        $configFiles = [];
+        /** @var \Cheppers\Robo\Git\ListFilesItem $file */
+        foreach ($result['files'] as $file) {
+            $configFiles[] = $file->fileName;
+        }
+
+        return $configFiles;
+    }
+
+    protected function getTaskYarnInstall(array $options = []): \Closure
+    {
+        return function () use ($options) {
+            foreach ($this->getPackageJsonFiles() as $packageJsonFile) {
+                $wd = pathinfo($packageJsonFile, PATHINFO_DIRNAME);
+                $wd = $wd === '.' ? '' : $wd;
+
+                $this
+                    ->taskYarnInstall($options)
+                    ->setOutput($this->output())
+                    ->setWorkingDirectory($wd)
+                    ->run()
+                    ->stopOnFail();
+            }
+
+            return 0;
+        };
+    }
+
+    /**
+     * @return string[]
+     */
+    protected function getPackageJsonFiles(): array
+    {
+        $result = $this
+            ->taskGitListFiles()
+            ->setPaths(['package.json', '*/package.json'])
+            ->run()
+            ->stopOnFail();
+
+        return array_keys($result['files']);
     }
 }

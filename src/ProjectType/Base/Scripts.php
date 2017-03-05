@@ -283,13 +283,9 @@ class Scripts
 
     protected static function renamePackageInput(): void
     {
-        if (static::$event->getIO()->isInteractive() === false) {
-            // @todo Provide default values or use CLI arguments.
-            return;
-        }
-
         $cwd = static::$packageRootDir === '.' ? getcwd() : static::$packageRootDir;
         $cwdParts = explode('/', $cwd);
+
         $defaultNewNameMachine = array_pop($cwdParts);
         $defaultNewVendorMachine = array_pop($cwdParts);
 
@@ -467,20 +463,20 @@ class Scripts
         GitHooksComposerScripts::deploy(static::$event);
     }
 
-    protected static function newInstanceFromDrupalProfileCustomer(string $profilesDir, string $machine_name): void
+    protected static function newInstanceFromDrupalProfileCustomer(string $profilesDir, string $machineName): void
     {
         $src = static::getRoboDrupalRoot() . '/src/Templates/drupal/profiles/customer';
-        $dst = "$profilesDir/$machine_name";
+        $dst = "$profilesDir/$machineName";
         $fs = new Filesystem();
         $fs->mirror($src, $dst);
-        $fs->rename("$dst/machine_name.info.yml", "$dst/$machine_name.info.yml");
+        $fs->rename("$dst/machine_name.info.yml", "$dst/$machineName.info.yml");
 
         file_put_contents(
-            "$dst/$machine_name.info.yml",
+            "$dst/$machineName.info.yml",
             str_replace(
                 'name: HumanName',
                 'name: ' . static::$inputNewNameNamespace,
-                file_get_contents("$dst/$machine_name.info.yml")
+                file_get_contents("$dst/$machineName.info.yml")
             )
         );
 
@@ -488,7 +484,7 @@ class Scripts
             "$dst/composer.json",
             str_replace(
                 'drupal/project',
-                "drupal/$machine_name",
+                "drupal/$machineName",
                 file_get_contents("$dst/composer.json")
             )
         );

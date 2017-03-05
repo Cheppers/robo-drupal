@@ -12,9 +12,6 @@ use Symfony\Component\Process\Process;
 use Symfony\Component\Yaml\Yaml;
 use Webmozart\PathUtil\Path;
 
-/**
- * Class RoboFile.
- */
 class RoboFile extends \Robo\Tasks
     // @codingStandardsIgnoreEnd
 {

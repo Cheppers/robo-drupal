@@ -382,6 +382,49 @@ class ScriptsTest extends Unit
     }
     //endregion
 
+    public function casesIoAskQuestion(): array
+    {
+        return [
+            'basic' => [
+                implode("\n", [
+                    '<question>my-question</question>',
+                    '<question>my-description</question>',
+                    'Default: "<info>my-default</info>"',
+                    ': ',
+                ]),
+                'my-question',
+                'my-default',
+                'my-description'
+            ],
+            'extra' => [
+                implode("\n", [
+                    '<question>my-question, my-title, 42/100</question>',
+                    '<question>my-description</question>',
+                    'Default: "<info>my-default</info>"',
+                    ': ',
+                ]),
+                'my-question, {title}, {current}/100',
+                'my-default',
+                'my-description',
+                [
+                    '{current}' => 42,
+                    '{title}' => 'my-title',
+                ],
+            ],
+        ];
+    }
+
+    /**
+     * @dataProvider casesIoAskQuestion
+     */
+    public function testIoAskQuestion(string $expected, ...$args): void
+    {
+        $className = $this->className;
+        $instance = new $className();
+        $method = $this->getProtectedMethod('IoAskQuestion');
+        $this->assertEquals($expected, $method->invokeArgs($instance, $args));
+    }
+
     protected function callProtectedMethod(string $methodName, ...$args)
     {
         $className = $this->className;

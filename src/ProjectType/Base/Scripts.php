@@ -301,7 +301,7 @@ class Scripts
             'nameNamespace' => null,
         ]);
 
-        $questionPattern = 'Rename the package ({current}/4) - {title}:</question>';
+        $questionPattern = 'Rename the package ({current}/4) - {title}:';
 
         $io = static::$event->getIO();
 
@@ -592,21 +592,22 @@ class Scripts
         array $replacements = []
     ): string {
         $pattern = [
-            '<question>{question}</question>',
+            "<question>$question</question>",
         ];
 
-        if ($description) {
-            $pattern[] = '<question>{description}</question>';
+        $descriptions = static::ioAskQuestionDescriptions();
+        $desc = $descriptions[$description] ?? $description;
+        if ($desc) {
+            $pattern[] = "<question>$desc</question>";
         }
 
         $pattern[] = 'Default: "<info>{default}</info>"';
         $pattern[] = ': ';
 
-        $descriptions = static::ioAskQuestionDescriptions();
 
         $replacements += [
             '{question}' => $question,
-            '{description}' => $descriptions[$description] ?? $description,
+            '{description}' => $desc,
             '{default}' => $default,
         ];
 
@@ -692,7 +693,7 @@ class Scripts
         return $vars;
     }
 
-    protected static function getEnvVar(string $name, $default): string
+    protected static function getEnvVar(string $name, ?string $default): ?string
     {
         $value = getenv(static::getEnvNamePrefix() . '_' . static::toEnvName($name));
 

@@ -144,7 +144,29 @@ class RoboFile extends Base\RoboFile
     {
         return $this
             ->collectionBuilder()
-            ->addCode($this>getTaskYarnInstall());
+            ->addCode($this->getTaskYarnInstall());
+    }
+
+    public function siteInstall(string $siteId = ''): TaskInterface
+    {
+        // @todo Check that there is a PhpVariant and DatabaseServer.
+        $site = $this->validateInputSiteId($siteId);
+        $phpVariant = reset($this->projectConfig->phpVariants);
+        $databaseServer = reset($this->projectConfig->databaseServers);
+
+        $placeholders = [
+            '{siteBranch}' => $site->id,
+            '{php}' => $phpVariant->id,
+            '{db}' => $databaseServer->id,
+        ];
+        $siteDir = $this->projectConfig->getSiteVariantDir($placeholders);
+
+        return $this
+            ->collectionBuilder()
+            ->addCode($this->getTaskUnlockSettingsPhp($site->id))
+            ->addCode($this->getTaskPublicFilesClean($siteDir))
+            ->addCode($this->getTaskPrivateFilesClean($siteDir))
+            ->addTask($this->getTaskDrushSiteInstall($site, $databaseServer, $phpVariant));
     }
 
     public function release()
@@ -158,6 +180,7 @@ class RoboFile extends Base\RoboFile
         return $task;
     }
 
+    //region Task builders.
     /**
      * @return \Robo\Contract\TaskInterface|\Robo\Collection\CollectionBuilder
      */
@@ -219,28 +242,6 @@ class RoboFile extends Base\RoboFile
         };
     }
 
-    /**
-     * @return string[]
-     */
-    protected function getGemFiles(): array
-    {
-        $result = $this
-            ->taskGitListFiles()
-            ->setPaths(['Gemfile*', '*/Gemfile*'])
-            ->run()
-            ->stopOnFail();
-
-        $gemFiles = [];
-        /** @var \Cheppers\Robo\Git\ListFilesItem $file */
-        foreach ($result['files'] as $file) {
-            if (!fnmatch('*.lock', $file->fileName)) {
-                $gemFiles[] = $file->fileName;
-            }
-        }
-
-        return $gemFiles;
-    }
-
     protected function getTaskCompassCompile(array $options = []): \Closure
     {
         return function () use ($options) {
@@ -288,26 +289,6 @@ class RoboFile extends Base\RoboFile
         };
     }
 
-    /**
-     * @return string[]
-     */
-    protected function getCompassConfigFiles(): array
-    {
-        $result = $this
-            ->taskGitListFiles()
-            ->setPaths(['config.rb', '*/config.rb'])
-            ->run()
-            ->stopOnFail();
-
-        $configFiles = [];
-        /** @var \Cheppers\Robo\Git\ListFilesItem $file */
-        foreach ($result['files'] as $file) {
-            $configFiles[] = $file->fileName;
-        }
-
-        return $configFiles;
-    }
-
     protected function getTaskYarnInstall(array $options = []): \Closure
     {
         return function () use ($options) {
@@ -326,18 +307,46 @@ class RoboFile extends Base\RoboFile
             return 0;
         };
     }
+    //endregion
+
+    /**
+     * @return string[]
+     */
+    protected function getGemFiles(): array
+    {
+        $files = $this->getGitTrackedFiles(['Gemfile*', '*/Gemfile*']);
+
+        $gemFiles = [];
+        foreach ($files as $file) {
+            if (!fnmatch('*.lock', $file)) {
+                $gemFiles[] = $file;
+            }
+        }
+
+        return $gemFiles;
+    }
+
+    /**
+     * @return string[]
+     */
+    protected function getCompassConfigFiles(): array
+    {
+        return $this->getGitTrackedFiles(['config.rb', '*/config.rb']);
+    }
 
     /**
      * @return string[]
      */
     protected function getPackageJsonFiles(): array
     {
-        $result = $this
-            ->taskGitListFiles()
-            ->setPaths(['package.json', '*/package.json'])
-            ->run()
-            ->stopOnFail();
+        return $this->getGitTrackedFiles(['package.json', '*/package.json']);
+    }
 
-        return array_keys($result['files']);
+    /**
+     * @return string[]
+     */
+    protected function getComposerJsonFiles(): array
+    {
+        return $this->getGitTrackedFiles(['*/composer.json']);
     }
 }

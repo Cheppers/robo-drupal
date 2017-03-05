@@ -148,6 +148,9 @@ class RoboFile extends Base\RoboFile
     }
     //endregion
 
+    /**
+     * Lists the managed Drupal extensions.
+     */
     public function selfManagedExtensions()
     {
         // @todo Improve the output format.
@@ -261,19 +264,34 @@ class RoboFile extends Base\RoboFile
             ->addTask($this->getTaskDrupalRebuildSitesPhp());
     }
 
-    public function siteInstall(string $siteId = ''): CollectionBuilder
-    {
-        $siteId = $this->validateInputSiteId($siteId);
-        if (!$siteId) {
-            $siteId = $this->projectConfig->getDefaultSiteId();
+    public function siteInstall(
+        string $siteId = '',
+        array $options = [
+            'db' => '',
+            'php' => '',
+        ]
+    ): CollectionBuilder {
+        $site = $this->validateInputSiteId($siteId);
+        $databaseServers = $this->validateInputDatabaseServerIds($options['db']);
+        $phpVariant = $this->validateInputPhpVariantId($options['php']);
+
+        $placeholders = [
+            '{siteBranch}' => $site->id,
+            '{php}' => $phpVariant->id,
+            '{db}' => null,
+        ];
+
+        $cb = $this->collectionBuilder();
+        $cb->addCode($this->getTaskUnlockSettingsPhp($site->id));
+        foreach ($databaseServers as $databaseServer) {
+            $placeholders['{db}'] = $databaseServer->id;
+            $siteDir = $this->projectConfig->getSiteVariantDir($placeholders);
+            $cb->addCode($this->getTaskPublicFilesClean($siteDir));
+            $cb->addCode($this->getTaskPrivateFilesClean($siteDir));
+            $cb->addTask($this->getTaskDrushSiteInstall($site, $databaseServer, $phpVariant));
         }
 
-        return $this
-            ->collectionBuilder()
-            ->addCode($this->getTaskUnlockSettingsPhp($siteId))
-            ->addCode($this->getTaskPublicFilesClean($siteId))
-            ->addCode($this->getTaskPrivateFilesClean($siteId))
-            ->addTask($this->getTaskSiteInstall($siteId));
+        return $cb;
     }
     //endregion
 
@@ -643,66 +661,6 @@ class RoboFile extends Base\RoboFile
                 file_put_contents($projectConfigFileName, implode('', $lines));
             }
             unset($pc->sites[$siteId]);
-
-            return 0;
-        };
-    }
-
-    /**
-     * Build a pre-configured DrushSiteInstall task.
-     *
-     * @todo Support advanced config management tools.
-     */
-    protected function getTaskSiteInstall(string $siteId): TaskInterface
-    {
-        $pc = $this->projectConfig;
-        $backToRootDir = $this->backToRootDir($pc->drupalRootDir);
-        $site = $pc->sites[$siteId];
-        $cmdPattern = '%s --yes --sites-subdir=%s';
-        $cmdArgs = [
-            escapeshellcmd("$backToRootDir/{$this->binDir}/drush"),
-            escapeshellarg($site->id),
-        ];
-
-        $configDir = "{$pc->outerSitesSubDir}/{$site->id}/config/sync";
-        if (file_exists($configDir) && glob("$configDir/*.yml")) {
-            $cmdPattern .= ' --config-dir=%s';
-            $cmdArgs[] = escapeshellarg("$backToRootDir/$configDir");
-        }
-
-        $cmdPattern .= ' site-install %s';
-        $cmdArgs[] = escapeshellarg($site->installProfileName);
-
-        return $this
-            ->taskExec(vsprintf($cmdPattern, $cmdArgs))
-            ->dir($pc->drupalRootDir);
-    }
-
-    protected function getTaskPublicFilesClean(string $siteId): \Closure
-    {
-        return $this->getTaskDirectoryClean("{$this->projectConfig->drupalRootDir}/sites/{$siteId}/files");
-    }
-
-    protected function getTaskPrivateFilesClean($siteId): \Closure
-    {
-        return $this->getTaskDirectoryClean("{$this->projectConfig->outerSitesSubDir}/{$siteId}/private");
-    }
-
-    protected function getTaskDirectoryClean(string $dir): \Closure
-    {
-        return function () use ($dir) {
-            $this->_mkdir($dir);
-
-            $entry = new \DirectoryIterator($dir);
-            while ($entry->valid()) {
-                if (!$entry->isDot() && $entry->isDir()) {
-                    $this->_deleteDir($entry->getRealPath());
-                } elseif ($entry->isFile() || $entry->isLink()) {
-                    $this->_remove($entry->getRealPath());
-                }
-
-                $entry->next();
-            }
 
             return 0;
         };

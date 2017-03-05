@@ -4,6 +4,8 @@ namespace Cheppers\Robo\Drupal\ProjectType\Base;
 
 use Cheppers\Robo\Drupal\Config\BaseConfig;
 use Cheppers\Robo\Drupal\Config\DatabaseServerConfig;
+use Cheppers\Robo\Drupal\Config\PhpVariantConfig;
+use Cheppers\Robo\Drupal\Config\SiteConfig;
 use Cheppers\Robo\Drupal\Utils;
 
 use Stringy\StaticStringy;
@@ -234,6 +236,30 @@ class ProjectConfig extends BaseConfig
     }
 
     /**
+     * @param \Cheppers\Robo\Drupal\Config\SiteConfig $siteId
+     * @param \Cheppers\Robo\Drupal\Config\DatabaseServerConfig[] $dbConfigs
+     * @param \Cheppers\Robo\Drupal\Config\PhpVariantConfig[] $phpVariants
+     *
+     * @return string[]
+     */
+    public function getSiteVariantDirs(SiteConfig $site, array $dbServerConfigs, array $phpVariants): array
+    {
+        $dirs = [];
+        foreach ($phpVariants as $phpVariant) {
+            foreach ($dbServerConfigs as $dbServerConfig) {
+                $dir = $this->getSiteVariantDir([
+                    '{siteBranch}' => $site->id,
+                    '{php}' => $phpVariant->id,
+                    '{db}' => $dbServerConfig->id,
+                ]);
+                $dirs[$dir] = $dir;
+            }
+        }
+
+        return $dirs;
+    }
+
+    /**
      * @return $this
      */
     public function populateDefaultValues()
@@ -244,6 +270,10 @@ class ProjectConfig extends BaseConfig
 
         foreach ($this->databaseServers as $id => $db) {
             $db->id = $id;
+        }
+
+        if (!$this->phpVariants) {
+            $this->phpVariants[PHP_VERSION_ID] = new PhpVariantConfig(['binDir' => PHP_BINDIR]);
         }
 
         foreach ($this->phpVariants as $id => $php) {

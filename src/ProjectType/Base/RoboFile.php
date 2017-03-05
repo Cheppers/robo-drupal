@@ -5,6 +5,7 @@ namespace Cheppers\Robo\Drupal\ProjectType\Base;
 use Cheppers\LintReport\Reporter\BaseReporter;
 use Cheppers\Robo\Drupal\Config\DatabaseServerConfig;
 use Cheppers\Robo\Drupal\Config\PhpVariantConfig;
+use Cheppers\Robo\Drupal\Config\SiteConfig;
 use Cheppers\Robo\Drupal\Robo\DrupalCoreTestsTaskLoader;
 use Cheppers\Robo\Drupal\Utils;
 use Cheppers\Robo\Drupal\VarExport;
@@ -89,7 +90,7 @@ class RoboFile extends Tasks
     public function __construct()
     {
         putenv('COMPOSER_DISABLE_XDEBUG_WARN=1');
-        $this->roboDrupalRoot = Path::makeAbsolute('../../..', __DIR__);
+        $this->roboDrupalRoot = Utils::getRoboDrupalRoot();
 
         $this
             ->initProjectConfig()
@@ -550,25 +551,94 @@ PHP;
             return 0;
         };
     }
+
+    protected function getTaskPublicFilesClean(string $siteDir): \Closure
+    {
+        return $this->getTaskDirectoryClean("{$this->projectConfig->drupalRootDir}/sites/{$siteDir}/files");
+    }
+
+    protected function getTaskPrivateFilesClean($siteDir): \Closure
+    {
+        return $this->getTaskDirectoryClean("{$this->projectConfig->outerSitesSubDir}/{$siteDir}/private");
+    }
+
+    protected function getTaskDirectoryClean(string $dir): \Closure
+    {
+        return function () use ($dir) {
+            $this->_mkdir($dir);
+
+            $entry = new \DirectoryIterator($dir);
+            while ($entry->valid()) {
+                if (!$entry->isDot() && $entry->isDir()) {
+                    $this->_deleteDir($entry->getRealPath());
+                } elseif ($entry->isFile() || $entry->isLink()) {
+                    $this->_remove($entry->getRealPath());
+                }
+
+                $entry->next();
+            }
+
+            return 0;
+        };
+    }
+
+    /**
+     * Build a pre-configured DrushSiteInstall task.
+     *
+     * @todo Support advanced config management tools.
+     */
+    protected function getTaskDrushSiteInstall(
+        SiteConfig $site,
+        DatabaseServerConfig $db,
+        PhpVariantConfig $php
+    ): TaskInterface {
+        $pc = $this->projectConfig;
+        $backToRootDir = $this->backToRootDir($pc->drupalRootDir);
+
+        $siteDir = $pc->getSiteVariantDir([
+            '{siteBranch}' => $site->id,
+            '{db}' => $db->id,
+            '{php}' => $php->id,
+        ]);
+
+        $task = $this
+            ->taskDrush('site-install')
+            ->setWorkingDirectory($pc->drupalRootDir)
+            ->setDrushExecutable("$backToRootDir/{$this->binDir}/drush")
+            ->setCmdOption('yes', true)
+            ->setCmdOption('sites-subdir', $siteDir);
+
+        $configDir = "{$pc->outerSitesSubDir}/$siteDir/config/sync";
+        if (file_exists($configDir) && glob("$configDir/*.yml")) {
+            $task->setCmdOption('config-dir', "$backToRootDir/$configDir");
+        }
+
+        $task->setCmdArguments([$site->installProfileName]);
+
+        return $task;
+    }
     //endregion
 
     //region Input validators.
-    protected function validateInputSiteId(string $siteId, bool $required = false): string
+    protected function validateInputSiteId(string $siteId, bool $required = false): SiteConfig
     {
         if (!$siteId) {
             if ($required) {
                 throw new \InvalidArgumentException('Site ID is required', 1);
             }
 
-            return $this->projectConfig->getDefaultSiteId();
+            $siteId = $this->projectConfig->getDefaultSiteId();
         }
 
-        $pc = $this->projectConfig;
-        if ($siteId && !array_key_exists($siteId, $pc->sites)) {
-            throw new \InvalidArgumentException("Unknown site ID: '$siteId'", 1);
+        if ($siteId) {
+            if (!array_key_exists($siteId, $this->projectConfig->sites)) {
+                throw new \InvalidArgumentException("Unknown site ID: '$siteId'", 1);
+            }
+
+            return $this->projectConfig->sites[$siteId];
         }
 
-        return $siteId;
+        throw  new \Exception('There is no site. Run "robo site:create"');
     }
 
     /**
@@ -585,6 +655,23 @@ PHP;
             $this->projectConfig->phpVariants,
             'Unknown PHP variant identifiers: "%s"'
         );
+    }
+
+    protected function validateInputPhpVariantId(string $input, bool $required = false): PhpVariantConfig
+    {
+        if (!$input) {
+            if ($required) {
+                throw new \InvalidArgumentException('@todo Line: ' . __LINE__);
+            }
+
+            return reset($this->projectConfig->phpVariants);
+        }
+
+        if (!isset($this->projectConfig->phpVariants[$input])) {
+            throw new \InvalidArgumentException(sprintf('Unknown PHP variant identifier: "%s"', $input));
+        }
+
+        return $this->projectConfig->phpVariants[$input];
     }
 
     /**
@@ -621,4 +708,15 @@ PHP;
         return array_intersect_key($available, array_flip($ids));
     }
     //endregion
+
+    protected function getGitTrackedFiles(array $paths): array
+    {
+        $result = $this
+            ->taskGitListFiles()
+            ->setPaths($paths)
+            ->run()
+            ->stopOnFail();
+
+        return array_keys($result['files']);
+    }
 }

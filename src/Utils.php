@@ -12,10 +12,17 @@ class Utils
 
     const DEFAULT_HTTPS_PORT = 443;
 
+    const DEFAULT_MYSQL_PORT = 3306;
+
     /**
      * @var string
      */
     public static $projectConfigFileName = 'ProjectConfig.php';
+
+    /**
+     * @var string
+     */
+    public static $projectConfigLocalFileName = 'ProjectConfig.local.php';
 
     /**
      * @var bool[]
@@ -87,6 +94,16 @@ class Utils
     public static function isDrupalPackage(array $package): bool
     {
         return in_array($package['type'], static::$drupalPackageTypes);
+    }
+
+    public static function getDefaultMysqlPort(): int
+    {
+        return (int) ini_get('mysqli.default_port') ?: static::DEFAULT_MYSQL_PORT;
+    }
+
+    public static function isLocalhost(string $host): bool
+    {
+        return ($host === '127.0.0.1' || $host === 'localhost');
     }
 
     public static function manipulateString(

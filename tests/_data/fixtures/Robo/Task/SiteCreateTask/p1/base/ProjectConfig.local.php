@@ -1,6 +1,6 @@
 <?php
 
-/** @var \Cheppers\Robo\Drupal\Config\ProjectIncubatorConfig $projectConfig */
+/** @var \Cheppers\Robo\Drupal\ProjectType\Incubator\ProjectConfig $projectConfig */
 global $projectConfig;
 
 $projectConfig->baseHostPort = 1080;

@@ -16,7 +16,7 @@
 
 $databases['default']['default']['username'] = 'my56_user';
 $databases['default']['default']['password'] = 'my56_pass';
-$databases['default']['default']['port'] = '3311';
+$databases['default']['default']['port'] = 3311;
 
 /**
  * Assertions.

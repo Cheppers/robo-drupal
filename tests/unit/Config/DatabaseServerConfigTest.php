@@ -53,7 +53,9 @@ class DatabaseServerConfigTest extends BaseConfigTest
             ],
             'sqlite' => [
                 [
+                    'driver' => 'sqlite',
                     'connection' => [
+                        'driver' => 'sqlite',
                         'database' => '',
                     ],
                     'authenticationMethod' => 'none',

@@ -268,6 +268,10 @@ class ProjectConfig extends BaseConfig
             $site->id = $id;
         }
 
+        if (!$this->databaseServers) {
+            $this->databaseServers['my'] = new DatabaseServerConfig();
+        }
+
         foreach ($this->databaseServers as $id => $db) {
             $db->id = $id;
         }

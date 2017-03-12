@@ -47,10 +47,10 @@ class SiteCreateTaskTest extends Unit
         $this->tester->assertEquals('', $result->getMessage());
         $this->tester->assertEquals(0, $result->getExitCode());
 
-        $expectedFiles = new Finder();
-        $expectedFiles
-            ->files()
-            ->in("$workspaceDir/expected");
+        $expectedFiles = (new Finder())
+            ->in("$workspaceDir/expected")
+            ->files();
+        /** @var \Symfony\Component\Finder\SplFileInfo $expectedFile */
         foreach ($expectedFiles as $expectedFile) {
             $filePath = $expectedFile->getRelativePathname();
             $actualFilePath = "$workspaceDir/actual/$filePath";

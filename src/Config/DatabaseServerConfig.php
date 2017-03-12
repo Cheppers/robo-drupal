@@ -31,6 +31,7 @@ class DatabaseServerConfig extends BaseConfig
             'database' => '',
         ],
         'sqlite' => [
+            'driver' => 'sqlite',
             'database' => '',
         ],
     ];
@@ -49,6 +50,11 @@ class DatabaseServerConfig extends BaseConfig
      * @var string
      */
     public $authenticationMethod = 'user:pass';
+
+    public function getConnection(): array
+    {
+        return array_replace_recursive($this->connection, $this->connectionLocal);
+    }
 
     /**
      * {@inheritdoc}

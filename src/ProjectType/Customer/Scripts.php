@@ -4,6 +4,8 @@ namespace Cheppers\Robo\Drupal\ProjectType\Customer;
 
 use Cheppers\Robo\Drupal\ProjectType\Base as Base;
 use Cheppers\Robo\Drupal\ProjectType\Incubator as Incubator;
+use Cheppers\Robo\Drupal\Utils;
+use Cheppers\Robo\Drupal\VarExport;
 use Robo\Robo;
 use Stringy\StaticStringy;
 
@@ -50,13 +52,90 @@ class Scripts extends Base\Scripts
     protected static $inputThemeBackendMachineName = '';
 
     /**
+     * @var string
+     */
+    protected static $inputDatabaseUsername = '';
+
+    /**
+     * @var string
+     */
+    protected static $inputDatabasePassword = '';
+
+    /**
      * {@inheritdoc}
      */
     protected static function oneTimeMain(): void
     {
         parent::oneTimeMain();
+        static::projectConfigLocalCreate();
         static::siteCreate();
         static::themeCreate();
+    }
+
+    protected static function projectConfigLocalCreate(): void
+    {
+        $io = static::$event->getIO();
+
+        $fileName = 'ProjectConfig.local.php';
+        if (static::$fs->exists($fileName)) {
+            $io->write("The '<info>{$fileName}</info>' already exists", true);
+
+            return;
+        }
+
+        $defaults = static::getDefaultMySQLConnection();
+
+        static::$inputDatabaseUsername = $io->ask(
+            static::ioAskQuestion('MySQL username', $defaults['username']),
+            $defaults['username']
+        );
+
+        // @todo Hide password.
+        static::$inputDatabasePassword = $io->ask(
+            static::ioAskQuestion('MySQL password', $defaults['password']),
+            $defaults['password']
+        );
+
+        $fileContent = <<< 'PHP'
+<?php
+
+$projectConfig = $GLOBALS['projectConfig'];
+
+PHP;
+
+        $tpl = "\$projectConfig->databaseServers[%s]->connectionLocal['%s'] = %s;\n";
+        $usernameSafe = VarExport::string(static::$inputDatabaseUsername);
+        $passwordSafe = VarExport::string(static::$inputDatabasePassword);
+        foreach (static::$projectConfig->databaseServers as $dbId => $dbServerConfig) {
+            $connection = $dbServerConfig->getConnection();
+            if ($connection['driver'] === 'mysql' && empty($connection['username'])) {
+                $dbIdSafe = VarExport::string($dbId);
+
+                $fileContent .= "\n";
+
+                $dbServerConfig->connectionLocal['username'] = $defaults['username'];
+                $fileContent .= sprintf($tpl, $dbIdSafe, 'username', $usernameSafe);
+
+                $dbServerConfig->connectionLocal['password'] = $defaults['password'];
+                $fileContent .= sprintf($tpl, $dbIdSafe, 'password', $passwordSafe);
+
+                if ($defaults['host'] && !Utils::isLocalhost($defaults['host'])) {
+                    $dbServerConfig->connectionLocal['host'] = $defaults['host'];
+                    $fileContent .= sprintf($tpl, $dbIdSafe, 'host', VarExport::string($defaults['host']));
+                }
+
+                if ($defaults['port'] !== Utils::getDefaultMysqlPort()) {
+                    $dbServerConfig->connectionLocal['port'] = $defaults['port'];
+                    $fileContent .= sprintf($tpl, $dbIdSafe, 'port', VarExport::number($defaults['port']));
+                }
+            }
+        }
+
+        // @todo Error handling.
+        file_put_contents(Utils::$projectConfigLocalFileName, $fileContent);
+
+        static::$projectConfig = null;
+        static::initProjectConfig();
     }
 
     protected static function siteCreate(): void

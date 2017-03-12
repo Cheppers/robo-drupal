@@ -20,6 +20,11 @@ class Scripts
     protected static $event = null;
 
     /**
+     * @var \Symfony\Component\Filesystem\Filesystem
+     */
+    protected static $fs = null;
+
+    /**
      * @var string
      */
     protected static $projectConfigClass = ProjectConfig::class;
@@ -105,6 +110,7 @@ class Scripts
     public static function postInstallCmd(Event $event): bool
     {
         static::$event = $event;
+        static::$fs = new Filesystem();
         static::initProjectConfig();
 
         static::buildScaffold();
@@ -121,6 +127,7 @@ class Scripts
     public static function postUpdateCmd(Event $event): bool
     {
         static::$event = $event;
+        static::$fs = new Filesystem();
         static::initProjectConfig();
 
         static::buildScaffold();
@@ -137,6 +144,7 @@ class Scripts
     public static function postCreateProjectCmd(Event $event): bool
     {
         static::$event = $event;
+        static::$fs = new Filesystem();
         static::initProjectConfig();
 
         static::oneTime();
@@ -170,8 +178,7 @@ class Scripts
      */
     protected static function buildScaffold(): bool
     {
-        $fs = new Filesystem();
-        if (!$fs->exists(static::$projectConfig->drupalRootDir . '/autoload.php')) {
+        if (!static::$fs->exists(static::$projectConfig->drupalRootDir . '/autoload.php')) {
             Plugin::scaffold(static::$event);
         }
 
@@ -183,7 +190,6 @@ class Scripts
      */
     protected static function createRequiredFiles(): bool
     {
-        $fs = new Filesystem();
         $dirsToCreate = [
             '.' => [
                 'sites/all/translations',
@@ -198,8 +204,8 @@ class Scripts
         foreach ($dirsToCreate as $root => $dirs) {
             foreach ($dirs as $dir) {
                 $dir = "$root/$dir";
-                if (!$fs->exists($dir)) {
-                    $fs->mkdir($dir);
+                if (!static::$fs->exists($dir)) {
+                    static::$fs->mkdir($dir);
                     static::$event->getIO()->write("Create a '$dir' directory");
                 }
             }
@@ -466,15 +472,15 @@ class Scripts
 
     protected static function gitInit(): void
     {
-        if (file_exists(static::$packageRootDir . '/.git')) {
+        if (static::$fs->exists(static::$packageRootDir . '/.git')) {
             return;
         }
 
         $command = sprintf('cd %s && git init', static::$packageRootDir);
         $output = [];
-        $exit_code = 0;
-        exec($command, $output, $exit_code);
-        if ($exit_code !== 0) {
+        $exitCode = 0;
+        exec($command, $output, $exitCode);
+        if ($exitCode !== 0) {
             // @todo Do something.
         }
 
@@ -483,11 +489,10 @@ class Scripts
 
     protected static function newInstanceFromDrupalProfileCustomer(string $profilesDir, string $machineName): void
     {
-        $src = static::getRoboDrupalRoot() . '/src/Templates/drupal/profiles/customer';
+        $src = Utils::getRoboDrupalRoot() . '/src/Templates/drupal/profiles/customer';
         $dst = "$profilesDir/$machineName";
-        $fs = new Filesystem();
-        $fs->mirror($src, $dst);
-        $fs->rename("$dst/machine_name.info.yml", "$dst/$machineName.info.yml");
+        static::$fs->mirror($src, $dst);
+        static::$fs->rename("$dst/machine_name.info.yml", "$dst/$machineName.info.yml");
 
         file_put_contents(
             "$dst/$machineName.info.yml",
@@ -716,5 +721,28 @@ class Scripts
     protected static function toEnvName(string $name): string
     {
         return StaticStringy::toUpperCase(StaticStringy::underscored($name));
+    }
+
+    protected static function getDefaultMySQLConnection(): array
+    {
+        $default = [
+            'username' => '',
+            'password' => '',
+            'host' => '127.0.0.1',
+            'port' => 3306,
+        ];
+
+        $home = getenv('HOME');
+        $mysql = [];
+        if ($home && static::$fs->exists("$home/.my.cnf")) {
+            $myCnf = @parse_ini_file("$home/.my.cnf", true);
+            $mysql = $myCnf['mysql'] ?? $mysql;
+            if (isset($mysql['user'])) {
+                $mysql['username'] = $mysql['user'];
+                unset($mysql['user']);
+            }
+        }
+
+        return $mysql + $default;
     }
 }

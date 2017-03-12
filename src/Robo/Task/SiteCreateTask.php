@@ -10,7 +10,6 @@ use Cheppers\Robo\Drupal\VarExport;
 use League\Container\ContainerAwareInterface;
 use League\Container\ContainerAwareTrait;
 use Robo\Result;
-use Robo\Task\BaseTask;
 use Robo\TaskAccessor;
 use Symfony\Component\Filesystem\Filesystem;
 use Webmozart\PathUtil\Path;
@@ -21,6 +20,11 @@ class SiteCreateTask extends BaseTask implements ContainerAwareInterface
 {
     use ContainerAwareTrait;
     use TaskAccessor;
+
+    /**
+     * {@inheritdoc}
+     */
+    protected $taskName = 'Create Drupal site';
 
     /**
      * @var \Symfony\Component\Filesystem\Filesystem
@@ -75,6 +79,7 @@ class SiteCreateTask extends BaseTask implements ContainerAwareInterface
      */
     protected $sitesPhp = '';
 
+    //region Options.
     //region siteBranch
     /**
      * @var string
@@ -190,6 +195,7 @@ class SiteCreateTask extends BaseTask implements ContainerAwareInterface
         return $this;
     }
     //endregion
+    //endregion
 
     public function __construct(array $options = [])
     {
@@ -249,6 +255,7 @@ class SiteCreateTask extends BaseTask implements ContainerAwareInterface
                 ->validateSiteBranch()
                 ->readProjectConfigPhp()
                 ->readSitesPhp()
+                ->runHeader()
                 ->doAddSite();
 
             $sites = array_unique($pc->getSiteBranchUrls($siteBranch));
@@ -266,6 +273,23 @@ class SiteCreateTask extends BaseTask implements ContainerAwareInterface
         }
 
         return new Result($this, $exitCode, $message);
+    }
+
+    /**
+     * @return $this
+     */
+    protected function runHeader()
+    {
+        $pc = $this->getProjectConfig();
+        $message = 'Combo = {siteId} × ({dbServerIds}) × ({phpVariantIds})';
+        $args = [
+            'siteId' => $this->getSiteBranch(),
+            'dbServerIds' => implode('|', array_keys($pc->databaseServers)),
+            'phpVariantIds' => implode('|', array_keys($pc->phpVariants)),
+        ];
+        $this->printTaskInfo($message, $args);
+
+        return $this;
     }
 
     /**
@@ -772,7 +796,7 @@ PHP;
         $replace = [];
         foreach ($db->connectionLocal as $key => $value) {
             $keySafe = VarExport::string($key);
-            $valueSafe = VarExport::string($value);
+            $valueSafe = VarExport::any($value);
             $replace[] = "\$databases['default']['default'][$keySafe] = $valueSafe;";
         }
 

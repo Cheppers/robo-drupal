@@ -296,14 +296,14 @@ PHP;
      */
     protected function initProjectConfig()
     {
-        if (!$this->projectConfig) {
-            if (file_exists(Utils::$projectConfigFileName)) {
-                require_once Utils::$projectConfigFileName;
-                $this->projectConfig = $GLOBALS['projectConfig'];
-            }
+        if (!$this->projectConfig && file_exists(Utils::$projectConfigFileName)) {
+            require Utils::$projectConfigFileName;
+            $this->projectConfig = $GLOBALS['projectConfig'];
+        }
 
+        if (!$this->projectConfig) {
             $class = $this->projectConfigClass;
-            $this->projectConfig = $GLOBALS['projectConfig'] ?? new $class();
+            $this->projectConfig = new $class();
         }
 
         return $this;

@@ -418,18 +418,10 @@ class GeneralReleaseTask extends BaseTask implements ContainerAwareInterface
      */
     protected function runCreateGitIgnore()
     {
-        $pc = $this->getProjectConfig();
         $dst = $this->getReleaseDir();
         (new FileWriteTask("$dst/.gitignore"))
             ->inflect($this)
             ->lines([
-                '',
-                // @todo Create .htaccess file.
-                "/{$pc->publicHtmlDir}/sites/*/files/",
-                "/!{$pc->publicHtmlDir}/sites/*/files/.htaccess",
-                '',
-                "/{$pc->publicHtmlDir}/sites/*/settings*.php",
-                "!/{$pc->publicHtmlDir}/sites/*/settings.php",
                 '',
                 '/ProjectConfig.local.php',
             ])
@@ -459,21 +451,39 @@ class GeneralReleaseTask extends BaseTask implements ContainerAwareInterface
         if (isset($composerInfo['repositories'])) {
             $changed = false;
             foreach ($composerInfo['repositories'] as $key => $repo) {
-                if (!isset($repo['type'])
-                    || $repo['type'] !== 'path'
-                    || Path::isAbsolute($repo['url'])
-                ) {
+                if (!isset($repo['type'])) {
                     continue;
                 }
 
-                $newUrl = Path::makeRelative(
-                    Path::canonicalize("$projectRootDir/{$repo['url']}"),
-                    $releaseDir
-                );
+                if ($repo['type'] === 'path' && Path::isRelative($repo['url'])) {
+                    $newUrl = Path::makeRelative(
+                        Path::canonicalize("$projectRootDir/{$repo['url']}"),
+                        $releaseDir
+                    );
 
-                if ($composerInfo['repositories'][$key]['url'] !== $newUrl) {
-                    $composerInfo['repositories'][$key]['url'] = $newUrl;
-                    $changed = true;
+                    if ($composerInfo['repositories'][$key]['url'] !== $newUrl) {
+                        $composerInfo['repositories'][$key]['url'] = $newUrl;
+                        $changed = true;
+                    }
+                }
+
+                if ($repo['type'] === 'package') {
+                    foreach (['dist', 'source'] as $remote) {
+                        $remoteType = $repo['package'][$remote]['type'] ?? '';
+                        if ($remoteType !== 'path' || Path::isAbsolute($repo['package'][$remote]['url'])) {
+                            continue;
+                        }
+
+                        $newUrl = Path::makeRelative(
+                            Path::canonicalize("$projectRootDir/{$repo['package'][$remote]['url']}"),
+                            $releaseDir
+                        );
+
+                        if ($composerInfo['repositories'][$key]['package'][$remote]['url'] !== $newUrl) {
+                            $composerInfo['repositories'][$key]['package'][$remote]['url'] = $newUrl;
+                            $changed = true;
+                        }
+                    }
                 }
             }
 

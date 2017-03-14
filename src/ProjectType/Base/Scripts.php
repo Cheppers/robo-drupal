@@ -105,6 +105,16 @@ class Scripts
     protected static $envNamePrefix = '';
 
     /**
+     * @var bool
+     */
+    protected static $isGitRepoNew = false;
+
+    /**
+     * @var string
+     */
+    protected static $processClass = Process::class;
+
+    /**
      * Composer script event handler.
      */
     public static function postInstallCmd(Event $event): bool
@@ -147,9 +157,14 @@ class Scripts
         static::$fs = new Filesystem();
         static::initProjectConfig();
 
-        static::oneTime();
+        $result = true;
+        try {
+            static::oneTime();
+        } catch (\Exception $e) {
+            $result = false;
+        }
 
-        return true;
+        return $result;
     }
 
     protected static function initProjectConfig(): void
@@ -160,7 +175,7 @@ class Scripts
 
         $projectConfigFilePath = static::$packageRootDir . '/' . Utils::$projectConfigFileName;
         if (file_exists($projectConfigFilePath)) {
-            require_once $projectConfigFilePath;
+            require $projectConfigFilePath;
             if (!empty($GLOBALS['projectConfig'])) {
                 static::$projectConfig = $GLOBALS['projectConfig'];
 
@@ -256,6 +271,7 @@ class Scripts
         static::packageDump();
         static::composerDumpAutoload();
         static::composerUpdate();
+        static::gitInitialCommit();
     }
 
     protected static function packageRead(): void
@@ -476,15 +492,15 @@ class Scripts
             return;
         }
 
+        static::$isGitRepoNew = true;
+
         $command = sprintf('cd %s && git init', static::$packageRootDir);
-        $output = [];
-        $exitCode = 0;
-        exec($command, $output, $exitCode);
+        /** @var \Symfony\Component\Process\Process $process */
+        $process = new static::$processClass($command);
+        $exitCode = $process->run();
         if ($exitCode !== 0) {
             // @todo Do something.
         }
-
-        GitHooksComposerScripts::deploy(static::$event);
     }
 
     protected static function newInstanceFromDrupalProfileCustomer(string $profilesDir, string $machineName): void
@@ -513,9 +529,6 @@ class Scripts
         );
     }
 
-    /**
-     * @todo Error handling.
-     */
     protected static function composerDumpAutoload(): void
     {
         $cmdPattern = '%s dump-autoload';
@@ -523,14 +536,15 @@ class Scripts
             escapeshellcmd($_SERVER['argv'][0]),
         ];
 
-        $exitCode = 0;
-        $files = [];
-        exec(vsprintf($cmdPattern, $cmdArgs), $files, $exitCode);
+        /** @var \Symfony\Component\Process\Process $process */
+        $process = new static::$processClass(vsprintf($cmdPattern, $cmdArgs));
+        $exitCode = $process->run();
+        if ($exitCode !== 0) {
+            // @todo Error handling.
+            throw new \Exception('@todo Better error message');
+        }
     }
 
-    /**
-     * @todo Error handling.
-     */
     protected static function composerUpdate(): void
     {
         $cmdPattern = '%s update nothing --lock';
@@ -538,9 +552,51 @@ class Scripts
             escapeshellcmd($_SERVER['argv'][0]),
         ];
 
-        $exitCode = 0;
-        $files = [];
-        exec(vsprintf($cmdPattern, $cmdArgs), $files, $exitCode);
+        /** @var \Symfony\Component\Process\Process $process */
+        $process = new static::$processClass(vsprintf($cmdPattern, $cmdArgs));
+        $exitCode = $process->run();
+        if ($exitCode !== 0) {
+            // @todo Error handling.
+            throw new \Exception('@todo Better error message');
+        }
+    }
+
+    protected static function gitInitialCommit(): void
+    {
+        if (!static::$isGitRepoNew) {
+            return;
+        }
+
+        $commands = [
+            [
+                'pattern' => 'git add %s',
+                'args' => [escapeshellarg('README.md')],
+            ],
+            [
+                'pattern' => 'git commit -m %s',
+                'args' => [escapeshellarg('Initial commit')],
+            ],
+            [
+                'pattern' => 'git add %s',
+                'args' => [escapeshellarg('.')],
+            ],
+            [
+                'pattern' => 'git commit -m %s',
+                'args' => [escapeshellarg('Basic implementation')],
+            ],
+        ];
+        $io = static::$event->getIO();
+        foreach ($commands as $command) {
+            $cmd = vsprintf($command['pattern'], $command['args']);
+            $io->write($cmd, true);
+
+            /** @var \Symfony\Component\Process\Process $process */
+            $process = new static::$processClass($cmd);
+            if ($process->run() !== 0) {
+                // @todo Better error message.
+                throw new \Exception('@todo Better error message');
+            }
+        }
     }
 
     protected static function getDrupalProfiles(string $drupalRoot, bool $withHiddenOnes = false): array

@@ -10,9 +10,6 @@ use Cheppers\Robo\Drupal\Utils;
 
 use Stringy\StaticStringy;
 
-/**
- * @todo Abstract?
- */
 class ProjectConfig extends BaseConfig
 {
     /**
@@ -80,13 +77,6 @@ class ProjectConfig extends BaseConfig
     public $drupalRootDir = 'drupal_root';
 
     /**
-     * Public HTML directory.
-     *
-     * @var string
-     */
-    public $publicHtmlDir = 'public_html';
-
-    /**
      * Root directory of "sites" directory outside of "$drupalRootDir".
      *
      * Relative path from the project root.
@@ -142,7 +132,6 @@ class ProjectConfig extends BaseConfig
             'gitExecutable' => 'gitExecutable',
             'outerSitesSubDir' => 'outerSitesSubDir',
             'phpVariants' => 'phpVariants',
-            'publicHtmlDir' => 'publicHtmlDir',
             'reportDir' => 'reportDir',
             'sites' => [
                 'type' => 'subConfigs',

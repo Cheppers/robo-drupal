@@ -8,7 +8,6 @@ use Cheppers\Robo\Drupal\Config\PhpVariantConfig;
 use Cheppers\Robo\Drupal\Config\SiteConfig;
 use Cheppers\Robo\Drupal\Robo\DrupalCoreTestsTaskLoader;
 use Cheppers\Robo\Drupal\Utils;
-use Cheppers\Robo\Drupal\VarExport;
 use Cheppers\Robo\Drush\DrushTaskLoader;
 use Cheppers\Robo\Git\GitTaskLoader;
 use Cheppers\Robo\Serialize\SerializeTaskLoader;
@@ -16,7 +15,6 @@ use League\Container\ContainerInterface;
 use Robo\Collection\CollectionBuilder;
 use Robo\Contract\TaskInterface;
 use Robo\Tasks;
-use Symfony\Component\Filesystem\Filesystem;
 use Webmozart\PathUtil\Path;
 
 class RoboFile extends Tasks
@@ -209,85 +207,6 @@ class RoboFile extends Tasks
         return $this
             ->collectionBuilder()
             ->addCode($this->getTaskUnlockSettingsPhp());
-    }
-
-    public function updatePublicHtml(): TaskInterface
-    {
-        $cb = $this->collectionBuilder();
-
-        $dirsToSync = [
-            "{$this->projectConfig->drupalRootDir}/core",
-            "{$this->projectConfig->drupalRootDir}/libraries",
-            "{$this->projectConfig->drupalRootDir}/modules",
-            "{$this->projectConfig->drupalRootDir}/profiles",
-            "{$this->projectConfig->drupalRootDir}/themes",
-        ];
-        $includeFrom = Path::makeRelative(
-            $this->getFallbackFileName('rsync.public_html.include.txt', '.'),
-            getcwd()
-        );
-
-        $cb->addTask(
-            $this
-                ->taskRsync()
-                ->recursive()
-                ->delete()
-                ->option('prune-empty-dirs')
-                ->option('include-from', $includeFrom)
-                ->fromPath($dirsToSync)
-                ->toPath($this->projectConfig->publicHtmlDir)
-        );
-
-        $cb->addCode(function () {
-            $files = [
-                '.htaccess',
-                'robots.txt',
-            ];
-            $fs = new Filesystem();
-            foreach ($files as $file) {
-                $fs->copy(
-                    "{$this->projectConfig->drupalRootDir}/$file",
-                    "{$this->projectConfig->publicHtmlDir}/$file"
-                );
-            }
-        });
-
-        $drupalRoot = Path::makeRelative($this->projectConfig->drupalRootDir, $this->projectConfig->publicHtmlDir);
-        $drupalRootSafe = VarExport::string($drupalRoot);
-        $indexPhpName = "{$this->projectConfig->publicHtmlDir}/index.php";
-        $indexPhpContent = <<< PHP
-<?php
-
-chdir($drupalRootSafe);
-require_once 'index.php';
-
-PHP;
-        $cb->addTask(
-            $this
-                ->taskWriteToFile($indexPhpName)
-                ->text($indexPhpContent)
-        );
-
-        $pathToVendorAutoload = Path::join(
-            $this->backToRootDir($this->projectConfig->publicHtmlDir),
-            $this->vendorDir,
-            'autoload.php'
-        );
-        $pathToVendorAutoloadSafe = VarExport::string("/$pathToVendorAutoload");
-        $autoloadPhpName = Path::join($this->projectConfig->publicHtmlDir, 'autoload.php');
-        $autoloadPhpContent = <<< PHP
-<?php
-
-return require __DIR__ . $pathToVendorAutoloadSafe;
-
-PHP;
-        $cb->addTask(
-            $this
-                ->taskWriteToFile($autoloadPhpName)
-                ->text($autoloadPhpContent)
-        );
-
-        return $cb;
     }
     //endregion
 

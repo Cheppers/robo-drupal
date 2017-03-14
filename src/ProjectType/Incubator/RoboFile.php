@@ -610,7 +610,6 @@ class RoboFile extends Base\RoboFile
                 $filesToDelete = [];
                 $dirsToDelete = [
                     "{$pc->outerSitesSubDir}/$siteDir",
-                    "{$pc->publicHtmlDir}/sites/$siteDir",
                 ];
 
                 if ($siteDir === 'default') {

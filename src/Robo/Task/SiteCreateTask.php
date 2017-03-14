@@ -628,14 +628,7 @@ PHP;
         $replace = "\n\$settings['file_public_path'] = {$filePathSafe};\n";
         Utils::manipulateString($this->settingsPhp, $search, $replace);
 
-        $projectRootDir = $this->getProjectRootDir();
-        $relative = Path::makeRelative(
-            "$projectRootDir/{$pc->drupalRootDir}/sites/$siteDir/files",
-            "$projectRootDir/{$pc->publicHtmlDir}/sites/$siteDir"
-        );
-
         $this->fs->mkdir($filePathFull);
-        $this->fs->symlink($relative, "$projectRootDir/{$pc->publicHtmlDir}/sites/$siteDir/files");
 
         return $this;
     }

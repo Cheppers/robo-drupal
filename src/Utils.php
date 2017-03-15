@@ -128,6 +128,21 @@ class Utils
         }
     }
 
+    public static function addUseStatement(string $phpCode, string $class, string $as = ''): string
+    {
+        $callback = function (array $matches) use ($class, $as) {
+            $useStatements = explode("\n", trim($matches[0]));
+            $useStatements[] = "use $class" . ($as ? " as $as;" : ';');
+
+            $useStatements = array_unique($useStatements);
+            sort($useStatements);
+
+            return "\n" . implode("\n", $useStatements) . "\n";
+        };
+
+        return preg_replace_callback('/\n(use .+\n){1,}/', $callback, $phpCode);
+    }
+
     /**
      * Get directory names grouped by depth.
      *

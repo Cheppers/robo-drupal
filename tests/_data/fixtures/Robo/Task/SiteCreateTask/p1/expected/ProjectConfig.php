@@ -2,8 +2,8 @@
 
 use Cheppers\Robo\Drupal\Config\DatabaseServerConfig;
 use Cheppers\Robo\Drupal\Config\PhpVariantConfig;
-use Cheppers\Robo\Drupal\ProjectType\Incubator\ProjectConfig;
 use Cheppers\Robo\Drupal\Config\SiteConfig;
+use Cheppers\Robo\Drupal\ProjectType\Incubator\ProjectConfig;
 
 if (!isset($GLOBALS['projectConfig'])) {
   /** @var \Cheppers\Robo\Drupal\ProjectType\Incubator\ProjectConfig $projectConfig */

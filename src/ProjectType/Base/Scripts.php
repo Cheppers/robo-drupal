@@ -261,9 +261,9 @@ class Scripts
 
     protected static function oneTimeMain(): void
     {
+        static::gitInit();
         static::removePostCreateProjectCmdScript();
         static::renamePackage();
-        static::gitInit();
     }
 
     protected static function oneTimePost(): void
@@ -467,6 +467,31 @@ class Scripts
                     "namespace $oldNamespace",
                     "namespace $newNamespace",
                     file_get_contents($file->getPathname())
+                )
+            );
+        }
+
+        $pc = static::$projectConfig;
+        $from_to = [
+            'machine_name_long' => StaticStringy::underscored(static::$inputNewNameMachine),
+            'MACHINE_NAME_LONG' => StaticStringy::toUpperCase(StaticStringy::underscored(static::$inputNewNameMachine)),
+        ];
+        $fileNames = [
+            "{$pc->drupalRootDir}/drush/machine_name_long.drush.inc",
+        ];
+        foreach ($fileNames as $fileNameOld) {
+            if (!static::$fs->exists($fileNameOld)) {
+                continue;
+            }
+
+            // @todo Protect drupalRootDir to get replaced.
+            $fileNameNew = strtr($fileNameOld, $from_to);
+            static::$fs->rename($fileNameOld, $fileNameNew);
+            file_put_contents(
+                $fileNameNew,
+                strtr(
+                    file_get_contents($fileNameNew),
+                    $from_to
                 )
             );
         }

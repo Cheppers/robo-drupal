@@ -4,11 +4,9 @@ use Cheppers\Robo\Drupal\Config\DatabaseServerConfig;
 use Cheppers\Robo\Drupal\Config\PhpVariantConfig;
 use Cheppers\Robo\Drupal\Config\SiteConfig;
 use Cheppers\Robo\Drupal\ProjectType\Incubator\ProjectConfig;
+use Cheppers\Robo\Drupal\Utils;
 
-if (!isset($GLOBALS['projectConfig'])) {
-  /** @var \Cheppers\Robo\Drupal\ProjectType\Incubator\ProjectConfig $projectConfig */
-  global $projectConfig;
-
+return call_user_func(function () {
   $projectConfig = new ProjectConfig();
   $projectConfig->id = 'test';
   $projectConfig->gitExecutable = 'git';
@@ -34,9 +32,11 @@ if (!isset($GLOBALS['projectConfig'])) {
     '709-dev.my56.okay.test.localhost:1080' => 'okay.my56',
   ];
 
-  if (file_exists(__DIR__ . '/ProjectConfig.local.php')) {
-    require_once __DIR__ . '/ProjectConfig.local.php';
+  if (file_exists(__DIR__ . '/' . Utils::$projectConfigLocalFileName)) {
+    include __DIR__ . '/' . Utils::$projectConfigLocalFileName;
   }
 
   $projectConfig->populateDefaultValues();
-}
+
+  return $projectConfig;
+});

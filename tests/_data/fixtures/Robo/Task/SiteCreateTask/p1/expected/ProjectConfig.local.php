@@ -1,7 +1,8 @@
 <?php
 
-/** @var \Cheppers\Robo\Drupal\ProjectType\Incubator\ProjectConfig $projectConfig */
-global $projectConfig;
+/**
+ * @var \Cheppers\Robo\Drupal\ProjectType\Incubator\ProjectConfig $projectConfig
+ */
 
 $projectConfig->baseHostPort = 1080;
 $projectConfig->databaseServers['my56']->connectionLocal['username'] = 'my56_user';

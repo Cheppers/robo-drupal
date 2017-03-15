@@ -828,7 +828,7 @@ PHP;
 
         $urlsSafe = VarExport::map($pc->sites[$siteBranch]->urls, 1, '  ');
 
-        $search = "\n  if (file_exists(__DIR__ . '/ProjectConfig.local.php')) {\n";
+        $search = "\n  if (file_exists(__DIR__ . '/' . Utils::\$projectConfigLocalFileName)) {\n";
         $replace = <<< PHP
 
   \$projectConfig->sites[{$siteBranchSafe}] = new SiteConfig();

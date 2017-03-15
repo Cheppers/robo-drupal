@@ -169,23 +169,15 @@ class Scripts
 
     protected static function initProjectConfig(): void
     {
-        if (static::$projectConfig) {
-            return;
-        }
-
         $projectConfigFilePath = static::$packageRootDir . '/' . Utils::$projectConfigFileName;
-        if (file_exists($projectConfigFilePath)) {
-            require $projectConfigFilePath;
-            if (!empty($GLOBALS['projectConfig'])) {
-                static::$projectConfig = $GLOBALS['projectConfig'];
-
-                return;
-            }
+        if (!static::$projectConfig && static::$fs->exists($projectConfigFilePath)) {
+            static::$projectConfig = include $projectConfigFilePath;
         }
 
-        $class = static::$projectConfigClass;
-
-        static::$projectConfig = new $class();
+        if (!static::$projectConfig) {
+            $class = static::$projectConfigClass;
+            static::$projectConfig = new $class();
+        }
     }
 
     /**
@@ -519,12 +511,23 @@ class Scripts
 
         static::$isGitRepoNew = true;
 
-        $command = sprintf('cd %s && git init', static::$packageRootDir);
+        $cmdPattern = '';
+        $cmdArgs = [];
+
+        if (static::$packageRootDir !== '.') {
+            $cmdPattern .= 'cd %s && ';
+            $cmdArgs[] = escapeshellarg(static::$packageRootDir);
+        }
+
+        $cmdPattern .= 'git init';
+
+        $command = vsprintf($cmdPattern, $cmdArgs);
         /** @var \Symfony\Component\Process\Process $process */
         $process = new static::$processClass($command);
         $exitCode = $process->run();
         if ($exitCode !== 0) {
-            // @todo Do something.
+            // @todo Error handling.
+            throw new \Exception('@todo Better error message');
         }
     }
 
@@ -556,13 +559,22 @@ class Scripts
 
     protected static function composerDumpAutoload(): void
     {
-        $cmdPattern = '%s dump-autoload';
-        $cmdArgs = [
-            escapeshellcmd($_SERVER['argv'][0]),
-        ];
+        $cmdPattern = '';
+        $cmdArgs = [];
+
+        if (static::$packageRootDir !== '.') {
+            $cmdPattern .= 'cd %s && ';
+            $cmdArgs[] = escapeshellarg(static::$packageRootDir);
+        }
+
+        $cmdPattern .= '%s dump-autoload';
+        $cmdArgs[] = escapeshellcmd($_SERVER['argv'][0]);
+
+        $command = vsprintf($cmdPattern, $cmdArgs);
+        static::$event->getIO()->write($command, true);
 
         /** @var \Symfony\Component\Process\Process $process */
-        $process = new static::$processClass(vsprintf($cmdPattern, $cmdArgs));
+        $process = new static::$processClass($command);
         $exitCode = $process->run();
         if ($exitCode !== 0) {
             // @todo Error handling.
@@ -572,13 +584,22 @@ class Scripts
 
     protected static function composerUpdate(): void
     {
-        $cmdPattern = '%s update nothing --lock';
-        $cmdArgs = [
-            escapeshellcmd($_SERVER['argv'][0]),
-        ];
+        $cmdPattern = '';
+        $cmdArgs = [];
+
+        if (static::$packageRootDir !== '.') {
+            $cmdPattern .= 'cd %s && ';
+            $cmdArgs[] = escapeshellarg(static::$packageRootDir);
+        }
+
+        $cmdPattern .= '%s update nothing --lock';
+        $cmdArgs[] = escapeshellcmd($_SERVER['argv'][0]);
+
+        $command = vsprintf($cmdPattern, $cmdArgs);
+        static::$event->getIO()->write($command, true);
 
         /** @var \Symfony\Component\Process\Process $process */
-        $process = new static::$processClass(vsprintf($cmdPattern, $cmdArgs));
+        $process = new static::$processClass($command);
         $exitCode = $process->run();
         if ($exitCode !== 0) {
             // @todo Error handling.
@@ -610,9 +631,18 @@ class Scripts
                 'args' => [escapeshellarg('Basic implementation')],
             ],
         ];
+
+        $cmdPrefix = '';
+        if (static::$packageRootDir !== '.') {
+            $cmdPrefix = sprintf(
+                'cd %s && ',
+                escapeshellarg(static::$packageRootDir)
+            );
+        }
+
         $io = static::$event->getIO();
         foreach ($commands as $command) {
-            $cmd = vsprintf($command['pattern'], $command['args']);
+            $cmd = $cmdPrefix . vsprintf($command['pattern'], $command['args']);
             $io->write($cmd, true);
 
             /** @var \Symfony\Component\Process\Process $process */

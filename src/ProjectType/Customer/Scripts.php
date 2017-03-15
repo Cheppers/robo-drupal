@@ -76,7 +76,7 @@ class Scripts extends Base\Scripts
     {
         $io = static::$event->getIO();
 
-        $fileName = 'ProjectConfig.local.php';
+        $fileName = Utils::$projectConfigLocalFileName;
         if (static::$fs->exists($fileName)) {
             $io->write("The '<info>{$fileName}</info>' already exists", true);
 
@@ -96,12 +96,7 @@ class Scripts extends Base\Scripts
             $defaults['password']
         );
 
-        $fileContent = <<< 'PHP'
-<?php
-
-$projectConfig = $GLOBALS['projectConfig'];
-
-PHP;
+        $fileContent = "<?php\n\n";
 
         $tpl = "\$projectConfig->databaseServers[%s]->connectionLocal['%s'] = %s;\n";
         $usernameSafe = VarExport::string(static::$inputDatabaseUsername);
@@ -132,7 +127,7 @@ PHP;
         }
 
         // @todo Error handling.
-        file_put_contents(Utils::$projectConfigLocalFileName, $fileContent);
+        file_put_contents($fileName, $fileContent);
 
         static::$projectConfig = null;
         static::initProjectConfig();

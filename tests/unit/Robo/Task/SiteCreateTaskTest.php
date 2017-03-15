@@ -4,6 +4,7 @@ namespace Cheppers\Robo\Drupal\Tests\Unit\Robo\Task;
 
 use Cheppers\Robo\Drupal\ProjectType\Incubator\ProjectConfig;
 use Cheppers\Robo\Drupal\Robo\Task\SiteCreateTask;
+use Cheppers\Robo\Drupal\Utils;
 use Codeception\Test\Unit;
 use Robo\Robo;
 use Symfony\Component\Filesystem\Filesystem;
@@ -95,9 +96,8 @@ class SiteCreateTaskTest extends Unit
 
     protected function getProjectConfig(string $projectRootDir): ProjectConfig
     {
-        require "$projectRootDir/ProjectConfig.php";
-
-        global $projectConfig;
+        /** @var \Cheppers\Robo\Drupal\ProjectType\Incubator\ProjectConfig $projectConfig */
+        $projectConfig = include $projectRootDir . '/' . Utils::$projectConfigFileName;
 
         return $projectConfig;
     }

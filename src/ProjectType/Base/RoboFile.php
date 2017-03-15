@@ -216,8 +216,7 @@ class RoboFile extends Tasks
     protected function initProjectConfig()
     {
         if (!$this->projectConfig && file_exists(Utils::$projectConfigFileName)) {
-            require Utils::$projectConfigFileName;
-            $this->projectConfig = $GLOBALS['projectConfig'];
+            $this->projectConfig = include Utils::$projectConfigFileName;
         }
 
         if (!$this->projectConfig) {

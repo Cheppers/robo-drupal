@@ -32,11 +32,10 @@ return call_user_func(function () {
     '709-dev.my56.okay.test.localhost:1080' => 'okay.my56',
   ];
 
+  $projectConfig->populateDefaultValues();
   if (file_exists(__DIR__ . '/' . Utils::$projectConfigLocalFileName)) {
     include __DIR__ . '/' . Utils::$projectConfigLocalFileName;
   }
-
-  $projectConfig->populateDefaultValues();
 
   return $projectConfig;
 });

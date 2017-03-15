@@ -24,11 +24,10 @@ return call_user_func(function () {
 
   $projectConfig->sites = [];
 
+  $projectConfig->populateDefaultValues();
   if (file_exists(__DIR__ . '/' . Utils::$projectConfigLocalFileName)) {
     include __DIR__ . '/' . Utils::$projectConfigLocalFileName;
   }
-
-  $projectConfig->populateDefaultValues();
 
   return $projectConfig;
 });

@@ -5,7 +5,7 @@ namespace Cheppers\Robo\Drupal\Robo\Task\Release;
 use Cheppers\Robo\Drupal\ProjectType\Base\ProjectConfig;
 use Cheppers\Robo\Drupal\Robo\Task\BaseTask;
 use Cheppers\Robo\Drupal\Utils;
-use Cheppers\Robo\Git\Task\ListFilesTask as GitListFilesTask;
+use Cheppers\Robo\Git\Task\GitListFilesTask;
 use League\Container\ContainerAwareInterface;
 use League\Container\ContainerAwareTrait;
 use Robo\Exception\TaskExitException;

@@ -57,7 +57,8 @@ class RoboFile extends Base\RoboFile
                 "$profileDir/src/",
                 "$profileDir/$profileName.install",
                 "$profileDir/$profileName.profile",
-                // @todo Add other files.
+                "$profileDir/$profileName.drush.inc",
+                "{$this->projectConfig->drupalRootDir}/drush/",
             ];
             foreach ($suggestions as $suggestion) {
                 $phpcsConfig->files[$suggestion] = file_exists($suggestion);

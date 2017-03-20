@@ -161,6 +161,8 @@ class Scripts
         try {
             static::oneTime();
         } catch (\Exception $e) {
+            static::$event->getIO()->writeError($e->getMessage(), true);
+
             $result = false;
         }
 
@@ -649,7 +651,7 @@ class Scripts
             $process = new static::$processClass($cmd);
             if ($process->run() !== 0) {
                 // @todo Better error message.
-                throw new \Exception('@todo Better error message');
+                throw new \Exception("Failed to create the initial commit with '$cmd' command.");
             }
         }
     }

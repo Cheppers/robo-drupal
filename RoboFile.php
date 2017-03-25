@@ -376,6 +376,7 @@ class RoboFile extends \Robo\Tasks
                 'lint.phpcs.psr2' => $this
                     ->taskPhpcsLintInput($options)
                     ->setIgnore([
+                        'src/GitHooks/',
                         '*/composer.json',
                         '*/.gitignore',
                         '*.txt',

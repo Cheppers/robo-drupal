@@ -11,7 +11,7 @@ function roboDrupalExit ()
 		echo "Exit message: '${2}'"
 	fi
 
-	echo "End Git hook: ${roboDrupalHookName}"
+	echo "END   Git hook: ${roboDrupalHookName}"
 
 	exit $1
 }

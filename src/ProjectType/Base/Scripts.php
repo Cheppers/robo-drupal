@@ -115,6 +115,13 @@ class Scripts
     protected static $processClass = Process::class;
 
     /**
+     * @todo Dynamically detect the main Drupal version.
+     *
+     * @var int
+     */
+    protected static $drupalCoreVersionMain = 8;
+
+    /**
      * Composer script event handler.
      */
     public static function postInstallCmd(Event $event): bool

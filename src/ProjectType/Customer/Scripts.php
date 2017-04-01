@@ -10,6 +10,7 @@ use Robo\Robo;
 use Stringy\StaticStringy;
 use Symfony\Component\Finder\Finder;
 use Symfony\Component\Yaml\Yaml;
+use Webmozart\PathUtil\Path;
 
 class Scripts extends Base\Scripts
 {
@@ -342,7 +343,7 @@ class Scripts extends Base\Scripts
 
     protected static function themeCreateBasedOn(string $machineName, string $baseTheme): void
     {
-        $dir = static::$projectConfig->drupalRootDir . "/themes/custom/$machineName";
+        $dir = Path::join(static::$projectConfig->drupalRootDir, "themes/custom/$machineName");
         static::$fs->mkdir($dir);
         $info = [
             'core' => static::$drupalCoreVersionMain . '.x',
@@ -375,6 +376,20 @@ class Scripts extends Base\Scripts
         $result = file_put_contents("$dir/$machineName.info.yml", Yaml::dump($info) . "\n");
         if ($result === false) {
             throw new \Exception('@todo');
+        }
+
+        $roboDrupalRoot = Utils::getRoboDrupalRoot();
+        $files = (new Finder())
+            ->in("$roboDrupalRoot/src/Templates/drupal/themes/common")
+            ->files();
+        $replacements = [
+            'machine_name' => $machineName,
+        ];
+        /** @var \Symfony\Component\Finder\SplFileInfo $file */
+        foreach ($files as $file) {
+            $dstFileName = Path::join($dir, strtr($file->getRelativePathname(), $replacements));
+            static::$fs->mkdir(Path::getDirectory($dstFileName));
+            file_put_contents($dstFileName, strtr($file->getContents(), $replacements));
         }
     }
 

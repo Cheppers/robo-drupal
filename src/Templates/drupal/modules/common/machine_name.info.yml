@@ -1,0 +1,5 @@
+core: 8.x
+type: module
+name: moduleNameHuman
+description: 'Useless description.'
+package: packageNameMachine

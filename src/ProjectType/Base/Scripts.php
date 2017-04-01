@@ -122,6 +122,11 @@ class Scripts
     protected static $drupalCoreVersionMain = 8;
 
     /**
+     * @var string[]
+     */
+    protected static $usedEnvVars = [];
+
+    /**
      * Composer script event handler.
      */
     public static function postInstallCmd(Event $event): bool
@@ -173,7 +178,17 @@ class Scripts
             $result = false;
         }
 
+        static::debugPrintUsedEnvVars();
+
         return $result;
+    }
+
+    protected static function debugPrintUsedEnvVars(): void
+    {
+        $io = static::$event->getIO();
+
+        $io->write('Used environment variables:', true);
+        $io->write(implode("\n", array_keys(static::$usedEnvVars)), true);
     }
 
     protected static function initProjectConfig(): void
@@ -820,7 +835,10 @@ class Scripts
 
     protected static function getEnvVar(string $name, ?string $default): ?string
     {
-        $value = getenv(static::getEnvNamePrefix() . '_' . static::toEnvName($name));
+        $name = static::getEnvNamePrefix() . '_' . static::toEnvName($name);
+        static::$usedEnvVars[$name] = true;
+
+        $value = getenv($name);
 
         return $value === false ? $default : $value;
     }

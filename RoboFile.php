@@ -379,6 +379,7 @@ class RoboFile extends \Robo\Tasks
                         'src/GitHooks/',
                         '*/composer.json',
                         '*/.gitignore',
+                        '*.scss',
                         '*.txt',
                         '*.yml',
                     ])

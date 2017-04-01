@@ -277,7 +277,7 @@ class RoboFile extends Base\RoboFile
                 $fileName = $fileName === 'config.rb' ? '' : $fileName;
 
                 $this
-                    ->taskCompassCompile($options)
+                    ->taskCompassClean($options)
                     ->setOutput($this->output())
                     ->setWorkingDirectory($wd)
                     ->setConfigFile($fileName)

@@ -7,13 +7,16 @@ use Cheppers\LintReport\Reporter\CheckstyleReporter;
 use Cheppers\Robo\Bundler\BundlerTaskLoader;
 use Cheppers\Robo\Compass\CompassTaskLoader;
 use Cheppers\Robo\Drupal\Config\PhpcsConfig;
+use Cheppers\Robo\Drupal\Config\ScssLintConfig;
 use Cheppers\Robo\Drupal\ProjectType\Base as Base;
 use Cheppers\Robo\Drupal\Robo\GeneralReleaseTaskLoader;
 use Cheppers\Robo\Drupal\Utils;
 use Cheppers\Robo\Phpcs\PhpcsTaskLoader;
+use Cheppers\Robo\ScssLint\ScssLintTaskLoader;
 use Cheppers\Robo\Yarn\YarnTaskLoader;
 use Robo\Collection\CollectionBuilder;
 use Robo\Contract\TaskInterface;
+use Webmozart\PathUtil\Path;
 
 class RoboFile extends Base\RoboFile
 {
@@ -21,6 +24,7 @@ class RoboFile extends Base\RoboFile
     use GeneralReleaseTaskLoader;
     use CompassTaskLoader;
     use PhpcsTaskLoader;
+    use ScssLintTaskLoader;
     use YarnTaskLoader;
 
     /**
@@ -36,15 +40,15 @@ class RoboFile extends Base\RoboFile
     protected function getPhpcsConfigDrupal(): PhpcsConfig
     {
         // @todo Configurable class.
-        $phpcsConfig = new PhpcsConfig();
+        $config = new PhpcsConfig();
 
-        $phpcsConfig->standard = 'Drupal';
-        $phpcsConfig->lintReporters = [
+        $config->standard = 'Drupal';
+        $config->lintReporters = [
             'lintVerboseReporter' => null,
         ];
 
-        $phpcsConfig->filesGitStaged += Utils::phpFileExtensionPatterns('*.', '');
-        $phpcsConfig->files += [
+        $config->filesGitStaged += Utils::phpFileExtensionPatterns('*.', '');
+        $config->files += [
             'RoboFile.php' => true,
             Utils::$projectConfigFileName => file_exists(Utils::$projectConfigFileName),
         ];
@@ -61,11 +65,11 @@ class RoboFile extends Base\RoboFile
                 "{$this->projectConfig->drupalRootDir}/drush/",
             ];
             foreach ($suggestions as $suggestion) {
-                $phpcsConfig->files[$suggestion] = file_exists($suggestion);
+                $config->files[$suggestion] = file_exists($suggestion);
             }
         }
 
-        return $phpcsConfig;
+        return $config;
     }
 
     //region Git hooks.
@@ -77,6 +81,7 @@ class RoboFile extends Base\RoboFile
             ->collectionBuilder()
             ->addTaskList([
                 'lint.phpcs.Drupal' => $this->getTaskPhpcsLint($this->getPhpcsConfigDrupal()),
+                'lint.scss' => $this->getTaskScssLint($this->getScssLintConfig()),
                 'lint.composer.lock' => $this->taskComposerValidate(),
             ]);
     }
@@ -92,6 +97,7 @@ class RoboFile extends Base\RoboFile
             ->collectionBuilder()
             ->addTaskList([
                 'lint.phpcs.Drupal' => $this->getTaskPhpcsLint($this->getPhpcsConfigDrupal()),
+                'lint.scss' => $this->getTaskScssLint($this->getScssLintConfig()),
                 'lint.composer.lock' => $this->taskComposerValidate(),
             ]);
     }
@@ -99,6 +105,11 @@ class RoboFile extends Base\RoboFile
     public function lintPhpcs(): TaskInterface
     {
         return $this->getTaskPhpcsLint($this->getPhpcsConfigDrupal());
+    }
+
+    public function lintScss(): TaskInterface
+    {
+        return $this->getTaskScssLint($this->getScssLintConfig());
     }
 
     public function lintComposerValidate(): TaskInterface
@@ -221,6 +232,53 @@ class RoboFile extends Base\RoboFile
             ]);
     }
 
+    protected function getTaskScssLint(ScssLintConfig $config): TaskInterface
+    {
+        $paths = Utils::filterDisabled($config->paths);
+        if (!$paths) {
+            return $this
+                ->collectionBuilder()
+                ->addCode(function () {
+                    $this->output()->writeln('There are no SCSS files');
+
+                    return 0;
+                });
+        }
+
+        $env = $this->getEnvironment();
+        $reportDir = $this->projectConfig->reportDir;
+
+        if ($env === 'ci') {
+            $checkstyleLintReporter = new CheckstyleReporter();
+            $checkstyleLintReporter->setDestination("$reportDir/checkstyle/scss.xml");
+            $config->lintReporters['lintCheckstyleReporter'] = $checkstyleLintReporter;
+        }
+
+        if ($env !== 'git-hook') {
+            return $this->taskScssLintRunFiles((array) $config);
+        }
+
+        $options = (array) $config;
+        unset($options['paths']);
+        $assetJar = new AssetJar();
+
+        return $this
+            ->collectionBuilder()
+            ->addTaskList([
+                'git.staged' => $this
+                    ->taskGitReadStagedFiles()
+                    ->setCommandOnly(true)
+                    ->setAssetJar($assetJar)
+                    ->setAssetJarMap('files', ['files'])
+                    ->setPaths($config->pathsGitStaged),
+                'scss.lint' => $this
+                    ->taskScssLintRunInput($options)
+                    ->setAssetJar($assetJar)
+                    ->setAssetJarMap('paths', ['files'])
+                    ->setAssetJarMap('report', ['report']),
+            ]);
+    }
+
     protected function getTaskBundleCheckOrInstall(): \Closure
     {
         return function () {
@@ -246,7 +304,7 @@ class RoboFile extends Base\RoboFile
     protected function getTaskCompassCompile(array $options = []): \Closure
     {
         return function () use ($options) {
-            foreach ($this->getCompassConfigFiles() as $configFile) {
+            foreach ($this->getCompassConfigRbFiles() as $configFile) {
                 $wd = pathinfo($configFile, PATHINFO_DIRNAME);
                 $wd = $wd === '.' ? '' : $wd;
 
@@ -269,7 +327,7 @@ class RoboFile extends Base\RoboFile
     protected function getTaskCompassClean(array $options = []): \Closure
     {
         return function () use ($options) {
-            foreach ($this->getCompassConfigFiles() as $configFile) {
+            foreach ($this->getCompassConfigRbFiles() as $configFile) {
                 $wd = pathinfo($configFile, PATHINFO_DIRNAME);
                 $wd = $wd === '.' ? '' : $wd;
 
@@ -310,6 +368,29 @@ class RoboFile extends Base\RoboFile
     }
     //endregion
 
+    protected function getScssLintConfig(): ScssLintConfig
+    {
+        $config = new ScssLintConfig();
+
+        $gemFile = $this->getFallbackFileName('Gemfile', '.');
+        if ($gemFile) {
+            $config->bundleGemFile = $gemFile;
+        }
+
+        $scssLintYml = $this->getFallbackFileName('.scss-lint.yml', '.');
+        if ($scssLintYml) {
+            $config->configFile = $scssLintYml;
+        }
+
+        foreach ($this->getCompassConfigRbFiles() as $configRbFile) {
+            // @todo Configurable "scss" directory.
+            $dir = Path::join(Path::getDirectory($configRbFile), 'css');
+            $config->paths[$dir] = true;
+        }
+
+        return $config;
+    }
+
     /**
      * @return string[]
      */
@@ -330,7 +411,7 @@ class RoboFile extends Base\RoboFile
     /**
      * @return string[]
      */
-    protected function getCompassConfigFiles(): array
+    protected function getCompassConfigRbFiles(): array
     {
         return $this->getGitTrackedFiles(['config.rb', '*/config.rb']);
     }

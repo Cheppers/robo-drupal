@@ -2,26 +2,34 @@
 
 namespace Cheppers\Robo\Drupal\ProjectType\Base;
 
+use Cheppers\AssetJar\AssetJar;
 use Cheppers\LintReport\Reporter\BaseReporter;
+use Cheppers\Robo\Bundler\BundlerTaskLoader;
 use Cheppers\Robo\Drupal\Config\DatabaseServerConfig;
 use Cheppers\Robo\Drupal\Config\PhpVariantConfig;
+use Cheppers\Robo\Drupal\Config\SassRootConfig;
 use Cheppers\Robo\Drupal\Config\SiteConfig;
 use Cheppers\Robo\Drupal\Robo\DrupalCoreTestsTaskLoader;
 use Cheppers\Robo\Drupal\Utils;
 use Cheppers\Robo\Drush\DrushTaskLoader;
 use Cheppers\Robo\Git\GitTaskLoader;
+use Cheppers\Robo\Sass\SassTaskLoader;
 use Cheppers\Robo\Serialize\SerializeTaskLoader;
 use League\Container\ContainerInterface;
 use Robo\Collection\CollectionBuilder;
 use Robo\Contract\TaskInterface;
 use Robo\Tasks;
+use Symfony\Component\Filesystem\Filesystem;
+use Symfony\Component\Finder\Finder;
 use Webmozart\PathUtil\Path;
 
 class RoboFile extends Tasks
 {
+    use BundlerTaskLoader;
     use DrupalCoreTestsTaskLoader;
     use DrushTaskLoader;
     use GitTaskLoader;
+    use SassTaskLoader;
     use SerializeTaskLoader;
 
     /**
@@ -534,6 +542,50 @@ class RoboFile extends Tasks
         $task->setCmdArguments([$site->installProfileName]);
 
         return $task;
+    }
+
+    protected function getTaskSassCompile(SassRootConfig $sassRoot, bool $isProduction = false): CollectionBuilder
+    {
+        $assetJar = new AssetJar();
+        $sassFiles = (new Finder())
+            ->in($sassRoot->sassDir)
+            ->name('/^[^_].*\.(sass|scss)$/');
+
+        return $this
+            ->collectionBuilder()
+            ->addTask(
+                $this
+                    ->taskBundleShowPaths()
+                    ->setAssetJar($assetJar)
+                    ->setAssetJarMap('paths', ['gemPaths'])
+                    ->setWorkingDirectory($sassRoot->sassDir)
+                    ->setBundleGemFile($sassRoot->bundleGemFile)
+            )
+            ->addCode(function () use ($sassRoot) {
+                $cssFiles = (new Finder)
+                    ->in($sassRoot->cssDir)
+                    ->name('*.css')
+                    ->name('*.css.map');
+
+                $fs = new Filesystem();
+
+                /** @var \Symfony\Component\Finder\SplFileInfo $cssFile */
+                foreach ($cssFiles as $cssFile) {
+                    $fs->remove($cssFile->getPathname());
+                }
+            })
+            ->addTask(
+                $this
+                    ->taskSassCompile()
+                    ->setAssetJar($assetJar)
+                    ->setAssetJarMap('gemPaths', ['gemPaths'])
+                    ->setFiles($sassFiles)
+                    ->setStyle($isProduction ? 'compressed' : 'expanded')
+                    ->setComments(!$isProduction)
+                    ->setEmbed(!$isProduction)
+                    ->setCssPath($sassRoot->cssDir)
+                    ->setMapPath($isProduction ? '' : $sassRoot->cssDir)
+            );
     }
     //endregion
 

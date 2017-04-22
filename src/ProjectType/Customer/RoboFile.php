@@ -12,8 +12,10 @@ use Cheppers\Robo\Drupal\ProjectType\Base as Base;
 use Cheppers\Robo\Drupal\Robo\GeneralReleaseTaskLoader;
 use Cheppers\Robo\Drupal\Utils;
 use Cheppers\Robo\Phpcs\PhpcsTaskLoader;
+use Cheppers\Robo\Sass\SassTaskLoader;
 use Cheppers\Robo\ScssLint\ScssLintTaskLoader;
 use Cheppers\Robo\Yarn\YarnTaskLoader;
+use function foo\func;
 use Robo\Collection\CollectionBuilder;
 use Robo\Contract\TaskInterface;
 use Webmozart\PathUtil\Path;
@@ -24,6 +26,7 @@ class RoboFile extends Base\RoboFile
     use GeneralReleaseTaskLoader;
     use CompassTaskLoader;
     use PhpcsTaskLoader;
+    use SassTaskLoader;
     use ScssLintTaskLoader;
     use YarnTaskLoader;
 
@@ -143,6 +146,27 @@ class RoboFile extends Base\RoboFile
         return $this
             ->collectionBuilder()
             ->addCode($this->getTaskCompassCompile($options));
+    }
+
+    public function sassCompile(
+        array $options = [
+            'production' => false,
+        ]
+    ): CollectionBuilder {
+        $cb = $this->collectionBuilder();
+        if ($this->projectConfig->sassRoots) {
+            foreach ($this->projectConfig->sassRoots as $sassRoot) {
+                $cb->addTask($this->getTaskSassCompile($sassRoot, $options['production']));
+            }
+        } else {
+            $cb->addCode(function () {
+                $this->yell('There is no pre-configured "sassRoots"', 40, 'yellow');
+
+                return 0;
+            });
+        }
+
+        return $cb;
     }
 
     public function compassClean(): CollectionBuilder

@@ -5,6 +5,7 @@ namespace Cheppers\Robo\Drupal\ProjectType\Incubator;
 use Cheppers\AssetJar\AssetJar;
 use Cheppers\LintReport\Reporter\CheckstyleReporter;
 use Cheppers\Robo\Drupal\Config\DrupalExtensionConfig;
+use Cheppers\Robo\Drupal\Config\SiteConfig;
 use Cheppers\Robo\Drupal\ProjectType\Base as Base;
 use Cheppers\Robo\Drupal\Robo\ComposerTaskLoader;
 use Cheppers\Robo\Drupal\Robo\DrupalCoreTestsTaskLoader;
@@ -245,12 +246,12 @@ class RoboFile extends Base\RoboFile
      * @return \Robo\Collection\CollectionBuilder
      */
     public function siteDelete(
-        string $siteId,
+        string $siteConfig,
         array $options = [
             'yes' => false,
         ]
     ): ?CollectionBuilder {
-        $siteId = $this->validateInputSiteId($siteId, true);
+        $siteConfig = $this->validateInputSiteId($siteConfig, true);
 
         // @todo Better description.
         $is_sure = $options['yes'] || $this->io()->confirm('Are you sure?', false);
@@ -260,7 +261,7 @@ class RoboFile extends Base\RoboFile
 
         return $this
             ->collectionBuilder()
-            ->addCode($this->getTaskDrupalSiteDelete($siteId))
+            ->addCode($this->getTaskDrupalSiteDelete($siteConfig))
             ->addTask($this->getTaskDrupalRebuildSitesPhp());
     }
 
@@ -595,18 +596,17 @@ class RoboFile extends Base\RoboFile
         return $this->taskDrupalSiteCreate($options);
     }
 
-    protected function getTaskDrupalSiteDelete(string $siteId): \Closure
+    protected function getTaskDrupalSiteDelete(SiteConfig $siteConfig): \Closure
     {
         // @todo Create a native Task.
         // @todo Separate Tasks, dir delete, ProjectConfig manipulation.
         // @todo Delete other resources: databases.
         // @todo Delete other resources: Solr, Elastic.
         // @todo Delete other resources: Nginx, Apache.
-        return function () use ($siteId) {
+        return function () use ($siteConfig) {
             $pc = $this->projectConfig;
-            $site = $pc->sites[$siteId];
 
-            foreach (array_unique($site->urls) as $siteDir) {
+            foreach (array_unique($siteConfig->urls) as $siteDir) {
                 $filesToDelete = [];
                 $dirsToDelete = [
                     "{$pc->outerSitesSubDir}/$siteDir",
@@ -639,7 +639,7 @@ class RoboFile extends Base\RoboFile
                 $lines = file($projectConfigFileName);
                 $lineIndex = 0;
 
-                $siteIdSafe = var_export($siteId, true);
+                $siteIdSafe = var_export($siteConfig, true);
                 $first = "  \$projectConfig->sites[$siteIdSafe] = new SiteConfig();\n";
                 while ($lineIndex < count($lines) && $lines[$lineIndex] !== $first) {
                     $lineIndex++;
@@ -659,7 +659,7 @@ class RoboFile extends Base\RoboFile
                 // @todo Error handling.
                 file_put_contents($projectConfigFileName, implode('', $lines));
             }
-            unset($pc->sites[$siteId]);
+            unset($pc->sites[$siteConfig->id]);
 
             return 0;
         };

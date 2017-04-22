@@ -27,12 +27,31 @@ class ProjectConfig extends Base\ProjectConfig
     public $releaseDir = 'release';
 
     /**
+     * @var \Cheppers\Robo\Drupal\Config\SassRootConfig[]
+     */
+    public $sassRoots = [];
+
+    /**
      * {@inheritdoc}
      */
     protected function initPropertyMapping()
     {
         parent::initPropertyMapping();
-        $this->propertyMapping += ['releaseDir' => 'releaseDir'];
+        $this->propertyMapping += [
+            'releaseDir' => 'releaseDir',
+            'sassRoots' => 'sassRoots',
+        ];
+
+        return $this;
+    }
+
+    public function populateDefaultValues()
+    {
+        parent::populateDefaultValues();
+
+        foreach ($this->sassRoots as $id => $sassRoot) {
+            $sassRoot->id = $id;
+        }
 
         return $this;
     }

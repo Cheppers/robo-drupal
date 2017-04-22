@@ -4,37 +4,53 @@
         "Read more about it at https://getcomposer.org/doc/01-basic-usage.md#composer-lock-the-lock-file",
         "This file is @generated automatically"
     ],
-    "content-hash": "3e6d9f178af565c250dada892fac578b",
+    "content-hash": "a200d47167ef7efbe6d3ab7daaaef58e",
     "packages": [
         {
             "name": "cheppers/asset-jar",
-            "version": "0.0.1",
+            "version": "v0.0.1",
             "source": {
-                "type": "path",
-                "url": "../../cheppers/asset-jar",
+                "type": "git",
+                "url": "https://github.com/Cheppers/asset-jar.git",
                 "reference": "ef34273299c55defb0da78090b92a44125cf8ab2"
             },
             "dist": {
-                "type": "path",
+                "type": "zip",
                 "url": "https://api.github.com/repos/Cheppers/asset-jar/zipball/ef34273299c55defb0da78090b92a44125cf8ab2",
                 "reference": "ef34273299c55defb0da78090b92a44125cf8ab2",
-                "shasum": null
+                "shasum": ""
+            },
+            "require-dev": {
+                "phpunit/php-code-coverage": "^4.0",
+                "phpunit/phpunit": "^5.4",
+                "squizlabs/php_codesniffer": "^2.6"
             },
             "type": "library",
             "autoload": {
                 "psr-4": {
                     "Cheppers\\AssetJar\\": "src/"
                 }
-            }
+            },
+            "notification-url": "https://packagist.org/downloads/",
+            "license": [
+                "GPL-2.0+"
+            ],
+            "description": "Provides a very simple, shared, in-memory data storage.",
+            "time": "2016-07-30T09:09:38+00:00"
         },
         {
             "name": "cheppers/git-hooks",
             "version": "dev-master",
+            "source": {
+                "type": "git",
+                "url": "https://github.com/Cheppers/git-hooks.git",
+                "reference": "2b24a8a4ae3e65374b5e16009974faa76f8c651c"
+            },
             "dist": {
-                "type": "path",
-                "url": "../../cheppers/git-hooks",
+                "type": "zip",
+                "url": "https://api.github.com/repos/Cheppers/git-hooks/zipball/2b24a8a4ae3e65374b5e16009974faa76f8c651c",
                 "reference": "2b24a8a4ae3e65374b5e16009974faa76f8c651c",
-                "shasum": null
+                "shasum": ""
             },
             "require-dev": {
                 "behat/behat": "~3.1",
@@ -56,48 +72,64 @@
                     "Cheppers\\GitHooks\\": "src/"
                 }
             },
-            "scripts": {
-                "post-install-cmd": [
-                    "@deploy-git-hooks"
-                ],
-                "deploy-git-hooks": [
-                    "\\Cheppers\\GitHooks\\Main::deploy"
-                ]
-            },
+            "notification-url": "https://packagist.org/downloads/",
             "license": [
                 "GPL-2.0"
             ],
-            "description": "Provide a bridge between Git hooks and scripts under VCS."
+            "description": "Provide a bridge between Git hooks and scripts under VCS.",
+            "time": "2017-01-08 15:44:57"
         },
         {
             "name": "cheppers/lint-report",
-            "version": "0.0.1",
+            "version": "v0.0.5",
             "source": {
-                "type": "path",
-                "url": "../../cheppers/lint-report",
-                "reference": "master"
+                "type": "git",
+                "url": "https://github.com/Cheppers/lint-report.git",
+                "reference": "adc7536bea7df3fa8de378e0dff5dcbb9b644af8"
             },
             "dist": {
-                "type": "path",
-                "url": "../../cheppers/lint-report",
-                "reference": "master",
-                "shasum": null
+                "type": "zip",
+                "url": "https://api.github.com/repos/Cheppers/lint-report/zipball/adc7536bea7df3fa8de378e0dff5dcbb9b644af8",
+                "reference": "adc7536bea7df3fa8de378e0dff5dcbb9b644af8",
+                "shasum": ""
+            },
+            "require": {
+                "league/container": "^2.2",
+                "symfony/console": "^2.8 || ^3.1",
+                "symfony/filesystem": "^2.8 || ^3.1",
+                "symfony/yaml": "^2.8 || ^3.1"
+            },
+            "require-dev": {
+                "cheppers/git-hooks": "^0.0.8",
+                "codeception/codeception": "^2.2",
+                "squizlabs/php_codesniffer": "2.6.2"
             },
             "type": "library",
             "autoload": {
                 "psr-4": {
                     "Cheppers\\LintReport\\": "src/"
                 }
-            }
+            },
+            "notification-url": "https://packagist.org/downloads/",
+            "license": [
+                "GPL-2.0+"
+            ],
+            "description": "Generate reports from lint results",
+            "time": "2016-12-14T21:09:07+00:00"
         },
         {
             "name": "cheppers/robo-bundler",
             "version": "dev-master",
+            "source": {
+                "type": "git",
+                "url": "https://github.com/Cheppers/robo-bundler.git",
+                "reference": "cab0530107e0955494b820f2f66169a293c47c7d"
+            },
             "dist": {
-                "type": "path",
-                "url": "../../cheppers/robo-bundler",
+                "type": "zip",
+                "url": "https://api.github.com/repos/Cheppers/robo-bundler/zipball/cab0530107e0955494b820f2f66169a293c47c7d",
                 "reference": "cab0530107e0955494b820f2f66169a293c47c7d",
-                "shasum": null
+                "shasum": ""
             },
             "require": {
                 "cheppers/asset-jar": "^0.0",
@@ -119,37 +151,29 @@
                     "Cheppers\\Robo\\Bundler\\": "src/"
                 }
             },
-            "autoload-dev": {
-                "psr-4": {
-                    "Cheppers\\Robo\\Bundler\\Test\\Helper\\": "tests/_support/Helper/",
-                    "Cheppers\\Robo\\Bundler\\Tests\\Acceptance\\": "tests/acceptance/",
-                    "Cheppers\\Robo\\Bundler\\Tests\\Unit\\": "tests/unit/"
-                }
-            },
-            "scripts": {
-                "post-install-cmd": [
-                    "\\Cheppers\\Robo\\Bundler\\Composer\\Scripts::postInstallCmd"
-                ],
-                "post-update-cmd": [
-                    "\\Cheppers\\Robo\\Bundler\\Composer\\Scripts::postUpdateCmd"
-                ]
-            },
+            "notification-url": "https://packagist.org/downloads/",
             "license": [
                 "GPL-2.0"
             ],
-            "description": "Robo task wrapper for Bundler."
+            "description": "Robo task wrapper for Bundler.",
+            "time": "2017-04-22 07:44:20"
         },
         {
             "name": "cheppers/robo-compass",
             "version": "dev-master",
+            "source": {
+                "type": "git",
+                "url": "https://github.com/Cheppers/robo-compass.git",
+                "reference": "6938a7adbe33b3d425dbac53d51f08d806cf70dc"
+            },
             "dist": {
-                "type": "path",
-                "url": "../../cheppers/robo-compass",
-                "reference": "00e2e36dba8edab98526c409056486d2ad8e022a",
-                "shasum": null
+                "type": "zip",
+                "url": "https://api.github.com/repos/Cheppers/robo-compass/zipball/6938a7adbe33b3d425dbac53d51f08d806cf70dc",
+                "reference": "6938a7adbe33b3d425dbac53d51f08d806cf70dc",
+                "shasum": ""
             },
             "require": {
-                "cheppers/asset-jar": "^0.0.1",
+                "cheppers/asset-jar": "^0.0",
                 "consolidation/robo": "^1.0",
                 "php": ">=7.1"
             },
@@ -158,7 +182,7 @@
                 "cheppers/robo-git": "^0.0",
                 "cheppers/robo-phpcs": "^0.0",
                 "codeception/codeception": "^2.2",
-                "danielstjules/stringy": "^2.3",
+                "danielstjules/stringy": "^3.0",
                 "symfony/finder": "^3.2",
                 "webmozart/path-util": "^2.3"
             },
@@ -168,34 +192,26 @@
                     "Cheppers\\Robo\\Compass\\": "src/"
                 }
             },
-            "autoload-dev": {
-                "psr-4": {
-                    "Cheppers\\Robo\\Compass\\Test\\Helper\\": "tests/_support/Helper/",
-                    "Cheppers\\Robo\\Compass\\Tests\\Acceptance\\": "tests/acceptance/",
-                    "Cheppers\\Robo\\Compass\\Tests\\Unit\\": "tests/unit/"
-                }
-            },
-            "scripts": {
-                "post-install-cmd": [
-                    "\\Cheppers\\Robo\\Compass\\Composer\\Scripts::postInstallCmd"
-                ],
-                "post-update-cmd": [
-                    "\\Cheppers\\Robo\\Compass\\Composer\\Scripts::postUpdateCmd"
-                ]
-            },
+            "notification-url": "https://packagist.org/downloads/",
             "license": [
                 "GPL-2.0"
             ],
-            "description": "Wrapper Robo task for Compass commands."
+            "description": "Wrapper Robo task for Compass commands.",
+            "time": "2017-04-22 13:56:13"
         },
         {
             "name": "cheppers/robo-drush",
             "version": "dev-master",
+            "source": {
+                "type": "git",
+                "url": "https://github.com/Cheppers/robo-drush.git",
+                "reference": "850214d8fee01ecb792c968c68a24009163cb3fe"
+            },
             "dist": {
-                "type": "path",
-                "url": "../../cheppers/robo-drush",
+                "type": "zip",
+                "url": "https://api.github.com/repos/Cheppers/robo-drush/zipball/850214d8fee01ecb792c968c68a24009163cb3fe",
                 "reference": "850214d8fee01ecb792c968c68a24009163cb3fe",
-                "shasum": null
+                "shasum": ""
             },
             "require": {
                 "cheppers/asset-jar": "^0.0",
@@ -216,36 +232,26 @@
                     "Cheppers\\Robo\\Drush\\": "src/"
                 }
             },
-            "autoload-dev": {
-                "psr-4": {
-                    "Cheppers\\Robo\\Drush\\Tests\\Unit\\": "tests/unit/",
-                    "Cheppers\\Robo\\Drush\\Tests\\Acceptance\\": "tests/acceptance/"
-                }
-            },
-            "scripts": {
-                "post-install-cmd": [
-                    "@deploy-git-hooks"
-                ],
-                "post-update-cmd": [
-                    "@deploy-git-hooks"
-                ],
-                "deploy-git-hooks": [
-                    "\\Cheppers\\GitHooks\\Main::deploy"
-                ]
-            },
+            "notification-url": "https://packagist.org/downloads/",
             "license": [
                 "GPL-2.0+"
             ],
-            "description": "Drush related Robo tasks"
+            "description": "Drush related Robo tasks",
+            "time": "2017-03-25 15:39:42"
         },
         {
             "name": "cheppers/robo-eslint",
             "version": "dev-master",
+            "source": {
+                "type": "git",
+                "url": "https://github.com/Cheppers/robo-eslint.git",
+                "reference": "14e7560e211a1ba0bbd5c84d013a4c4897f3b6a4"
+            },
             "dist": {
-                "type": "path",
-                "url": "../../cheppers/robo-eslint",
+                "type": "zip",
+                "url": "https://api.github.com/repos/Cheppers/robo-eslint/zipball/14e7560e211a1ba0bbd5c84d013a4c4897f3b6a4",
                 "reference": "14e7560e211a1ba0bbd5c84d013a4c4897f3b6a4",
-                "shasum": null
+                "shasum": ""
             },
             "require": {
                 "cheppers/asset-jar": "^0.0",
@@ -266,41 +272,26 @@
                     "Cheppers\\Robo\\ESLint\\": "src/"
                 }
             },
-            "autoload-dev": {
-                "psr-4": {
-                    "Cheppers\\Robo\\ESLint\\Tests\\Acceptance\\": "tests/acceptance/",
-                    "Cheppers\\Robo\\ESLint\\Tests\\Unit\\": "tests/unit/"
-                }
-            },
-            "scripts": {
-                "post-install-cmd": [
-                    "@deploy-git-hooks",
-                    "@tests-data-npm-install"
-                ],
-                "post-update-cmd": [
-                    "@deploy-git-hooks",
-                    "@tests-data-npm-install"
-                ],
-                "deploy-git-hooks": [
-                    "\\Cheppers\\GitHooks\\Main::deploy"
-                ],
-                "tests-data-npm-install": [
-                    "cd tests/_data && npm install"
-                ]
-            },
+            "notification-url": "https://packagist.org/downloads/",
             "license": [
                 "GPL-2.0+"
             ],
-            "description": "Robo task wrapper for ESLint"
+            "description": "Robo task wrapper for ESLint",
+            "time": "2017-01-14 17:52:12"
         },
         {
             "name": "cheppers/robo-git",
             "version": "dev-master",
+            "source": {
+                "type": "git",
+                "url": "https://github.com/Cheppers/robo-git.git",
+                "reference": "3c714e25cc2432dab4a73818f8373789db94bc7c"
+            },
             "dist": {
-                "type": "path",
-                "url": "../../cheppers/robo-git",
+                "type": "zip",
+                "url": "https://api.github.com/repos/Cheppers/robo-git/zipball/3c714e25cc2432dab4a73818f8373789db94bc7c",
                 "reference": "3c714e25cc2432dab4a73818f8373789db94bc7c",
-                "shasum": null
+                "shasum": ""
             },
             "require": {
                 "cheppers/asset-jar": "^0.0",
@@ -318,37 +309,26 @@
                     "Cheppers\\Robo\\Git\\": "src/"
                 }
             },
-            "autoload-dev": {
-                "psr-4": {
-                    "Cheppers\\Robo\\Git\\Test\\Helper\\": "tests/_support/Helper/",
-                    "Cheppers\\Robo\\Git\\Tests\\Acceptance\\": "tests/acceptance/",
-                    "Cheppers\\Robo\\Git\\Tests\\Unit\\": "tests/unit/"
-                }
-            },
-            "scripts": {
-                "post-install-cmd": [
-                    "@deploy-git-hooks"
-                ],
-                "post-update-cmd": [
-                    "@deploy-git-hooks"
-                ],
-                "deploy-git-hooks": [
-                    "\\Cheppers\\GitHooks\\Main::deploy"
-                ]
-            },
+            "notification-url": "https://packagist.org/downloads/",
             "license": [
                 "GPL-2.0"
             ],
-            "description": "Robo task to read the content of the staged files"
+            "description": "Robo task to read the content of the staged files",
+            "time": "2017-04-09 11:26:24"
         },
         {
             "name": "cheppers/robo-phpcs",
             "version": "dev-master",
+            "source": {
+                "type": "git",
+                "url": "https://github.com/Cheppers/robo-phpcs.git",
+                "reference": "ac4adfb182062fc6acf8b6151291b4d2666da16a"
+            },
             "dist": {
-                "type": "path",
-                "url": "../../cheppers/robo-phpcs",
+                "type": "zip",
+                "url": "https://api.github.com/repos/Cheppers/robo-phpcs/zipball/ac4adfb182062fc6acf8b6151291b4d2666da16a",
                 "reference": "ac4adfb182062fc6acf8b6151291b4d2666da16a",
-                "shasum": null
+                "shasum": ""
             },
             "require": {
                 "cheppers/asset-jar": "^0.0",
@@ -369,36 +349,26 @@
                     "Cheppers\\Robo\\Phpcs\\": "src/"
                 }
             },
-            "autoload-dev": {
-                "psr-4": {
-                    "Cheppers\\Robo\\Phpcs\\Tests\\Acceptance\\": "tests/acceptance/",
-                    "Cheppers\\Robo\\Phpcs\\Tests\\Unit\\": "tests/unit/"
-                }
-            },
-            "scripts": {
-                "post-install-cmd": [
-                    "@deploy-git-hooks"
-                ],
-                "post-update-cmd": [
-                    "@deploy-git-hooks"
-                ],
-                "deploy-git-hooks": [
-                    "\\Cheppers\\GitHooks\\Main::deploy"
-                ]
-            },
+            "notification-url": "https://packagist.org/downloads/",
             "license": [
                 "GPL-2.0+"
             ],
-            "description": "Robo task wrapper for PHPCS"
+            "description": "Robo task wrapper for PHPCS",
+            "time": "2017-02-04 16:43:44"
         },
         {
             "name": "cheppers/robo-sass",
             "version": "dev-master",
+            "source": {
+                "type": "git",
+                "url": "https://github.com/Cheppers/robo-sass.git",
+                "reference": "a74f9fa9840aeb1c6bdf9b286a9e7088ae531e1f"
+            },
             "dist": {
-                "type": "path",
-                "url": "../../cheppers/robo-sass",
+                "type": "zip",
+                "url": "https://api.github.com/repos/Cheppers/robo-sass/zipball/a74f9fa9840aeb1c6bdf9b286a9e7088ae531e1f",
                 "reference": "a74f9fa9840aeb1c6bdf9b286a9e7088ae531e1f",
-                "shasum": null
+                "shasum": ""
             },
             "require": {
                 "cheppers/asset-jar": "^0.0",
@@ -421,38 +391,26 @@
                     "Cheppers\\Robo\\Sass\\": "src/"
                 }
             },
-            "autoload-dev": {
-                "psr-4": {
-                    "Cheppers\\Robo\\Sass\\Composer\\": "src-dev/Composer/",
-                    "Cheppers\\Robo\\Sass\\Test\\Helper\\": "tests/_support/Helper/",
-                    "Cheppers\\Robo\\Sass\\Tests\\Acceptance\\": "tests/acceptance/",
-                    "Cheppers\\Robo\\Sass\\Tests\\Unit\\": "tests/unit/"
-                },
-                "classmap": [
-                    "tests/_data/project-01/SassRoboFile.php"
-                ]
-            },
-            "scripts": {
-                "post-install-cmd": [
-                    "\\Cheppers\\Robo\\Sass\\Composer\\Scripts::postInstallCmd"
-                ],
-                "post-update-cmd": [
-                    "\\Cheppers\\Robo\\Sass\\Composer\\Scripts::postUpdateCmd"
-                ]
-            },
+            "notification-url": "https://packagist.org/downloads/",
             "license": [
                 "GPL-2.0"
             ],
-            "description": "Compile SCSS files with the 'sass' PHP extension."
+            "description": "Compile SCSS files with the 'sass' PHP extension.",
+            "time": "2017-04-22 10:43:26"
         },
         {
             "name": "cheppers/robo-scss-lint",
             "version": "dev-master",
+            "source": {
+                "type": "git",
+                "url": "https://github.com/Cheppers/robo-scss-lint.git",
+                "reference": "abacbc2b2732f17ece4f3a836f1bc1a03f0d0523"
+            },
             "dist": {
-                "type": "path",
-                "url": "../../cheppers/robo-scss-lint",
+                "type": "zip",
+                "url": "https://api.github.com/repos/Cheppers/robo-scss-lint/zipball/abacbc2b2732f17ece4f3a836f1bc1a03f0d0523",
                 "reference": "abacbc2b2732f17ece4f3a836f1bc1a03f0d0523",
-                "shasum": null
+                "shasum": ""
             },
             "require": {
                 "cheppers/asset-jar": "^0.0",
@@ -473,36 +431,26 @@
                     "Cheppers\\Robo\\ScssLint\\": "src/"
                 }
             },
-            "autoload-dev": {
-                "psr-4": {
-                    "Cheppers\\Robo\\ScssLint\\Tests\\Acceptance\\": "tests/acceptance/",
-                    "Cheppers\\Robo\\ScssLint\\Tests\\Unit\\": "tests/unit/"
-                }
-            },
-            "scripts": {
-                "post-install-cmd": [
-                    "@deploy-git-hooks"
-                ],
-                "post-update-cmd": [
-                    "@deploy-git-hooks"
-                ],
-                "deploy-git-hooks": [
-                    "\\Cheppers\\GitHooks\\Main::deploy"
-                ]
-            },
+            "notification-url": "https://packagist.org/downloads/",
             "license": [
                 "GPL-2.0+"
             ],
-            "description": "Robo task wrapper for scss-lint"
+            "description": "Robo task wrapper for scss-lint",
+            "time": "2017-01-14 14:23:37"
         },
         {
             "name": "cheppers/robo-serialize",
             "version": "dev-master",
+            "source": {
+                "type": "git",
+                "url": "https://github.com/Cheppers/robo-serialize.git",
+                "reference": "459e933f6373b00dc9792e2f4bbc64fb5464049a"
+            },
             "dist": {
-                "type": "path",
-                "url": "../../cheppers/robo-serialize",
+                "type": "zip",
+                "url": "https://api.github.com/repos/Cheppers/robo-serialize/zipball/459e933f6373b00dc9792e2f4bbc64fb5464049a",
                 "reference": "459e933f6373b00dc9792e2f4bbc64fb5464049a",
-                "shasum": null
+                "shasum": ""
             },
             "require": {
                 "consolidation/robo": "^1.0",
@@ -523,39 +471,26 @@
                     "Cheppers\\Robo\\Serialize\\": "src/"
                 }
             },
-            "autoload-dev": {
-                "psr-4": {
-                    "Cheppers\\Robo\\Serialize\\Tests\\Acceptance\\": "tests/acceptance/",
-                    "Cheppers\\Robo\\Serialize\\Tests\\Unit\\": "tests/unit/"
-                },
-                "classmap": [
-                    "tests/_data/fixtures/RoboFiles/"
-                ]
-            },
-            "scripts": {
-                "post-install-cmd": [
-                    "@deploy-git-hooks"
-                ],
-                "post-update-cmd": [
-                    "@deploy-git-hooks"
-                ],
-                "deploy-git-hooks": [
-                    "\\Cheppers\\GitHooks\\Main::deploy"
-                ]
-            },
+            "notification-url": "https://packagist.org/downloads/",
             "license": [
                 "GPL-2.0"
             ],
-            "description": "Export variables in various format"
+            "description": "Export variables in various format",
+            "time": "2017-03-20 13:14:18"
         },
         {
             "name": "cheppers/robo-tslint",
             "version": "dev-master",
+            "source": {
+                "type": "git",
+                "url": "https://github.com/Cheppers/robo-tslint.git",
+                "reference": "a1b54c2942ae8539276dcbf7f0bac63fc6291a82"
+            },
             "dist": {
-                "type": "path",
-                "url": "../../cheppers/robo-tslint",
-                "reference": "b626cdbadc73b09533a6e6f5b89b9e54be3e9235",
-                "shasum": null
+                "type": "zip",
+                "url": "https://api.github.com/repos/Cheppers/robo-tslint/zipball/a1b54c2942ae8539276dcbf7f0bac63fc6291a82",
+                "reference": "a1b54c2942ae8539276dcbf7f0bac63fc6291a82",
+                "shasum": ""
             },
             "require": {
                 "cheppers/asset-jar": "^0.0",
@@ -568,7 +503,7 @@
                 "cheppers/robo-git": "^0.0",
                 "cheppers/robo-phpcs": "^0.0",
                 "codeception/codeception": "^2.2",
-                "symfony/process": "^2.8 || ^3.1"
+                "symfony/process": "^2.8||^3.1"
             },
             "type": "library",
             "autoload": {
@@ -576,41 +511,26 @@
                     "Cheppers\\Robo\\TsLint\\": "src/"
                 }
             },
-            "autoload-dev": {
-                "psr-4": {
-                    "Cheppers\\Robo\\TsLint\\Tests\\Unit\\": "tests/unit/",
-                    "Cheppers\\Robo\\TsLint\\Tests\\Acceptance\\": "tests/acceptance/"
-                }
-            },
-            "scripts": {
-                "post-install-cmd": [
-                    "@deploy-git-hooks",
-                    "@npm-install"
-                ],
-                "post-update-cmd": [
-                    "@deploy-git-hooks",
-                    "@npm-install"
-                ],
-                "deploy-git-hooks": [
-                    "\\Cheppers\\GitHooks\\Main::deploy"
-                ],
-                "npm-install": [
-                    "cd tests/_data && npm install"
-                ]
-            },
+            "notification-url": "https://packagist.org/downloads/",
             "license": [
                 "GPL-2.0+"
             ],
-            "description": "Robo task wrapper for tslint"
+            "description": "Robo task wrapper for tslint",
+            "time": "2017-01-01 15:46:21"
         },
         {
             "name": "cheppers/robo-yarn",
             "version": "dev-master",
+            "source": {
+                "type": "git",
+                "url": "https://github.com/Cheppers/robo-yarn.git",
+                "reference": "685d4f6368db5bea3d0eacc7352b222944bacab2"
+            },
             "dist": {
-                "type": "path",
-                "url": "../../cheppers/robo-yarn",
+                "type": "zip",
+                "url": "https://api.github.com/repos/Cheppers/robo-yarn/zipball/685d4f6368db5bea3d0eacc7352b222944bacab2",
                 "reference": "685d4f6368db5bea3d0eacc7352b222944bacab2",
-                "shasum": null
+                "shasum": ""
             },
             "require": {
                 "cheppers/asset-jar": "^0.0",
@@ -632,25 +552,12 @@
                     "Cheppers\\Robo\\Yarn\\": "src/"
                 }
             },
-            "autoload-dev": {
-                "psr-4": {
-                    "Cheppers\\Robo\\Yarn\\Test\\Helper\\": "tests/_support/Helper/",
-                    "Cheppers\\Robo\\Yarn\\Tests\\Acceptance\\": "tests/acceptance/",
-                    "Cheppers\\Robo\\Yarn\\Tests\\Unit\\": "tests/unit/"
-                }
-            },
-            "scripts": {
-                "post-install-cmd": [
-                    "\\Cheppers\\Robo\\Yarn\\Composer\\Scripts::postInstallCmd"
-                ],
-                "post-update-cmd": [
-                    "\\Cheppers\\Robo\\Yarn\\Composer\\Scripts::postUpdateCmd"
-                ]
-            },
+            "notification-url": "https://packagist.org/downloads/",
             "license": [
                 "GPL-2.0"
             ],
-            "description": "Template to create a new Robo task."
+            "description": "Template to create a new Robo task.",
+            "time": "2017-03-05 12:29:44"
         },
         {
             "name": "consolidation/annotated-command",
@@ -912,20 +819,20 @@
         },
         {
             "name": "danielstjules/stringy",
-            "version": "2.4.0",
+            "version": "3.0.1",
             "source": {
                 "type": "git",
                 "url": "https://github.com/danielstjules/Stringy.git",
-                "reference": "edbda419cbe4bcc3cb200b7c9811cb6597bf058b"
+                "reference": "2288363663d94ce11c9ca555f7c760e9f799bb74"
             },
             "dist": {
                 "type": "zip",
-                "url": "https://api.github.com/repos/danielstjules/Stringy/zipball/edbda419cbe4bcc3cb200b7c9811cb6597bf058b",
-                "reference": "edbda419cbe4bcc3cb200b7c9811cb6597bf058b",
+                "url": "https://api.github.com/repos/danielstjules/Stringy/zipball/2288363663d94ce11c9ca555f7c760e9f799bb74",
+                "reference": "2288363663d94ce11c9ca555f7c760e9f799bb74",
                 "shasum": ""
             },
             "require": {
-                "php": ">=5.3.0",
+                "php": ">=5.4.0",
                 "symfony/polyfill-mbstring": "~1.1"
             },
             "require-dev": {
@@ -964,7 +871,7 @@
                 "utility",
                 "utils"
             ],
-            "time": "2017-03-02T20:43:29+00:00"
+            "time": "2017-04-12T15:20:39+00:00"
         },
         {
             "name": "dflydev/dot-access-data",
@@ -4289,7 +4196,19 @@
     ],
     "aliases": [],
     "minimum-stability": "dev",
-    "stability-flags": [],
+    "stability-flags": {
+        "cheppers/git-hooks": 20,
+        "cheppers/robo-bundler": 20,
+        "cheppers/robo-compass": 20,
+        "cheppers/robo-drush": 20,
+        "cheppers/robo-eslint": 20,
+        "cheppers/robo-git": 20,
+        "cheppers/robo-phpcs": 20,
+        "cheppers/robo-sass": 20,
+        "cheppers/robo-scss-lint": 20,
+        "cheppers/robo-serialize": 20,
+        "cheppers/robo-tslint": 20
+    },
     "prefer-stable": true,
     "prefer-lowest": false,
     "platform": {

@@ -549,7 +549,8 @@ class RoboFile extends Tasks
         $assetJar = new AssetJar();
         $sassFiles = (new Finder())
             ->in($sassRoot->sassDir)
-            ->name('/^[^_].*\.(sass|scss)$/');
+            ->name('/^[^_].*\.(sass|scss)$/')
+            ->files();
 
         return $this
             ->collectionBuilder()

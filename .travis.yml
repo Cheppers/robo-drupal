@@ -2,6 +2,7 @@
 cache:
     directories:
         - '$HOME/.composer/cache'
+        - '$HOME/.sassphp'
 
 matrix:
     fast_finish: true

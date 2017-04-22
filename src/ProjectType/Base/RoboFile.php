@@ -563,17 +563,14 @@ class RoboFile extends Tasks
                     ->setBundleGemFile($sassRoot->bundleGemFile)
             )
             ->addCode(function () use ($sassRoot) {
-                $cssFiles = (new Finder)
+                $cssFiles = (new Finder())
                     ->in($sassRoot->cssDir)
                     ->name('*.css')
-                    ->name('*.css.map');
+                    ->name('*.css.map')
+                    ->files();
+                (new Filesystem())->remove($cssFiles);
 
-                $fs = new Filesystem();
-
-                /** @var \Symfony\Component\Finder\SplFileInfo $cssFile */
-                foreach ($cssFiles as $cssFile) {
-                    $fs->remove($cssFile->getPathname());
-                }
+                return 0;
             })
             ->addTask(
                 $this

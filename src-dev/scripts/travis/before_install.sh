@@ -34,3 +34,5 @@ if [[ "${TRAVIS_OS_NAME}" == 'osx' ]]; then
     curl -s 'http://getcomposer.org/installer' | php
     ln -s "$(pwd)/composer.phar" "$HOME/bin/composer"
 fi
+
+src-dev/scripts/install-php-ext-sass.sh

@@ -18,9 +18,11 @@ use Cheppers\Robo\TsLint\TsLintTaskLoader;
 use Robo\Collection\CollectionBuilder;
 use Robo\Contract\TaskInterface;
 use Robo\Task\Filesystem\loadShortcuts as FilesystemShortcuts;
+use Symfony\Component\Console\Helper\Table;
 use Symfony\Component\Filesystem\Filesystem;
 use Symfony\Component\Finder\Finder;
 use Symfony\Component\Process\Process;
+use Symfony\Component\Yaml\Yaml;
 use Webmozart\PathUtil\Path;
 
 /**
@@ -152,12 +154,32 @@ class RoboFile extends Base\RoboFile
     /**
      * Lists the managed Drupal extensions.
      */
-    public function selfManagedExtensions()
-    {
-        // @todo Improve the output format.
+    public function selfManagedExtensions(
+        array $options = [
+            'format' => 'table',
+        ]
+    ) {
         $managedExtensions = $this->getManagedDrupalExtensions();
+        $rows = [];
         foreach ($managedExtensions as $e) {
-            $this->say("{$e->packageVendor}/{$e->packageName} {$e->path}");
+            $rows[$e->packageName] = [
+                'vendor' => $e->packageVendor,
+                'name' => $e->packageName,
+                'path' => $e->path,
+            ];
+        }
+
+        switch ($options['format']) {
+            case 'table':
+                (new Table($this->output()))
+                    ->setHeaders(['Vendor', 'Name', 'Path'])
+                    ->addRows($rows)
+                    ->render();
+                break;
+
+            case 'yaml':
+                $this->output()->write(Yaml::dump($rows));
+                break;
         }
     }
     //endregion

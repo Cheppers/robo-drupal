@@ -484,6 +484,10 @@ class RoboFile extends Base\RoboFile
             '.gitignore' => true,
             '*.json' => true,
             '*.scss' => true,
+            '*.png' => true,
+            '*.jpeg' => true,
+            '*.jpg' => true,
+            '*.svg' => true,
         ];
         $options['extensions'] += [
             'php/PHP' => true,

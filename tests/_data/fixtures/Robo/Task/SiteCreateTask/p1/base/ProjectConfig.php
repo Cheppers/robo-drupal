@@ -11,7 +11,6 @@ return call_user_func(function () {
   $projectConfig->gitExecutable = 'git';
   $projectConfig->environment = 'dev';
   $projectConfig->drupalRootDir = 'drupal_root';
-  $projectConfig->publicHtmlDir = 'public_html';
   $projectConfig->phpVariants = [];
 
   $projectConfig->phpVariants['709-dev'] = new PhpVariantConfig();

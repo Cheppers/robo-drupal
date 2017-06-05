@@ -169,7 +169,9 @@ class GeneralReleaseTask extends BaseTask implements ContainerAwareInterface
         'Gemfile.lock' => true,
         'Gruntfile.js' => true,
         'Guardfile' => true,
+        'npm-shrinkwrap.json' => true,
         'package.json' => true,
+        'yarn.lock' => true,
     ];
 
     public function getExcludePatterns(): array

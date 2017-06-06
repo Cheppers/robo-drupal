@@ -129,7 +129,7 @@ class RoboFile extends Tasks
             'db' => '',
         ]
     ): CollectionBuilder {
-        $siteId = $this->validateInputSiteId($options['site']);
+        $site = $this->validateInputSiteId($options['site']);
         $phpVariants = $this->validateInputPhpVariantIds($options['php']);
         $databaseServers = $this->validateInputDatabaseServerIds($options['db']);
 
@@ -158,7 +158,7 @@ class RoboFile extends Tasks
         $placeholders = [
             '{php}' => '',
             '{db}' => '',
-            '{siteBranch}' => $siteId,
+            '{siteBranch}' => $site->id,
         ];
         foreach ($databaseServers as $databaseServer) {
             $tasks = [];
@@ -172,7 +172,7 @@ class RoboFile extends Tasks
                 }
 
                 $taskId = "run-tests.{$phpVariant->id}.{$databaseServer->id}";
-                $tasks[$taskId] = $this->getTaskDrupalCoreTestsRun($subjects, $siteId, $phpVariant, $databaseServer);
+                $tasks[$taskId] = $this->getTaskDrupalCoreTestsRun($subjects, $site->id, $phpVariant, $databaseServer);
             }
 
             $cb->addTaskList($tasks);

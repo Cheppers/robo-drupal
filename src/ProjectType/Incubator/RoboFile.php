@@ -449,11 +449,11 @@ class RoboFile extends Base\RoboFile
             ],
         ];
 
-        $options['files']['**/*.css'] = !$extension->hasSCSS;
-        $options['ignore']['*.css'] = $extension->hasSCSS;
+        $options['files']['**/*.css'] = $extension->hasCSS;
+        $options['ignore']['*.css'] = !$extension->hasCSS;
 
-        $options['files']['**/*.js'] = !$extension->hasTypeScript;
-        $options['ignore']['*.js'] = $extension->hasTypeScript;
+        $options['files']['**/*.js'] = $extension->hasJavaScript;
+        $options['ignore']['*.js'] = !$extension->hasJavaScript;
 
         return $this->getTaskPhpcsLint($options);
     }
@@ -807,12 +807,13 @@ class RoboFile extends Base\RoboFile
             }
 
             $ec = $this->projectConfig->managedDrupalExtensions[$name];
-            $ec->name = $packageName;
-            $ec->path = $path;
             $ec->packageVendor = $vendor;
             $ec->packageName = $name;
+            $ec->path = $path;
             $ec->hasGit = file_exists("$path/.git");
+            $ec->hasJavaScript = $this->hasDrupalExtensionJavaScript($path);
             $ec->hasTypeScript = $this->hasDrupalExtensionTypeScript($path);
+            $ec->hasCSS = $this->hasDrupalExtensionCss($path);
             $ec->hasSCSS = $this->hasDrupalExtensionScss($path);
 
             if (!$ec->phpcs->files) {
@@ -860,13 +861,45 @@ class RoboFile extends Base\RoboFile
 
     protected function hasDrupalExtensionTypeScript(string $path): bool
     {
-        // @todo Better detection.
-        return file_exists("$path/tsconfig.json");
+        $result = $this
+            ->taskGitListFiles()
+            ->setWorkingDirectory($path)
+            ->setPaths(['*.ts'])
+            ->run();
+
+        return !empty($result['files']);
+    }
+
+    protected function hasDrupalExtensionJavaScript(string $path): bool
+    {
+        $result = $this
+            ->taskGitListFiles()
+            ->setWorkingDirectory($path)
+            ->setPaths(['*.js'])
+            ->run();
+
+        return !empty($result['files']);
+    }
+
+    protected function hasDrupalExtensionCss(string $path): bool
+    {
+        $result = $this
+            ->taskGitListFiles()
+            ->setWorkingDirectory($path)
+            ->setPaths(['*.css'])
+            ->run();
+
+        return !empty($result['files']);
     }
 
     protected function hasDrupalExtensionScss(string $path): bool
     {
-        // @todo Better detection.
-        return file_exists("$path/config.rb");
+        $result = $this
+            ->taskGitListFiles()
+            ->setWorkingDirectory($path)
+            ->setPaths(['*.scss', '*.sass'])
+            ->run();
+
+        return !empty($result['files']);
     }
 }

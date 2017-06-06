@@ -44,7 +44,11 @@ class DrupalExtensionConfig extends BaseConfig
      */
     public $phpcs = null;
 
+    public $hasJavaScript = false;
+
     public $hasTypeScript = false;
+
+    public $hasCSS = false;
 
     public $hasSCSS = false;
 
@@ -70,7 +74,9 @@ class DrupalExtensionConfig extends BaseConfig
             'type' => 'subConfig',
             'class' => PhpcsConfig::class,
         ];
+        $this->propertyMapping['hasJavaScript'] = 'hasJavaScript';
         $this->propertyMapping['hasTypeScript'] = 'hasTypeScript';
+        $this->propertyMapping['hasCSS'] = 'hasCSS';
         $this->propertyMapping['hasSCSS'] = 'hasSCSS';
         $this->propertyMapping['scssLint'] = 'scssLint';
 

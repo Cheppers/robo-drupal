@@ -141,7 +141,6 @@ class ProjectConfigTest extends Unit
     public function testGetProjectUrls(array $expected, array $phpIds, array $dbIds)
     {
         $pc = new ProjectConfig();
-        $pc->name = 'a';
         $pc->baseHostName = 'b.c';
         foreach ($phpIds as $phpId) {
             $pc->phpVariants[$phpId] = new PhpVariantConfig();

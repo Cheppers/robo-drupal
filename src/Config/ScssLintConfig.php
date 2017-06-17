@@ -100,25 +100,26 @@ class ScssLintConfig extends BaseConfig
      */
     protected function initPropertyMapping()
     {
+        $this->propertyMapping += [
+            'assetJarMapping' => 'assetJarMapping',
+            'bundleExecutable' => 'bundleExecutable',
+            'bundleGemFile' => 'bundleGemFile',
+            'color' => 'color',
+            'configFile' => 'configFile',
+            'exclude' => 'exclude',
+            'failOn' => 'failOn',
+            'failOnNoFiles' => 'failOnNoFiles',
+            'format' => 'format',
+            'linters' => 'linters',
+            'lintReporters' => 'lintReporters',
+            'out' => 'out',
+            'paths' => 'paths',
+            'pathsGitStaged' => 'pathsGitStaged',
+            'require' => 'require',
+            'scssLintExecutable' => 'scssLintExecutable',
+            'workingDirectory' => 'workingDirectory',
+        ];
         parent::initPropertyMapping();
-
-        $this->propertyMapping['assetJarMapping'] = 'assetJarMapping';
-        $this->propertyMapping['bundleExecutable'] = 'bundleExecutable';
-        $this->propertyMapping['bundleGemFile'] = 'bundleGemFile';
-        $this->propertyMapping['color'] = 'color';
-        $this->propertyMapping['configFile'] = 'configFile';
-        $this->propertyMapping['exclude'] = 'exclude';
-        $this->propertyMapping['failOn'] = 'failOn';
-        $this->propertyMapping['failOnNoFiles'] = 'failOnNoFiles';
-        $this->propertyMapping['format'] = 'format';
-        $this->propertyMapping['linters'] = 'linters';
-        $this->propertyMapping['lintReporters'] = 'lintReporters';
-        $this->propertyMapping['out'] = 'out';
-        $this->propertyMapping['paths'] = 'paths';
-        $this->propertyMapping['pathsGitStaged'] = 'pathsGitStaged';
-        $this->propertyMapping['require'] = 'require';
-        $this->propertyMapping['scssLintExecutable'] = 'scssLintExecutable';
-        $this->propertyMapping['workingDirectory'] = 'workingDirectory';
 
         return $this;
     }

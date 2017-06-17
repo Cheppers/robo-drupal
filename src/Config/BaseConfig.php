@@ -33,7 +33,7 @@ class BaseConfig
      */
     protected function initPropertyMapping()
     {
-        $this->propertyMapping['id'] = 'id';
+        $this->propertyMapping += ['id' => 'id'];
 
         return $this;
     }
@@ -87,7 +87,8 @@ class BaseConfig
                     break;
 
                 case 'subConfigs':
-                    foreach ($this->data[$src] as $subConfigData) {
+                    foreach ($this->data[$src] as $subConfigId => $subConfigData) {
+                        $subConfigData += ['id' => $subConfigId];
                         $subConfig = new $handler['class']($subConfigData);
                         $this->{$handler['destination']}[$subConfig->id] = $subConfig;
                     }

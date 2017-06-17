@@ -30,6 +30,11 @@ class ProjectConfig extends BaseConfig
     /**
      * @var string
      */
+    public $siteAliasPattern = '{baseHostPort}.{php}.{db}.{siteBranch}.{baseHostName}';
+
+    /**
+     * @var string
+     */
     public $siteVariantDirPattern = '{siteBranch}.{db}';
 
     /**
@@ -105,7 +110,7 @@ class ProjectConfig extends BaseConfig
     public $composerExecutable = 'composer';
 
     /**
-     * @var \Cheppers\Robo\Drupal\Config\SiteConfig[]
+     * @var SiteConfig[]
      */
     public $sites = [];
 
@@ -114,7 +119,6 @@ class ProjectConfig extends BaseConfig
      */
     protected function initPropertyMapping()
     {
-        parent::initPropertyMapping();
         $this->propertyMapping += [
             'baseHostName' => 'baseHostName',
             'baseHostPort' => 'baseHostPort',
@@ -131,20 +135,25 @@ class ProjectConfig extends BaseConfig
             'environment' => 'environment',
             'gitExecutable' => 'gitExecutable',
             'outerSitesSubDir' => 'outerSitesSubDir',
-            'phpVariants' => 'phpVariants',
+            'phpVariants' => [
+                'type' => 'subConfigs',
+                'class' => PhpVariantConfig::class,
+            ],
             'reportDir' => 'reportDir',
             'sites' => [
                 'type' => 'subConfigs',
-                'class' => '\Cheppers\Robo\Drupal\Config\SiteConfig',
+                'class' => SiteConfig::class,
             ],
-            'siteVariantDirPattern' => 'siteVariantDirPattern',
             'siteVariantUrlPattern' => 'siteVariantUrlPattern',
+            'siteAliasPattern' => 'siteAliasPattern',
+            'siteVariantDirPattern' => 'siteVariantDirPattern',
         ];
+        parent::initPropertyMapping();
 
         return $this;
     }
 
-    public function getDefaultSiteId(): string
+    public function getDefaultSiteId(): ?string
     {
         if ($this->defaultSiteId) {
             if (!isset($this->sites[$this->defaultSiteId])) {
@@ -163,7 +172,7 @@ class ProjectConfig extends BaseConfig
 
         $first = each($this->sites);
 
-        return $first['key'] ?? '';
+        return $first['key'] ?? null;
     }
 
     public function getBaseHost(): string
@@ -184,8 +193,8 @@ class ProjectConfig extends BaseConfig
     public function getProjectUrls(): array
     {
         $sites = [];
-        foreach (array_keys($this->sites) as $sitesSubDir) {
-            $sites += $this->getSiteBranchUrls($sitesSubDir);
+        foreach ($this->sites as $site) {
+            $sites += $this->getSiteBranchUrls($site->id);
         }
 
         asort($sites);
@@ -193,13 +202,38 @@ class ProjectConfig extends BaseConfig
         return $sites;
     }
 
-    public function getSiteBranchUrls(string $siteBranch): array
+    public function getSitesPhpDefinition(): array
+    {
+        $sitesPhp = [];
+        $placeholders = [
+            '{baseHostPort}' => Utils::isDefaultHttpPort($this->baseHostPort) ? '' : $this->baseHostPort,
+            '{baseHostName}' => $this->getBaseHostName(),
+            '{php}' => null,
+            '{db}' => null,
+            '{siteBranch}' => null,
+        ];
+        foreach ($this->sites as $site) {
+            $placeholders['{siteBranch}'] = $site->id;
+            foreach ($this->databaseServers as $databaseServer) {
+                $placeholders['{db}'] = $databaseServer->id;
+                foreach ($this->phpVariants as $phpVariant) {
+                    $placeholders['{php}'] = $phpVariant->id;
+                    $alias = $this->processPattern($this->siteAliasPattern, $placeholders);
+                    $sitesPhp[$alias] = $this->processPattern($this->siteVariantDirPattern, $placeholders);
+                }
+            }
+        }
+
+        return $sitesPhp;
+    }
+
+    public function getSiteBranchUrls(string $siteId): array
     {
         $urls = [];
         $placeholders = [
             '{php}' => null,
             '{db}' => null,
-            '{siteBranch}' => $siteBranch,
+            '{siteBranch}' => $siteId,
         ];
         foreach (array_keys($this->phpVariants) as $php) {
             $placeholders['{php}'] = $php;
@@ -225,7 +259,7 @@ class ProjectConfig extends BaseConfig
     }
 
     /**
-     * @param \Cheppers\Robo\Drupal\Config\SiteConfig $siteId
+     * @param SiteConfig $siteId
      * @param \Cheppers\Robo\Drupal\Config\DatabaseServerConfig[] $dbConfigs
      * @param \Cheppers\Robo\Drupal\Config\PhpVariantConfig[] $phpVariants
      *
@@ -278,13 +312,15 @@ class ProjectConfig extends BaseConfig
 
     protected function processPattern(string $pattern, array $placeholders): string
     {
+        $separator = '.';
+
         $placeholders += [
             '{baseHost}' => $this->getBaseHost(),
         ];
 
         $result = strtr($pattern, $placeholders);
+        $replacePattern = '/' . preg_quote($separator) . '{2,}/';
 
-        // @todo The delimiter can be other than "." (dot).
-        return trim(preg_replace('/\.{2,}/', '.', $result), '.');
+        return trim(preg_replace($replacePattern, $separator, $result), $separator);
     }
 }

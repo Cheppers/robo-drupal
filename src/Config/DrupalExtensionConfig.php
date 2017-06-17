@@ -63,22 +63,23 @@ class DrupalExtensionConfig extends BaseConfig
      */
     protected function initPropertyMapping()
     {
-        parent::initPropertyMapping();
-
-        $this->propertyMapping['enabled'] = 'enabled';
-        $this->propertyMapping['path'] = 'path';
-        $this->propertyMapping['packageVendor'] = 'packageVendor';
-        $this->propertyMapping['packageName'] = 'packageName';
-        $this->propertyMapping['hasGit'] = 'hasGit';
-        $this->propertyMapping['phpcs'] = [
-            'type' => 'subConfig',
-            'class' => PhpcsConfig::class,
+        $this->propertyMapping += [
+            'enabled' => 'enabled',
+            'path' => 'path',
+            'packageVendor' => 'packageVendor',
+            'packageName' => 'packageName',
+            'hasGit' => 'hasGit',
+            'hasJavaScript' => 'hasJavaScript',
+            'hasTypeScript' => 'hasTypeScript',
+            'hasCSS' => 'hasCSS',
+            'hasSCSS' => 'hasSCSS',
+            'scssLint' => 'scssLint',
+            'phpcs' => [
+                'type' => 'subConfig',
+                'class' => PhpcsConfig::class,
+            ],
         ];
-        $this->propertyMapping['hasJavaScript'] = 'hasJavaScript';
-        $this->propertyMapping['hasTypeScript'] = 'hasTypeScript';
-        $this->propertyMapping['hasCSS'] = 'hasCSS';
-        $this->propertyMapping['hasSCSS'] = 'hasSCSS';
-        $this->propertyMapping['scssLint'] = 'scssLint';
+        parent::initPropertyMapping();
 
         return $this;
     }

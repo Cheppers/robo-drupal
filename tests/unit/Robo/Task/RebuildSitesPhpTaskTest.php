@@ -2,10 +2,7 @@
 
 namespace Cheppers\Robo\Drupal\Tests\Unit\Robo\Task;
 
-use Cheppers\Robo\Drupal\Config\DatabaseServerConfig;
-use Cheppers\Robo\Drupal\Config\PhpVariantConfig;
 use Cheppers\Robo\Drupal\ProjectType\Incubator\ProjectConfig;
-use Cheppers\Robo\Drupal\Config\SiteConfig;
 use Cheppers\Robo\Drupal\Robo\Task\RebuildSitesPhpTask;
 use Codeception\Test\Unit;
 use Codeception\Util\Stub;
@@ -55,10 +52,10 @@ class RebuildSitesPhpTaskTest extends Unit
                     '$sites = [];',
                     '',
                 ]),
-                "{$fixturesDir}/with-example-sites-php",
-                [],
-                [],
-                [],
+                [
+                    'id' => 'foo',
+                    'drupalRootDir' => "{$fixturesDir}/with-example-sites-php",
+                ],
             ],
             'without example.sites.php' => [
                 implode("\n", [
@@ -67,24 +64,101 @@ class RebuildSitesPhpTaskTest extends Unit
                     '$sites = [];',
                     '',
                 ]),
-                "{$fixturesDir}/without-example-sites-php",
-                [],
-                [],
-                [],
+                [
+                    'id' => 'foo',
+                    'drupalRootDir' => "{$fixturesDir}/without-example-sites-php",
+                ],
             ],
-            'php7.my56.default.foo.localhost' => [
+            '70106.my.default.foo.localhost' => [
                 implode("\n", [
                     '<?php',
                     '',
                     '$sites = [',
-                    "  'php7.my56.default.foo.localhost' => 'default.my56',",
+                    "  '70106.my.default.foo.localhost' => 'default.my',",
                     '];',
                     '',
                 ]),
-                "{$fixturesDir}/without-example-sites-php",
-                ['php7'],
-                ['my56'],
-                ['default'],
+                [
+                    'id' => 'foo',
+                    'drupalRootDir' => "{$fixturesDir}/without-example-sites-php",
+                    'phpVariants' => [
+                        '70106' => [],
+                    ],
+                    'databaseServers' => [
+                        'my' => [],
+                    ],
+                    'sites' => [
+                        'default' => [],
+                    ],
+                ],
+            ],
+            '(70106|50630).(my|pg).(default|other).foo.localhost' => [
+                implode("\n", [
+                    '<?php',
+                    '',
+                    '$sites = [',
+                    "  '70106.my.default.foo.localhost' => 'default.my',",
+                    "  '50630.my.default.foo.localhost' => 'default.my',",
+                    "  '70106.pg.default.foo.localhost' => 'default.pg',",
+                    "  '50630.pg.default.foo.localhost' => 'default.pg',",
+                    "  '70106.my.other.foo.localhost' => 'other.my',",
+                    "  '50630.my.other.foo.localhost' => 'other.my',",
+                    "  '70106.pg.other.foo.localhost' => 'other.pg',",
+                    "  '50630.pg.other.foo.localhost' => 'other.pg',",
+                    '];',
+                    '',
+                ]),
+                [
+                    'id' => 'foo',
+                    'drupalRootDir' => "{$fixturesDir}/without-example-sites-php",
+                    'phpVariants' => [
+                        '70106' => [],
+                        '50630' => [],
+                    ],
+                    'databaseServers' => [
+                        'my' => [],
+                        'pg' => [],
+                    ],
+                    'sites' => [
+                        'default' => [],
+                        'other' => [],
+                    ],
+                ],
+            ],
+            '(70106|50630).(my|pg).(default|other).incubator' => [
+                implode("\n", [
+                    '<?php',
+                    '',
+                    '$sites = [',
+                    "  '1080.70106.my.default.incubator' => 'default.my',",
+                    "  '1080.50630.my.default.incubator' => 'default.my',",
+                    "  '1080.70106.pg.default.incubator' => 'default.pg',",
+                    "  '1080.50630.pg.default.incubator' => 'default.pg',",
+                    "  '1080.70106.my.other.incubator' => 'other.my',",
+                    "  '1080.50630.my.other.incubator' => 'other.my',",
+                    "  '1080.70106.pg.other.incubator' => 'other.pg',",
+                    "  '1080.50630.pg.other.incubator' => 'other.pg',",
+                    '];',
+                    '',
+                ]),
+                [
+                    'id' => 'foo',
+                    'baseHostName' => 'incubator',
+                    'baseHostPort' => 1080,
+                    'drupalRootDir' => "{$fixturesDir}/without-example-sites-php",
+                    'phpVariants' => [
+                        '70106' => [],
+                        '50630' => [],
+                    ],
+                    'databaseServers' => [
+                        'my' => [],
+                        'pg' => [],
+                    ],
+                    'sites' => [
+                        'default' => [],
+                        'other' => [],
+                    ],
+                ],
             ],
         ];
     }
@@ -94,29 +168,12 @@ class RebuildSitesPhpTaskTest extends Unit
      */
     public function testRun(
         string $expected,
-        string $drupalRootDir,
-        array $phpVariants,
-        array $databaseServers,
-        array $sites
+        array $projectConfig
     ) {
         $container = Robo::createDefaultContainer();
         Robo::setContainer($container);
 
-        $pc = new ProjectConfig();
-        $pc->id = 'foo';
-        $pc->drupalRootDir = $drupalRootDir;
-        foreach ($phpVariants as $phpVariant) {
-            $pc->phpVariants[$phpVariant] = new PhpVariantConfig();
-        }
-
-        foreach ($databaseServers as $databaseServer) {
-            $pc->databaseServers[$databaseServer] = new DatabaseServerConfig();
-        }
-
-        foreach ($sites as $site) {
-            $pc->sites[$site] = new SiteConfig();
-        }
-
+        $pc = new ProjectConfig($projectConfig);
         $pc->populateDefaultValues();
 
         $options = [
@@ -138,8 +195,8 @@ class RebuildSitesPhpTaskTest extends Unit
 
         $result = $task->run();
 
-        $this->tester->assertEquals($expected, file_get_contents("$drupalRootDir/sites/sites.php"));
-        $this->tester->assertEquals($pc->getProjectUrls(), $result['projectUrls']);
+        $this->tester->assertEquals($expected, file_get_contents("{$projectConfig['drupalRootDir']}/sites/sites.php"));
+        $this->tester->assertEquals($pc->getSitesPhpDefinition(), $result['sitesPhp']);
     }
 
     protected function cleanFixturesDir()
@@ -148,7 +205,7 @@ class RebuildSitesPhpTaskTest extends Unit
         $filesToDelete = array_filter(
             [
                 "$fixturesDir/with-example-sites-php/sites/sites.php",
-                //"$fixturesDir/without-example-sites-php/sites/sites.php",
+                "$fixturesDir/without-example-sites-php/sites/sites.php",
                 "$fixturesDir/without-example-sites-php/sites",
             ],
             'file_exists'

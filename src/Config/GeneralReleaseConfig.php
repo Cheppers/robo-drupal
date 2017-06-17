@@ -17,12 +17,13 @@ class GeneralReleaseConfig extends BaseConfig
      */
     protected function initPropertyMapping()
     {
+        $this->propertyMapping += [
+            'releaseDir' => 'releaseDir',
+            'gitRemoteName' => 'gitRemoteName',
+            'gitRemoteBranch' => 'gitRemoteBranch',
+            'gitLocalBranch' => 'gitLocalBranch',
+        ];
         parent::initPropertyMapping();
-
-        $this->propertyMapping['releaseDir'] = 'releaseDir';
-        $this->propertyMapping['gitRemoteName'] = 'gitRemoteName';
-        $this->propertyMapping['gitRemoteBranch'] = 'gitRemoteBranch';
-        $this->propertyMapping['gitLocalBranch'] = 'gitLocalBranch';
 
         return $this;
     }

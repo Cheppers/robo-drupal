@@ -40,16 +40,17 @@ class PhpcsConfig extends BaseConfig
      */
     protected function initPropertyMapping()
     {
+        $this->propertyMapping += [
+            'files' => 'files',
+            'filesGitStaged' => 'filesGitStaged',
+            'exclude' => 'exclude',
+            'standard' => 'standard',
+            'failOn' => 'failOn',
+            'lintReporters' => 'lintReporters',
+            'extensions' => 'extensions',
+            'ignore' => 'ignore',
+        ];
         parent::initPropertyMapping();
-
-        $this->propertyMapping['files'] = 'files';
-        $this->propertyMapping['filesGitStaged'] = 'filesGitStaged';
-        $this->propertyMapping['exclude'] = 'exclude';
-        $this->propertyMapping['standard'] = 'standard';
-        $this->propertyMapping['failOn'] = 'failOn';
-        $this->propertyMapping['lintReporters'] = 'lintReporters';
-        $this->propertyMapping['extensions'] = 'extensions';
-        $this->propertyMapping['ignore'] = 'ignore';
 
         return $this;
     }

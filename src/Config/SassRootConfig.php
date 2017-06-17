@@ -24,11 +24,12 @@ class SassRootConfig extends BaseConfig
      */
     protected function initPropertyMapping()
     {
+        $this->propertyMapping += [
+            'bundleGemFile' => 'bundleGemFile',
+            'sassDir' => 'sassDir',
+            'cssDir' => 'cssDir',
+        ];
         parent::initPropertyMapping();
-
-        $this->propertyMapping['bundleGemFile'] = 'bundleGemFile';
-        $this->propertyMapping['sassDir'] = 'sassDir';
-        $this->propertyMapping['cssDir'] = 'cssDir';
 
         return $this;
     }

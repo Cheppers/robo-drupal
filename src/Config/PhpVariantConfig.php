@@ -68,15 +68,16 @@ class PhpVariantConfig extends BaseConfig
      */
     protected function initPropertyMapping()
     {
+        $this->propertyMapping += [
+            'binDir' => 'binDir',
+            'phpExecutable' => 'phpExecutable',
+            'phpdbgExecutable' => 'phpdbgExecutable',
+            'version' => 'version',
+            'cliIniFile' => 'cliIniFile',
+            'fastCgiPass' => 'fastCgiPass',
+            'ignoreTesting' => 'ignoreTesting',
+        ];
         parent::initPropertyMapping();
-
-        $this->propertyMapping['binDir'] = 'binDir';
-        $this->propertyMapping['phpExecutable'] = 'phpExecutable';
-        $this->propertyMapping['phpdbgExecutable'] = 'phpdbgExecutable';
-        $this->propertyMapping['version'] = 'version';
-        $this->propertyMapping['cliIniFile'] = 'cliIniFile';
-        $this->propertyMapping['fastCgiPass'] = 'fastCgiPass';
-        $this->propertyMapping['ignoreTesting'] = 'ignoreTesting';
 
         return $this;
     }

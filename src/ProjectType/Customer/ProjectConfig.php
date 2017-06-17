@@ -36,11 +36,11 @@ class ProjectConfig extends Base\ProjectConfig
      */
     protected function initPropertyMapping()
     {
-        parent::initPropertyMapping();
         $this->propertyMapping += [
             'releaseDir' => 'releaseDir',
             'sassRoots' => 'sassRoots',
         ];
+        parent::initPropertyMapping();
 
         return $this;
     }

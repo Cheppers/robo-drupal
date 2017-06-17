@@ -61,21 +61,21 @@ class DatabaseServerConfig extends BaseConfig
      */
     protected function initPropertyMapping()
     {
-        parent::initPropertyMapping();
-
-        $this->propertyMapping['connection'] = 'connection';
-        $this->propertyMapping['connectionLocal'] = 'connectionLocal';
-        $this->propertyMapping['authenticationMethod'] = 'authenticationMethod';
-
-        $this->propertyMapping['driver'] = [
-            'type' => 'closure',
-            'closure' => function ($driver) {
-                $this->connection = static::$driverMap[$driver];
-                if ($driver === 'sqlite') {
-                    $this->authenticationMethod = 'none';
+        $this->propertyMapping += [
+            'connection' => 'connection',
+            'connectionLocal' => 'connectionLocal',
+            'authenticationMethod' => 'authenticationMethod',
+            'driver' => [
+                'type' => 'closure',
+                'closure' => function ($driver) {
+                    $this->connection = static::$driverMap[$driver];
+                    if ($driver === 'sqlite') {
+                        $this->authenticationMethod = 'none';
+                    }
                 }
-            }
+            ],
         ];
+        parent::initPropertyMapping();
 
         return $this;
     }

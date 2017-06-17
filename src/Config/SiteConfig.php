@@ -39,12 +39,13 @@ class SiteConfig extends BaseConfig
      */
     protected function initPropertyMapping()
     {
+        $this->propertyMapping += [
+            'urls' => 'urls',
+            'drushAliasLocal' => 'drushAliasLocal',
+            'installProfileName' => 'installProfileName',
+            'configSkipModules' => 'configSkipModules',
+        ];
         parent::initPropertyMapping();
-
-        $this->propertyMapping['urls'] = 'urls';
-        $this->propertyMapping['drushAliasLocal'] = 'drushAliasLocal';
-        $this->propertyMapping['installProfileName'] = 'installProfileName';
-        $this->propertyMapping['configSkipModules'] = 'configSkipModules';
 
         return $this;
     }

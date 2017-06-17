@@ -25,9 +25,6 @@ use Symfony\Component\Process\Process;
 use Symfony\Component\Yaml\Yaml;
 use Webmozart\PathUtil\Path;
 
-/**
- * @todo Support for Drupal extensions where the "vendor" name isn't "drupal".
- */
 class RoboFile extends Base\RoboFile
 {
     use ComposerTaskLoader;
@@ -67,7 +64,7 @@ class RoboFile extends Base\RoboFile
             ->addTaskList([
                 'lint.composer.lock' => $this->taskComposerValidate(),
                 'lint.phpcs.psr2' => $this->getTaskPhpcsLint([
-                    'standard' => 'PSR2',
+                    'standards' => ['PSR2'],
                     'files' => $this->selfPhpcsFiles,
                 ]),
             ]);
@@ -131,7 +128,7 @@ class RoboFile extends Base\RoboFile
             ->collectionBuilder()
             ->addTaskList([
                 'lint:phpcs' => $this->getTaskPhpcsLint([
-                    'standard' => 'PSR2',
+                    'standards' => ['PSR2'],
                     'files' => $this->selfPhpcsFiles,
                 ]),
             ]);
@@ -143,7 +140,7 @@ class RoboFile extends Base\RoboFile
             ->collectionBuilder()
             ->addTaskList([
                 'lint:phpcs' => $this->getTaskPhpcsLint([
-                    'standard' => 'PSR2',
+                    'standards' => ['PSR2'],
                     'files' => $this->selfPhpcsFiles,
                 ]),
                 'composer:validate' => $this->taskComposerValidate(),
@@ -464,7 +461,7 @@ class RoboFile extends Base\RoboFile
 
         $options += [
             'workingDirectory' => '',
-            'standard' => 'Drupal',
+            'standards' => ['Drupal', 'DrupalPractice'],
             'failOn' => 'warning',
             'lintReporters' => [
                 'lintVerboseReporter' => null,
@@ -476,7 +473,7 @@ class RoboFile extends Base\RoboFile
             ],
         ];
 
-        $standardLower = strtolower($options['standard']);
+        $standardLower = strtolower(implode('-', $options['standards']));
 
         $options['ignore'] += [
             'node_modules/' => true,
@@ -494,7 +491,9 @@ class RoboFile extends Base\RoboFile
             'inc/PHP' => true,
         ];
 
-        if ($options['standard'] === 'Drupal') {
+        if (in_array('Drupal', $options['standards'])
+            || in_array('DrupalPractice', $options['standards'])
+        ) {
             $options['extensions'] += [
                 'engine/PHP' => true,
                 'install/PHP' => true,

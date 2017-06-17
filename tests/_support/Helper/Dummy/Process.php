@@ -1,6 +1,6 @@
 <?php
 
-namespace Helper\Dummy;
+namespace Cheppers\Robo\Drupal\Test\Helper\Dummy;
 
 /**
  * Class Process.
@@ -16,7 +16,7 @@ class Process extends \Symfony\Component\Process\Process
     public static $prophecy = [];
 
     /**
-     * @var \Helper\Dummy\Process[]
+     * @var Cheppers\Robo\Drupal\Test\Helper\Dummy\Process[]
      */
     public static $instances = null;
 

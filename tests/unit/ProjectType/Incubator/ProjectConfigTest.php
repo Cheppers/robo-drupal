@@ -24,7 +24,7 @@ class ProjectConfigTest extends Unit
     }
 
     /**
-     * @var \UnitTester
+     * @var \Cheppers\Robo\Drupal\Test\UnitTester
      */
     protected $tester;
 

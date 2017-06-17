@@ -43,6 +43,8 @@
     },
     "autoload-dev": {
         "psr-4": {
+            "Cheppers\\Robo\\Drupal\\Composer\\": "src-dev/Composer/",
+            "Cheppers\\Robo\\Drupal\\Test\\Helper\\": "tests/_support/Helper/",
             "Cheppers\\Robo\\Drupal\\Tests\\Acceptance\\": "tests/acceptance/",
             "Cheppers\\Robo\\Drupal\\Tests\\Unit\\": "tests/unit/"
         },
@@ -51,17 +53,7 @@
         ]
     },
     "scripts": {
-        "post-install-cmd": [
-            "@phpcs-set-installed-paths",
-            "@deploy-git-hooks",
-            "@npm-install"
-        ],
-        "post-update-cmd": [
-            "@deploy-git-hooks",
-            "@npm-install"
-        ],
-        "npm-install": "npm install",
-        "deploy-git-hooks": "\\Cheppers\\GitHooks\\Main::deploy",
-        "phpcs-set-installed-paths": "\\Cheppers\\Robo\\Drupal\\Composer\\Scripts::phpcsConfigSet"
+        "post-install-cmd": "\\Cheppers\\Robo\\Drupal\\Composer\\Scripts::postInstallCmd",
+        "post-update-cmd": "\\Cheppers\\Robo\\Drupal\\Composer\\Scripts::postUpdateCmd"
     }
 }

@@ -16,7 +16,7 @@ use Symfony\Component\Finder\Finder;
 class SiteCreateTaskTest extends Unit
 {
     /**
-     * @var \UnitTester
+     * @var \Cheppers\Robo\Drupal\Test\UnitTester
      */
     protected $tester;
 

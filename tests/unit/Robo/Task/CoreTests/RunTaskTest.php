@@ -8,7 +8,7 @@ use ReflectionClass;
 class RunTaskTest extends \Codeception\Test\Unit
 {
     /**
-     * @var \UnitTester
+     * @var \Cheppers\Robo\Drupal\Test\UnitTester
      */
     protected $tester;
 

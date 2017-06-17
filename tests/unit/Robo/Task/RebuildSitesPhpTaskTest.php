@@ -19,7 +19,7 @@ use Symfony\Component\Filesystem\Filesystem;
 class RebuildSitesPhpTaskTest extends Unit
 {
     /**
-     * @var \UnitTester
+     * @var \Cheppers\Robo\Drupal\Test\UnitTester
      */
     protected $tester;
 

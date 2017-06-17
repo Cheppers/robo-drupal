@@ -7,7 +7,7 @@ use Cheppers\Robo\Drupal\Robo\Task\CoreTests\CleanTask;
 class CleanTaskTest extends \Codeception\Test\Unit
 {
     /**
-     * @var \UnitTester
+     * @var \Cheppers\Robo\Drupal\Test\UnitTester
      */
     protected $tester;
 

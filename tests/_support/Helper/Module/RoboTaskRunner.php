@@ -1,9 +1,9 @@
 <?php
 
-namespace Helper\Module;
+namespace Cheppers\Robo\Drupal\Test\Helper\Module;
 
 use Codeception\Module as CodeceptionModule;
-use Helper\Dummy\Output as DummyOutput;
+use Cheppers\Robo\Drupal\Test\Helper\Dummy\Output as DummyOutput;
 use Robo\Robo;
 use Robo\Runner;
 use Symfony\Component\Console\Output\OutputInterface;
@@ -11,7 +11,7 @@ use Symfony\Component\Console\Output\OutputInterface;
 class RoboTaskRunner extends CodeceptionModule
 {
     /**
-     * @var \Helper\Dummy\Output
+     * @var Cheppers\Robo\Drupal\Test\Helper\Dummy\Output
      */
     protected $roboTaskStdOutput = null;
 
@@ -29,7 +29,7 @@ class RoboTaskRunner extends CodeceptionModule
 
     public function getRoboTaskStdError(): string
     {
-        /** @var \Helper\Dummy\Output $errorOutput */
+        /** @var Cheppers\Robo\Drupal\Test\Helper\Dummy\Output $errorOutput */
         $errorOutput = $this->roboTaskStdOutput->getErrorOutput();
 
         return $errorOutput->output;

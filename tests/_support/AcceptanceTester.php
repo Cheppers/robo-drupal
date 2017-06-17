@@ -1,5 +1,6 @@
 <?php
 
+namespace Cheppers\Robo\Drupal\Test;
 
 /**
  * Inherited Methods

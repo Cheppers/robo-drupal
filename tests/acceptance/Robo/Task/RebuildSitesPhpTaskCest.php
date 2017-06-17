@@ -2,7 +2,7 @@
 
 namespace Cheppers\Robo\Drupal\Tests\Acceptance\Robo\Task;
 
-use AcceptanceTester;
+use Cheppers\Robo\Drupal\Test\AcceptanceTester;
 use Symfony\Component\Filesystem\Filesystem;
 
 class RebuildSitesPhpTaskCest

@@ -258,7 +258,7 @@ class ProjectConfig extends BaseConfig
         }
 
         if (!$this->databaseServers) {
-            $this->databaseServers['my'] = new DatabaseServerConfig();
+            $this->databaseServers['my'] = new DatabaseServerConfig(['driver' => 'mysql']);
         }
 
         foreach ($this->databaseServers as $id => $db) {

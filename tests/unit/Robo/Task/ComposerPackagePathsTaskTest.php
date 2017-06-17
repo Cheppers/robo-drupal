@@ -4,8 +4,10 @@ namespace Cheppers\Robo\Drupal\Tests\Unit\Robo\Task;
 
 use Cheppers\AssetJar\AssetJar;
 use Cheppers\Robo\Drupal\Robo\Task\ComposerPackagePathsTask;
+use Cheppers\Robo\Drupal\Test\Helper\Dummy\Process as DummyProcess;
 use Codeception\Test\Unit;
 use Codeception\Util\Stub;
+use Robo\Robo;
 
 /**
  * @covers \Cheppers\Robo\Drupal\Robo\Task\ComposerPackagePathsTask
@@ -13,7 +15,7 @@ use Codeception\Util\Stub;
 class ComposerPackagePathsTaskTest extends Unit
 {
     /**
-     * @var \UnitTester
+     * @var \Cheppers\Robo\Drupal\Test\UnitTester
      */
     protected $tester;
 
@@ -22,7 +24,7 @@ class ComposerPackagePathsTaskTest extends Unit
      */
     protected function setUp()
     {
-        \Helper\Dummy\Process::reset();
+        DummyProcess::reset();
 
         parent::setUp();
     }
@@ -141,8 +143,8 @@ class ComposerPackagePathsTaskTest extends Unit
 
         $assetJar = new AssetJar();
 
-        $container = \Robo\Robo::createDefaultContainer();
-        \Robo\Robo::setContainer($container);
+        $container = Robo::createDefaultContainer();
+        Robo::setContainer($container);
 
         /** @var \Cheppers\Robo\Drupal\Robo\Task\ComposerPackagePathsTask $task */
         $task = Stub::construct(
@@ -158,12 +160,12 @@ class ComposerPackagePathsTaskTest extends Unit
                 ],
             ],
             [
-                'processClass' => \Helper\Dummy\Process::class,
+                'processClass' => DummyProcess::class,
             ]
         );
 
-        $processIndex = count(\Helper\Dummy\Process::$instances);
-        \Helper\Dummy\Process::$prophecy[$processIndex] = [
+        $processIndex = count(DummyProcess::$instances);
+        DummyProcess::$prophecy[$processIndex] = [
             'exitCode' => 0,
             'stdOutput' => $fakeStdOutput,
             'stdError' => '',
@@ -191,20 +193,20 @@ class ComposerPackagePathsTaskTest extends Unit
 
     public function testRunFail(): void
     {
-        $container = \Robo\Robo::createDefaultContainer();
-        \Robo\Robo::setContainer($container);
+        $container = Robo::createDefaultContainer();
+        Robo::setContainer($container);
 
         /** @var \Cheppers\Robo\Drupal\Robo\Task\ComposerPackagePathsTask $task */
         $task = Stub::construct(
             ComposerPackagePathsTask::class,
             [],
             [
-                'processClass' => \Helper\Dummy\Process::class,
+                'processClass' => DummyProcess::class,
             ]
         );
 
-        $processIndex = count(\Helper\Dummy\Process::$instances);
-        \Helper\Dummy\Process::$prophecy[$processIndex] = [
+        $processIndex = count(DummyProcess::$instances);
+        DummyProcess::$prophecy[$processIndex] = [
             'exitCode' => 1,
             'stdOutput' => '',
             'stdError' => '',

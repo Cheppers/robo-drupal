@@ -3,16 +3,15 @@
 namespace Cheppers\Robo\Drupal\Tests\Unit;
 
 use Cheppers\Robo\Drupal\Utils;
+use Codeception\Test\Unit;
 
 /**
- * Class UtilsTest.
- *
  * @covers \Cheppers\Robo\Drupal\Utils
  */
-class UtilsTest extends \Codeception\Test\Unit
+class UtilsTest extends Unit
 {
     /**
-     * @var \UnitTester
+     * @var \Cheppers\Robo\Drupal\Test\UnitTester
      */
     protected $tester;
 
@@ -49,6 +48,11 @@ class UtilsTest extends \Codeception\Test\Unit
         $this->tester->assertEquals($expected, Utils::phpFileExtensionPatterns($prefix, $suffix));
 
         Utils::$phpFileExtensions = $backup;
+    }
+
+    public function testGetRoboDrupalRoot(): void
+    {
+        $this->tester->assertEquals(getcwd(), Utils::getRoboDrupalRoot());
     }
 
     public function casesIsDefaultHttpPort(): array
@@ -139,6 +143,44 @@ class UtilsTest extends \Codeception\Test\Unit
         $this->tester->assertEquals($expected, Utils::isDrupalPackage($package));
     }
 
+    public function casesGetDefaultMysqlPort(): array
+    {
+        return [
+            'init 3306' => [3306, 3306],
+            'ini 0' => [3306, 0],
+            'ini 3311' => [3311, 3311],
+        ];
+    }
+
+    /**
+     * @dataProvider casesGetDefaultMysqlPort
+     */
+    public function testGetDefaultMysqlPort(int $expected, int $ini): void
+    {
+        $ini_var_name = 'mysqli.default_port';
+        $backup = ini_get($ini_var_name);
+        ini_set($ini_var_name, $ini);
+        $this->tester->assertEquals($expected, Utils::getDefaultMysqlPort());
+        ini_set($ini_var_name, $backup);
+    }
+
+    public function casesIsLocalhost(): array
+    {
+        return [
+            '127.0.0.1' => [true, '127.0.0.1'],
+            'localhost' => [true, 'localhost'],
+            'example.com' => [false, 'example.com'],
+        ];
+    }
+
+    /**
+     * @dataProvider casesIsLocalhost
+     */
+    public function testIsLocalhost($expected, $hostName): void
+    {
+        $this->tester->assertEquals($expected, Utils::isLocalhost($hostName));
+    }
+
     public function casesManipulateString(): array
     {
         return [
@@ -206,6 +248,34 @@ class UtilsTest extends \Codeception\Test\Unit
         } catch (\InvalidArgumentException $e) {
             $this->tester->assertEquals($e->getMessage(), "Unknown method: '$method'");
         }
+    }
+
+    public function casesAddUseStatement(): array
+    {
+        return [
+            'basic' => [
+                implode("\n", [
+                    '<?php',
+                    'use A\B;',
+                    'use A\C;',
+                    'use A\D;',
+                ]),
+                implode("\n", [
+                    '<?php',
+                    'use A\B;',
+                    'use A\D;',
+                ]),
+                'A\C',
+            ],
+        ];
+    }
+
+    /**
+     * @dataProvider casesAddUseStatement
+     */
+    public function testAddUseStatement(string $expected, string $phpCode, string $class, string $as = ''): void
+    {
+        $this->tester->assertEquals($expected, Utils::addUseStatement($phpCode, $class, $as));
     }
 
     /**
@@ -448,5 +518,88 @@ class UtilsTest extends \Codeception\Test\Unit
             $expected,
             Utils::getCustomDrupalProfiles($drupalRoot)
         );
+    }
+
+    public function casesIncludeFileNames(): array
+    {
+        return [
+            'empty' => [
+                [],
+                [
+                    [],
+                    [],
+                    [],
+                ],
+            ],
+            'basic' => [
+                [
+                    'a.php',
+                    'a.css',
+                ],
+                [
+                    [
+                        'a.php',
+                        'a.css',
+                        'a.scss',
+                        'a.dev.css',
+                        'a.local.css',
+                    ],
+                    [
+                        '*.php' => 'glob',
+                        '*.css' => 'glob',
+                    ],
+                    [
+                        '*.dev.css' => 'glob',
+                        '@\.local\.css$@' => 'regexp',
+                    ],
+                ],
+            ],
+        ];
+    }
+
+    /**
+     * @dataProvider casesIncludeFileNames
+     */
+    public function testIncludeFileNames(array $expected, array $args): void
+    {
+        $this->tester->assertEquals($expected, Utils::includeFileNames(...$args));
+    }
+
+    public function casesExcludeFileNames(): array
+    {
+        return [
+            'basic' => [
+                [
+                    'a.css',
+                    'a.local.css',
+                ],
+                [
+                    [
+                        'a.php',
+                        'a.css',
+                        'a.scss',
+                        'a.dev.css',
+                        'a.local.css',
+                    ],
+                    [
+                        '*.php' => 'glob',
+                        '*.css' => 'glob',
+                        '@.+\.scss$@' => 'regexp',
+                    ],
+                    [
+                        'a.css' => 'glob',
+                        '@\.local\.css$@' => 'regexp',
+                    ],
+                ],
+            ],
+        ];
+    }
+
+    /**
+     * @dataProvider casesExcludeFileNames
+     */
+    public function testExcludeFileNames($expected, array $args): void
+    {
+        $this->tester->assertEquals($expected, Utils::excludeFileNames(...$args));
     }
 }

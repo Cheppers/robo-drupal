@@ -233,7 +233,35 @@ class Utils
         return $profiles;
     }
 
-    public static function filterFileNames(array $fileNames, array $excludePatterns, array $includePatterns): array
+    /**
+     * @param string[] $fileNames
+     * @param string[] $includePatterns
+     * @param string[] $excludePatterns
+     *
+     * @return string[]
+     */
+    public static function includeFileNames(array $fileNames, array $includePatterns, array $excludePatterns): array
+    {
+        $return = [];
+        foreach ($fileNames as $fileName) {
+            if (static::fileNameMatch($fileName, $includePatterns)
+                && !static::fileNameMatch($fileName, $excludePatterns)
+            ) {
+                $return[] = $fileName;
+            }
+        }
+
+        return $return;
+    }
+
+    /**
+     * @param string[] $fileNames
+     * @param string[] $excludePatterns
+     * @param string[] $includePatterns
+     *
+     * @return string[]
+     */
+    public static function excludeFileNames(array $fileNames, array $excludePatterns, array $includePatterns): array
     {
         $return = [];
         foreach ($fileNames as $fileName) {
@@ -249,24 +277,19 @@ class Utils
 
     public static function fileNameMatch(string $fileName, array $patterns): bool
     {
-        foreach ($patterns as $pattern) {
-            if (fnmatch($pattern, $fileName)) {
-                return true;
-            }
+        foreach ($patterns as $pattern => $type) {
+            switch ($type) {
+                case 'regexp':
+                    if (preg_match($pattern, $fileName)) {
+                        return true;
+                    }
+                    break;
 
-            if (preg_match('@/$@u', $pattern) && strpos($fileName, $pattern) === 0) {
-                return true;
-            }
-
-            if (strpos($pattern, '**/') === 0
-                && strpos($fileName, '/') === false
-                && fnmatch($pattern, "a/$fileName")
-            ) {
-                return true;
-            }
-
-            if ($fileName === $pattern) {
-                return true;
+                case 'glob':
+                    if (fnmatch($pattern, $fileName)) {
+                        return true;
+                    }
+                    break;
             }
         }
 
@@ -280,9 +303,7 @@ class Utils
 
     public static function directDirectoryDescendants(string $dir): Finder
     {
-        $files = new Finder();
-
-        return $files
+        return (new Finder())
             ->in($dir)
             ->depth('== 0');
     }

@@ -151,27 +151,27 @@ class GeneralReleaseTask extends BaseTask implements ContainerAwareInterface
      * @var array
      */
     protected $excludePatterns = [
-        '*.scss' => true,
-        '*.ts' => true,
-        '.bowerrc' => true,
-        '.csslintrc' => true,
-        '.editorconfig' => true,
-        '.eslintignore' => true,
-        '.eslintrc' => true,
-        '.gitignore' => true,
-        '.jshintrc' => true,
-        '.npmignore' => true,
-        '.ruby-gemset' => true,
-        '.ruby-version' => true,
-        'bower.json' => true,
-        'config.rb' => true,
-        'Gemfile' => true,
-        'Gemfile.lock' => true,
-        'Gruntfile.js' => true,
-        'Guardfile' => true,
-        'npm-shrinkwrap.json' => true,
-        'package.json' => true,
-        'yarn.lock' => true,
+        '*.scss' => 'glob',
+        '*.ts' => 'glob',
+        '.bowerrc' => 'glob',
+        '.csslintrc' => 'glob',
+        '.editorconfig' => 'glob',
+        '.eslintignore' => 'glob',
+        '.eslintrc' => 'glob',
+        '.gitignore' => 'glob',
+        '.jshintrc' => 'glob',
+        '.npmignore' => 'glob',
+        '.ruby-gemset' => 'glob',
+        '.ruby-version' => 'glob',
+        'bower.json' => 'glob',
+        'config.rb' => 'glob',
+        'Gemfile' => 'glob',
+        'Gemfile.lock' => 'glob',
+        'Gruntfile.js' => 'glob',
+        'Guardfile' => 'glob',
+        'npm-shrinkwrap.json' => 'glob',
+        'package.json' => 'glob',
+        'yarn.lock' => 'glob',
     ];
 
     public function getExcludePatterns(): array
@@ -185,16 +185,6 @@ class GeneralReleaseTask extends BaseTask implements ContainerAwareInterface
     public function setExcludePatterns(array $excludePatterns)
     {
         $this->excludePatterns = $excludePatterns;
-
-        return $this;
-    }
-
-    /**
-     * @return $this
-     */
-    public function resetExcludePatterns()
-    {
-        $this->excludePatterns = [];
 
         return $this;
     }

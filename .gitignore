@@ -2,6 +2,7 @@
 /bin/
 /node_modules/
 
+/tests/_data/fixtures/ProjectType/Incubator/*/actual/
 /tests/_output/
 /tests/_support/_generated/
 

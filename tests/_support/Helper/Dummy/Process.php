@@ -2,25 +2,19 @@
 
 namespace Cheppers\Robo\Drupal\Test\Helper\Dummy;
 
-/**
- * Class Process.
- *
- * @package Helper
- */
 class Process extends \Symfony\Component\Process\Process
 {
-
     /**
      * @var array
      */
     public static $prophecy = [];
 
     /**
-     * @var Cheppers\Robo\Drupal\Test\Helper\Dummy\Process[]
+     * @var static[]
      */
     public static $instances = null;
 
-    public static function reset()
+    public static function reset(): void
     {
         static::$prophecy = [];
         static::$instances = [];

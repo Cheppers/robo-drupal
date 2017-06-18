@@ -5,13 +5,17 @@ namespace Cheppers\Robo\Drupal\Robo\Task;
 use Cheppers\Robo\Drupal\ProjectType\Base\ProjectConfig;
 use Cheppers\Robo\Drupal\VarExport;
 use Robo\Result;
-use Robo\Task\BaseTask;
 use Symfony\Component\Filesystem\Exception\IOException;
 use Symfony\Component\Filesystem\Filesystem;
 use Webmozart\PathUtil\Path;
 
 class RebuildSitesPhpTask extends BaseTask
 {
+    /**
+     * {@inheritdoc}
+     */
+    protected $taskName = 'Drupal - Rebuild sites.php';
+
     /**
      * @var string
      */

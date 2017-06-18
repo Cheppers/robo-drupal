@@ -49,7 +49,6 @@ class RoboFile extends Base\RoboFile
 
     //region Tasks.
     //region Self
-
     //region Self - Git hooks.
     /**
      * Git "pre-commit" hook callback.

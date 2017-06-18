@@ -6,17 +6,26 @@ use Cheppers\Robo\Drupal\Test\AcceptanceTester;
 
 class ComposerPackagePathsTaskCest
 {
+    protected $class = \ComposerPackagePathsTaskRoboFile::class;
+
+    protected function id(string $suffix): string
+    {
+        return __CLASS__ . ":$suffix";
+    }
+
     public function runBasicSuccess(AcceptanceTester $I)
     {
-        $I->runRoboTask(\ComposerPackagePathsTaskRoboFile::class, 'basic', 'composer');
-        $I->assertEquals(0, $I->getRoboTaskExitCode());
-        $I->assertEquals("Success\n", $I->getRoboTaskStdOutput());
+        $id = $this->id('basic:composer');
+        $I->runRoboTask($id, null, $this->class, 'basic', 'composer');
+        $I->assertEquals(0, $I->getRoboTaskExitCode($id));
+        $I->assertEquals("Success\n", $I->getRoboTaskStdOutput($id));
     }
 
     public function runBasicFail(AcceptanceTester $I)
     {
-        $I->runRoboTask(\ComposerPackagePathsTaskRoboFile::class, 'basic', 'false');
-        $I->assertEquals(1, $I->getRoboTaskExitCode());
-        $I->assertContains("Fail\n", $I->getRoboTaskStdError());
+        $id = $this->id('basic:false');
+        $I->runRoboTask($id, null, $this->class, 'basic', 'false');
+        $I->assertEquals(1, $I->getRoboTaskExitCode($id));
+        $I->assertContains("Fail\n", $I->getRoboTaskStdError($id));
     }
 }

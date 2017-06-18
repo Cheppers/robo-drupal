@@ -19,7 +19,6 @@ use Robo\Collection\CollectionBuilder;
 use Robo\Contract\TaskInterface;
 use Robo\Task\Filesystem\loadShortcuts as FilesystemShortcuts;
 use Symfony\Component\Console\Helper\Table;
-use Symfony\Component\Filesystem\Filesystem;
 use Symfony\Component\Finder\Finder;
 use Symfony\Component\Process\Process;
 use Symfony\Component\Yaml\Yaml;
@@ -243,7 +242,7 @@ class RoboFile extends Base\RoboFile
         $pc = $this->projectConfig;
         if (!$sitesSubDir) {
             $defaultSettingsPhp = "{$pc->drupalRootDir}/sites/default/settings.php";
-            $sitesSubDir = (!file_exists($defaultSettingsPhp) ? 'default' : $options['profile']);
+            $sitesSubDir = (!$this->fs->exists($defaultSettingsPhp) ? 'default' : $options['profile']);
         }
 
         $o = array_filter([
@@ -261,9 +260,6 @@ class RoboFile extends Base\RoboFile
             ]);
     }
 
-    /**
-     * @return \Robo\Collection\CollectionBuilder
-     */
     public function siteDelete(
         string $siteConfig,
         array $options = [
@@ -660,7 +656,7 @@ class RoboFile extends Base\RoboFile
             }
 
             $projectConfigFileName = Utils::$projectConfigFileName;
-            if (file_exists($projectConfigFileName)) {
+            if ($this->fs->exists($projectConfigFileName)) {
                 $lines = file($projectConfigFileName);
                 $lineIndex = 0;
 
@@ -682,7 +678,7 @@ class RoboFile extends Base\RoboFile
                 }
 
                 // @todo Error handling.
-                file_put_contents($projectConfigFileName, implode('', $lines));
+                $this->fs->dumpFile($projectConfigFileName, implode('', $lines));
             }
             unset($pc->sites[$siteConfig->id]);
 
@@ -703,20 +699,19 @@ class RoboFile extends Base\RoboFile
             );
 
             $mask = umask();
-            $fs = new Filesystem();
             $hostDir = getcwd();
             $srcDirUpstream = $this->getPackagePath('cheppers/git-hooks') . '/git-hooks';
             $srcDirCustom = "{$this->roboDrupalRoot}/src/GitHooks";
             // @todo Support .git pointers.
             $dstDir = "{$extension->path}/.git/hooks";
 
-            $fs->mirror($srcDirUpstream, $dstDir, null, ['override' => true]);
-            $fs->copy("$srcDirCustom/_common", "$dstDir/_common", true);
+            $this->fs->mirror($srcDirUpstream, $dstDir, null, ['override' => true]);
+            $this->fs->copy("$srcDirCustom/_common", "$dstDir/_common", true);
 
             $file = new \DirectoryIterator($srcDirUpstream);
             while ($file->valid()) {
                 if ($file->isFile() && is_executable($file->getPathname())) {
-                    $fs->chmod("$dstDir/" . $file->getBasename(), 0777, $mask);
+                    $this->fs->chmod("$dstDir/" . $file->getBasename(), 0777, $mask);
                 }
 
                 $file->next();
@@ -736,10 +731,8 @@ class RoboFile extends Base\RoboFile
                 escapeshellarg($extension->packageName)
             ];
             $configContent = vsprintf($configContentPattern, $configContentArgs);
-            $result = file_put_contents("$dstDir/$configFileName", $configContent);
-            if ($result === false) {
-                throw new \Exception("Failed to install git hooks for '{$extension->packageName}'.");
-            }
+            // @todo Error handling.
+            $this->fs->dumpFile("$dstDir/$configFileName", $configContent);
 
             return 0;
         };
@@ -809,15 +802,11 @@ class RoboFile extends Base\RoboFile
             $ec->packageVendor = $vendor;
             $ec->packageName = $name;
             $ec->path = $path;
-            $ec->hasGit = file_exists("$path/.git");
+            $ec->hasGit = $this->fs->exists("$path/.git");
             $ec->hasJavaScript = $this->hasDrupalExtensionJavaScript($path);
             $ec->hasTypeScript = $this->hasDrupalExtensionTypeScript($path);
             $ec->hasCSS = $this->hasDrupalExtensionCss($path);
             $ec->hasSCSS = $this->hasDrupalExtensionScss($path);
-
-            if (!$ec->phpcs->files) {
-                 $ec->phpcs->files = ['.'];
-            }
         }
 
         $this->areManagedDrupalExtensionsInitialized = true;

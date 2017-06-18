@@ -259,7 +259,7 @@ $databases = [
  * @endcode
  */
 $config_directories = [
-  CONFIG_SYNC_DIRECTORY => '../sites/okay.my56/config/sync',
+  CONFIG_SYNC_DIRECTORY => '../sites/okay.my/config/sync',
 ];
 
 /**
@@ -282,7 +282,7 @@ $config_directories = [
  *
  * @see install_select_profile()
  */
-$settings['install_profile'] = 'standard';
+$settings['install_profile'] = 'development';
 
 /**
  * Salt for one-time login links, cancel links, form tokens, etc.
@@ -301,7 +301,7 @@ $settings['install_profile'] = 'standard';
  *   $settings['hash_salt'] = file_get_contents('/home/example/salt.txt');
  * @endcode
  */
-$settings['hash_salt'] = file_get_contents('../sites/okay.my56/hash_salt.txt');
+$settings['hash_salt'] = file_get_contents('../sites/okay.my/hash_salt.txt');
 
 /**
  * Deployment identifier.
@@ -531,7 +531,7 @@ if ($settings['hash_salt']) {
  * must exist and be writable by Drupal. This directory must be relative to
  * the Drupal installation directory and be accessible over the web.
  */
-$settings['file_public_path'] = 'sites/okay.my56/files';
+$settings['file_public_path'] = 'sites/okay.my/files';
 
 /**
  * Private file path:
@@ -546,9 +546,9 @@ $settings['file_public_path'] = 'sites/okay.my56/files';
  * See https://www.drupal.org/documentation/modules/file for more information
  * about securing private files.
  */
-$settings['file_private_path'] = '../sites/okay.my56/private';
+$settings['file_private_path'] = '../sites/okay.my/private';
 
-$settings['file_temporary_path'] = '../sites/okay.my56/temporary';
+$settings['file_temporary_path'] = '../sites/okay.my/temporary';
 
 /**
  * Session write interval:
@@ -657,7 +657,7 @@ $settings['file_temporary_path'] = '../sites/okay.my56/temporary';
 
 $config['locale.settings']['translation']['path'] = '../sites/all/translations';
 
-$config['field_ui.settings']['field_prefix'] = 'standard_';
+$config['field_ui.settings']['field_prefix'] = 'my_p1_';
 
 $config['views.settings']['ui']['exposed_filter_any_label'] = 'new_any';
 

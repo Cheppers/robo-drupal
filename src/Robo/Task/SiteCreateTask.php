@@ -29,27 +29,7 @@ class SiteCreateTask extends BaseTask implements ContainerAwareInterface
     /**
      * @var \Symfony\Component\Filesystem\Filesystem
      */
-    protected $fs = null;
-
-    /**
-     * @var string
-     */
-    protected $projectRootDir = '.';
-
-    public function getProjectRootDir(): string
-    {
-        return $this->projectRootDir;
-    }
-
-    /**
-     * @return $this
-     */
-    public function setProjectRootDir(string $projectRootDir)
-    {
-        $this->projectRootDir = $projectRootDir ?: '.';
-
-        return $this;
-    }
+    protected $fs;
 
     /**
      * @var string[]
@@ -80,7 +60,29 @@ class SiteCreateTask extends BaseTask implements ContainerAwareInterface
     protected $sitesPhp = '';
 
     //region Options.
-    //region siteBranch
+    //region Option - projectRootDir
+    /**
+     * @var string
+     */
+    protected $projectRootDir = '.';
+
+    public function getProjectRootDir(): string
+    {
+        return $this->projectRootDir;
+    }
+
+    /**
+     * @return $this
+     */
+    public function setProjectRootDir(string $projectRootDir)
+    {
+        $this->projectRootDir = $projectRootDir ?: '.';
+
+        return $this;
+    }
+    //endregion
+
+    //region Option - siteBranch
     /**
      * @var string
      */
@@ -102,7 +104,7 @@ class SiteCreateTask extends BaseTask implements ContainerAwareInterface
     }
     //endregion
 
-    //region installProfile
+    //region Option - installProfile
     /**
      * @var string
      */
@@ -124,7 +126,7 @@ class SiteCreateTask extends BaseTask implements ContainerAwareInterface
     }
     //endregion
 
-    //region machineNameLong
+    //region Option - machineNameLong
     /**
      * @var string
      */
@@ -150,7 +152,7 @@ class SiteCreateTask extends BaseTask implements ContainerAwareInterface
     }
     //endregion
 
-    //region machineNameShort
+    //region Option - machineNameShort
     /**
      * @var string
      */
@@ -174,7 +176,7 @@ class SiteCreateTask extends BaseTask implements ContainerAwareInterface
     }
     //endregion
 
-    //region projectConfig
+    //region Option - projectConfig
     /**
      * @var \Cheppers\Robo\Drupal\ProjectType\Base\ProjectConfig
      */
@@ -254,7 +256,6 @@ class SiteCreateTask extends BaseTask implements ContainerAwareInterface
             $this
                 ->validateSiteBranch()
                 ->readProjectConfigPhp()
-                ->readSitesPhp()
                 ->runHeader()
                 ->doAddSite();
 
@@ -264,9 +265,7 @@ class SiteCreateTask extends BaseTask implements ContainerAwareInterface
                 $this->createSiteVariant($db);
             }
 
-            $this
-                ->dumpSitesPhp()
-                ->dumpProjectConfigPhp();
+            $this->dumpProjectConfigPhp();
         } catch (\Exception $e) {
             $exitCode = max(1, $e->getCode());
             $message = $e->getMessage();
@@ -299,7 +298,7 @@ class SiteCreateTask extends BaseTask implements ContainerAwareInterface
     {
         $siteBranch = $this->getSiteBranch();
         if (!preg_match('/^[0-9a-zA-Z_-]+$/', $siteBranch)) {
-            throw new \InvalidArgumentException("The given site name is invalid: $siteBranch", 1);
+            throw new \InvalidArgumentException("The given site name is invalid: '$siteBranch'", 1);
         }
 
         return $this;
@@ -327,10 +326,6 @@ class SiteCreateTask extends BaseTask implements ContainerAwareInterface
                 "{$this->projectRootDir}/{$pc->outerSitesSubDir}/{$siteDir}",
                 "{$this->projectRootDir}/{$pc->drupalRootDir}/sites/{$siteDir}",
             ];
-
-            if ($siteDir === 'default') {
-                $paths[1] .= '/settings.php';
-            }
 
             foreach ($paths as $path) {
                 if ($this->fs->exists($path)) {
@@ -398,9 +393,10 @@ class SiteCreateTask extends BaseTask implements ContainerAwareInterface
 
         $fullSiteDir = "{$this->projectRootDir}/{$pc->drupalRootDir}/sites/$siteDir";
 
-        return $this
-            ->filePutContent("$fullSiteDir/settings.php", $this->settingsPhp)
-            ->filePutContent("$fullSiteDir/settings.local.php", $this->localSettingsPhp);
+        $this->fs->dumpFile("$fullSiteDir/settings.php", $this->settingsPhp);
+        $this->fs->dumpFile("$fullSiteDir/settings.local.php", $this->localSettingsPhp);
+
+        return $this;
     }
 
     /**
@@ -422,38 +418,9 @@ class SiteCreateTask extends BaseTask implements ContainerAwareInterface
     {
         $fileName = Path::join($this->projectRootDir, Utils::$projectConfigFileName);
 
-        return $this->filePutContent($fileName, $this->projectConfigPhp);
-    }
-
-    /**
-     * @return $this
-     */
-    protected function readSitesPhp()
-    {
-        $pc = $this->getProjectConfig();
-        $sitesDir = Path::join($this->projectRootDir, $pc->drupalRootDir, 'sites');
-        $exampleSitesPhp = Path::join($sitesDir, 'example.sites.php');
-        $sitesPhp = Path::join($sitesDir, 'sites.php');
-        if (file_exists($sitesPhp)) {
-            $this->sitesPhp = file_get_contents($sitesPhp);
-        } elseif (file_exists($exampleSitesPhp)) {
-            $this->sitesPhp = file_get_contents($exampleSitesPhp);
-        } else {
-            $this->sitesPhp = "<?php\n\n";
-        }
+        $this->fs->dumpFile($fileName, $this->projectConfigPhp);
 
         return $this;
-    }
-
-    /**
-     * @return $this
-     */
-    protected function dumpSitesPhp()
-    {
-        $pc = $this->getProjectConfig();
-        $fileName = Path::join($this->projectRootDir, $pc->drupalRootDir, 'sites', 'sites.php');
-
-        return  $this->filePutContent($fileName, $this->sitesPhp);
     }
 
     /**
@@ -713,7 +680,7 @@ PHP;
         $dirPrefix = "{$this->projectRootDir}/{$pc->drupalRootDir}/sites";
         $src = "$dirPrefix/default/default.services.yml";
 
-        if (file_exists($src)) {
+        if ($this->fs->exists($src)) {
             $dst = "$dirPrefix/$siteDir/services.yml";
             $this->fs->copy($src, $dst, true);
         }
@@ -738,7 +705,9 @@ PHP;
             "\n\$settings['hash_salt'] = file_get_contents({$hashSaltFileNameSafe});\n"
         );
 
-        return $this->filePutContent($hashSaltFileNameFull, bin2hex(openssl_random_pseudo_bytes(rand(12, 36))));
+        $this->fs->dumpFile($hashSaltFileNameFull, bin2hex(openssl_random_pseudo_bytes(rand(12, 36))));
+
+        return $this;
     }
 
     /**
@@ -753,9 +722,11 @@ PHP;
 
         // @todo The $connection['database'] could be a pattern.
         if ($connection['driver'] === 'sqlite') {
-            // @todo Create the directory.
             $dbDir = $this->getSqliteDbDir($siteDir);
-            $this->fs->mkdir($dbDir, 0777 - umask());
+            $this->fs->mkdir(
+                Path::join($this->getProjectRootDir(), $pc->drupalRootDir, $dbDir),
+                0777 - umask()
+            );
             $connection['database'] = "$dbDir/default__default.sqlite";
         } else {
             $connection['database'] = implode('__', [
@@ -859,23 +830,10 @@ PHP;
         return $this;
     }
 
-    /**
-     * @return $this
-     */
-    protected function filePutContent(string $fileName, string $data)
-    {
-        $result = file_put_contents($fileName, $data);
-        if ($result === false) {
-            throw new \Exception("Failed to write data to file '$fileName'");
-        }
-
-        return $this;
-    }
-
     protected function getSqliteDbDir(string $siteDir): string
     {
         return Path::join(
-            $this->projectRootDir,
+            Path::makeRelative('.', $this->projectConfig->drupalRootDir) ?: '.',
             $this->projectConfig->outerSitesSubDir,
             $siteDir,
             'db'

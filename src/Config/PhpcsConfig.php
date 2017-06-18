@@ -13,7 +13,10 @@ class PhpcsConfig extends BaseConfig
 
     public $exclude = [];
 
-    public $standard = 'Drupal';
+    public $standards = [
+        'Drupal' => true,
+        'DrupalPractice' => true,
+    ];
 
     public $failOn = 'warning';
 
@@ -29,7 +32,7 @@ class PhpcsConfig extends BaseConfig
         'profile/PHP' => true,
         'install/PHP' => true,
         'engine/PHP' => true,
-        'js/JS' => true,
+        'theme/PHP' => true,
         'css/CSS' => true,
     ];
 
@@ -44,7 +47,7 @@ class PhpcsConfig extends BaseConfig
             'files' => 'files',
             'filesGitStaged' => 'filesGitStaged',
             'exclude' => 'exclude',
-            'standard' => 'standard',
+            'standards' => 'standards',
             'failOn' => 'failOn',
             'lintReporters' => 'lintReporters',
             'extensions' => 'extensions',

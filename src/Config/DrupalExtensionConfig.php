@@ -59,6 +59,21 @@ class DrupalExtensionConfig extends BaseConfig
     ];
 
     /**
+     * @var array
+     */
+    protected $dataDefaultValues = [
+        'phpcs' => [
+            'files' => [
+                '.' => true,
+            ],
+            'standards' => [
+                'Drupal' => true,
+                'DrupalPractice' => true,
+            ],
+        ],
+    ];
+
+    /**
      * {@inheritdoc}
      */
     protected function initPropertyMapping()
@@ -80,20 +95,6 @@ class DrupalExtensionConfig extends BaseConfig
             ],
         ];
         parent::initPropertyMapping();
-
-        return $this;
-    }
-
-    /**
-     * {@inheritdoc}
-     */
-    protected function populateProperties()
-    {
-        parent::populateProperties();
-
-        if ($this->phpcs === null) {
-            $this->phpcs = new PhpcsConfig();
-        }
 
         return $this;
     }

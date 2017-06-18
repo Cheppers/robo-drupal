@@ -19,6 +19,11 @@ class BaseConfig
      */
     protected $data;
 
+    /**
+     * @var array
+     */
+    protected $dataDefaultValues = [];
+
     public function __construct(array $data = [])
     {
         $this->data = $data;
@@ -62,32 +67,33 @@ class BaseConfig
      */
     protected function populateProperties()
     {
+        $data = $this->setDataDefaultValues($this->data);
         foreach ($this->propertyMapping as $src => $handler) {
-            if (!array_key_exists($src, $this->data)) {
+            if (!array_key_exists($src, $data)) {
                 continue;
             }
 
             switch ($handler['type']) {
                 case 'set':
-                    $this->{$handler['destination']} = $this->data[$src];
+                    $this->{$handler['destination']} = $data[$src];
                     break;
 
                 case 'closure':
-                    $this->{$handler['destination']} = $handler['closure']($this->data[$src], $src);
+                    $this->{$handler['destination']} = $handler['closure']($data[$src], $src);
                     break;
 
                 case 'callback':
-                    $this->{$handler['destination']} = call_user_func($handler['callback'], $this->data[$src], $src);
+                    $this->{$handler['destination']} = call_user_func($handler['callback'], $data[$src], $src);
                     break;
 
                 case 'subConfig':
                     /** @var static $subConfig */
-                    $subConfig = new $handler['class']($this->data[$src]);
+                    $subConfig = new $handler['class']($data[$src]);
                     $this->{$handler['destination']} = $subConfig;
                     break;
 
                 case 'subConfigs':
-                    foreach ($this->data[$src] as $subConfigId => $subConfigData) {
+                    foreach ($data[$src] as $subConfigId => $subConfigData) {
                         $subConfigData += ['id' => $subConfigId];
                         $subConfig = new $handler['class']($subConfigData);
                         $this->{$handler['destination']}[$subConfig->id] = $subConfig;
@@ -97,5 +103,10 @@ class BaseConfig
         }
 
         return $this;
+    }
+
+    protected function setDataDefaultValues(array $data): array
+    {
+        return array_replace_recursive($this->dataDefaultValues, $data);
     }
 }

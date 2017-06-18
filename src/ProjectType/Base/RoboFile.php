@@ -75,7 +75,7 @@ class RoboFile extends Tasks
     /**
      * @var \Cheppers\Robo\Drupal\ProjectType\Base\ProjectConfig
      */
-    protected $projectConfig = null;
+    protected $projectConfig;
 
     /**
      * Allowed values: dev, git-hook, ci, prod, jenkins
@@ -93,10 +93,16 @@ class RoboFile extends Tasks
      */
     protected $roboDrupalRoot = '';
 
+    /**
+     * @var \Symfony\Component\Filesystem\Filesystem
+     */
+    protected $fs;
+
     public function __construct()
     {
         putenv('COMPOSER_DISABLE_XDEBUG_WARN=1');
         $this->roboDrupalRoot = Utils::getRoboDrupalRoot();
+        $this->fs = new Filesystem();
 
         $this
             ->initProjectConfig()
@@ -223,7 +229,7 @@ class RoboFile extends Tasks
      */
     protected function initProjectConfig()
     {
-        if (!$this->projectConfig && file_exists(Utils::$projectConfigFileName)) {
+        if (!$this->projectConfig && $this->fs->exists(Utils::$projectConfigFileName)) {
             $this->projectConfig = include Utils::$projectConfigFileName;
         }
 
@@ -326,7 +332,7 @@ class RoboFile extends Tasks
 
     protected function getFallbackFileName(string $fileName, string $path): string
     {
-        if (file_exists("$path/$fileName")) {
+        if ($this->fs->exists("$path/$fileName")) {
             return '';
         }
 
@@ -340,14 +346,14 @@ class RoboFile extends Tasks
         ];
         foreach ($paths as $path) {
             if (strpos($fileName, 'node_modules/.bin/') === 0) {
-                if (file_exists("$path/$fileName")) {
+                if ($this->fs->exists("$path/$fileName")) {
                     return "$path/$fileName";
                 }
             } elseif (in_array($fileName, $root)) {
-                if (file_exists("$path/$fileName")) {
+                if ($this->fs->exists("$path/$fileName")) {
                     return "$path/$fileName";
                 }
-            } elseif (file_exists("$path/src/$fileName")) {
+            } elseif ($this->fs->exists("$path/src/$fileName")) {
                 return "$path/src/$fileName";
             }
         }
@@ -464,10 +470,10 @@ class RoboFile extends Tasks
             foreach ($sites as $site) {
                 foreach (array_unique($site->urls) as $siteDir) {
                     $dir = "{$pc->drupalRootDir}/sites/{$siteDir}";
-                    if (file_exists($dir)) {
+                    if ($this->fs->exists($dir)) {
                         $this->_chmod($dir, 0777, $mask);
 
-                        if (file_exists("$dir/settings.php")) {
+                        if ($this->fs->exists("$dir/settings.php")) {
                             $this->_chmod("$dir/settings.php", 0666, $mask);
                         }
                     }
@@ -535,7 +541,7 @@ class RoboFile extends Tasks
             ->setCmdOption('sites-subdir', $siteDir);
 
         $configDir = "{$pc->outerSitesSubDir}/$siteDir/config/sync";
-        if (file_exists($configDir) && glob("$configDir/*.yml")) {
+        if ($this->fs->exists($configDir) && glob("$configDir/*.yml")) {
             $task->setCmdOption('config-dir', "$backToRootDir/$configDir");
         }
 
@@ -568,7 +574,8 @@ class RoboFile extends Tasks
                     ->name('*.css')
                     ->name('*.css.map')
                     ->files();
-                (new Filesystem())->remove($cssFiles);
+
+                $this->fs->remove($cssFiles);
 
                 return 0;
             })

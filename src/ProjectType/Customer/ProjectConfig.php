@@ -2,7 +2,7 @@
 
 namespace Cheppers\Robo\Drupal\ProjectType\Customer;
 
-use Cheppers\Robo\Drupal\ProjectType\Base as Base;
+use Cheppers\Robo\Drupal\ProjectType\Base;
 
 class ProjectConfig extends Base\ProjectConfig
 {

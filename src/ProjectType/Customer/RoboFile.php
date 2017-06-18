@@ -15,7 +15,6 @@ use Cheppers\Robo\Phpcs\PhpcsTaskLoader;
 use Cheppers\Robo\Sass\SassTaskLoader;
 use Cheppers\Robo\ScssLint\ScssLintTaskLoader;
 use Cheppers\Robo\Yarn\YarnTaskLoader;
-use function foo\func;
 use Robo\Collection\CollectionBuilder;
 use Robo\Contract\TaskInterface;
 use Webmozart\PathUtil\Path;
@@ -45,7 +44,7 @@ class RoboFile extends Base\RoboFile
         // @todo Configurable class.
         $config = new PhpcsConfig();
 
-        $config->standard = 'Drupal';
+        $config->standards = ['Drupal', 'DrupalPractice'];
         $config->lintReporters = [
             'lintVerboseReporter' => null,
         ];
@@ -53,7 +52,7 @@ class RoboFile extends Base\RoboFile
         $config->filesGitStaged += Utils::phpFileExtensionPatterns('*.', '');
         $config->files += [
             'RoboFile.php' => true,
-            Utils::$projectConfigFileName => file_exists(Utils::$projectConfigFileName),
+            Utils::$projectConfigFileName => $this->fs->exists(Utils::$projectConfigFileName),
         ];
 
         $customDrupalProfiles = Utils::getCustomDrupalProfiles($this->projectConfig->drupalRootDir);
@@ -68,7 +67,7 @@ class RoboFile extends Base\RoboFile
                 "{$this->projectConfig->drupalRootDir}/drush/",
             ];
             foreach ($suggestions as $suggestion) {
-                $config->files[$suggestion] = file_exists($suggestion);
+                $config->files[$suggestion] = $this->fs->exists($suggestion);
             }
         }
 

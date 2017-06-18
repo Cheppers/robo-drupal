@@ -51,6 +51,13 @@ class DatabaseServerConfig extends BaseConfig
      */
     public $authenticationMethod = 'user:pass';
 
+    /**
+     * {@inheritdoc}
+     */
+    protected $dataDefaultValues = [
+        'driver' => 'mysql',
+    ];
+
     public function getConnection(): array
     {
         return array_replace_recursive($this->connection, $this->connectionLocal);
@@ -76,18 +83,6 @@ class DatabaseServerConfig extends BaseConfig
             ],
         ];
         parent::initPropertyMapping();
-
-        return $this;
-    }
-
-    /**
-     * {@inheritdoc}
-     */
-    protected function populateProperties()
-    {
-        $this->data += ['driver' => 'mysql'];
-
-        parent::populateProperties();
 
         return $this;
     }

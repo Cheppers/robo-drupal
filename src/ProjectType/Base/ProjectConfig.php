@@ -10,9 +10,14 @@ use Cheppers\Robo\Drupal\Utils;
 
 use Stringy\StaticStringy;
 
+/**
+ * @todo Replace {siteBranch} placeholder with {siteId}.
+ */
 class ProjectConfig extends BaseConfig
 {
     /**
+     * @see static::getBaseHostName
+     *
      * @var string
      */
     public $baseHostName = '';
@@ -110,7 +115,7 @@ class ProjectConfig extends BaseConfig
     public $composerExecutable = 'composer';
 
     /**
-     * @var SiteConfig[]
+     * @var \Cheppers\Robo\Drupal\Config\SiteConfig[]
      */
     public $sites = [];
 

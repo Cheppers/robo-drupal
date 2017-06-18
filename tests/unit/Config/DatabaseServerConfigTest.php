@@ -74,4 +74,41 @@ class DatabaseServerConfigTest extends BaseConfigTest
         $this->tester->assertEquals($expected['connection'], $dbServerConfig->connection);
         $this->tester->assertEquals($expected['authenticationMethod'], $dbServerConfig->authenticationMethod);
     }
+
+    public function casesGetConnection(): array
+    {
+        return [
+            'basic' => [
+                [
+                    'namespace' => 'Drupal\Core\Database\Driver\mysql',
+                    'driver' => 'mysql',
+                    'username' => '',
+                    'password' => '',
+                    'host' => '127.0.0.1',
+                    'port' => 3306,
+                    'collation' => 'utf8mb4_general_ci',
+                    'prefix' => '',
+                    'database' => '',
+                ],
+                [
+                    'connection' => [
+                        'host' => 'localhost',
+                    ],
+                    'connectionLocal' => [
+                        'host' => '127.0.0.1',
+                    ],
+                ],
+            ],
+        ];
+    }
+
+    /**
+     * @dataProvider casesGetConnection
+     */
+    public function testGetConnection(array $expected, array $data): void
+    {
+        /** @var \Cheppers\Robo\Drupal\Config\DatabaseServerConfig $db */
+        $db = new $this->className($data);
+        $this->tester->assertEquals($expected, $db->getConnection());
+    }
 }

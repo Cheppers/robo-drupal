@@ -13,13 +13,15 @@ return call_user_func(function () {
   $projectConfig->drupalRootDir = 'drupal_root';
   $projectConfig->phpVariants = [];
 
-  $projectConfig->phpVariants['709-dev'] = new PhpVariantConfig();
-  $projectConfig->phpVariants['709-dev']->id = '709-dev';
-  $projectConfig->phpVariants['709-dev']->version = '7.0.9';
-  $projectConfig->phpVariants['709-dev']->binDir = '/foo/php/709/bin';
+  $projectConfig->phpVariants['70106-dev'] = new PhpVariantConfig();
+  $projectConfig->phpVariants['70106-dev']->binDir = '/foo/php/70106/bin';
+
+  $projectConfig->phpVariants['50630-dev'] = new PhpVariantConfig();
+  $projectConfig->phpVariants['50630-dev']->binDir = '/foo/php/50630/bin';
 
   $projectConfig->databaseServers = [];
-  $projectConfig->databaseServers['my56'] = new DatabaseServerConfig();
+  $projectConfig->databaseServers['my'] = new DatabaseServerConfig(['driver' => 'mysql']);
+  $projectConfig->databaseServers['sl'] = new DatabaseServerConfig(['driver' => 'sqlite']);
 
   $projectConfig->sites = [];
 

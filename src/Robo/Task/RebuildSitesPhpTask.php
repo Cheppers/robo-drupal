@@ -18,6 +18,11 @@ class RebuildSitesPhpTask extends BaseTask
     protected $filesystemClass = Filesystem::class;
 
     /**
+     * @var \Symfony\Component\Filesystem\Filesystem
+     */
+    protected $fs;
+
+    /**
      * @var \Cheppers\Robo\Drupal\ProjectType\Base\ProjectConfig
      */
     protected $projectConfig;
@@ -66,19 +71,18 @@ class RebuildSitesPhpTask extends BaseTask
      */
     public function run(): Result
     {
+        /** @var \Symfony\Component\Filesystem\Filesystem $fs */
+        $this->fs = new $this->filesystemClass();
         $pc = $this->getProjectConfig();
         $sitesPhpDefinition = $pc->getSitesPhpDefinition();
-        $sites = '$sites = ' . VarExport::any($sitesPhpDefinition, 0, '  ') . ";\n";
-        $src = Path::join($pc->drupalRootDir, 'sites', 'example.sites.php');
         $dst = Path::join($pc->drupalRootDir, 'sites', 'sites.php');
-        /** @var \Symfony\Component\Filesystem\Filesystem $fs */
-        $fs = new $this->filesystemClass();
-        $content = ($fs->exists($src) ? file_get_contents($src) : "<?php\n\n");
+        $content = $this->getInitialContentOfSitesPhp();
+        $content .= '$sites = ' . VarExport::any($sitesPhpDefinition, 0, '  ') . ";\n";
 
         $exitCode = 0;
         $message = '';
         try {
-            $fs->dumpFile($dst, $content . $sites);
+            $this->fs->dumpFile($dst, $content);
         } catch (IOException $e) {
             $exitCode = 1;
             $message = $e->getMessage();
@@ -92,5 +96,12 @@ class RebuildSitesPhpTask extends BaseTask
                 'sitesPhp' => $sitesPhpDefinition,
             ]
         );
+    }
+
+    protected function getInitialContentOfSitesPhp(): string
+    {
+        $src = Path::join($this->getProjectConfig()->drupalRootDir, 'sites', 'example.sites.php');
+
+        return ($this->fs->exists($src) ? file_get_contents($src) : "<?php\n\n");
     }
 }

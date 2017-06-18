@@ -5,6 +5,6 @@
  */
 
 $projectConfig->baseHostPort = 1080;
-$projectConfig->databaseServers['my56']->connectionLocal['username'] = 'my56_user';
-$projectConfig->databaseServers['my56']->connectionLocal['password'] = 'my56_pass';
-$projectConfig->databaseServers['my56']->connectionLocal['port'] = 3311;
+$projectConfig->databaseServers['my']->connectionLocal['username'] = 'my_user';
+$projectConfig->databaseServers['my']->connectionLocal['password'] = 'my_pass';
+$projectConfig->databaseServers['my']->connectionLocal['port'] = 3311;

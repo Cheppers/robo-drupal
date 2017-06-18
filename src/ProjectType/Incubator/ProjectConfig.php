@@ -2,30 +2,11 @@
 
 namespace Cheppers\Robo\Drupal\ProjectType\Incubator;
 
-use Cheppers\Robo\Drupal\ProjectType\Base as Base;
+use Cheppers\Robo\Drupal\Config\DrupalExtensionConfig;
+use Cheppers\Robo\Drupal\ProjectType\Base;
 
 class ProjectConfig extends Base\ProjectConfig
 {
-    /**
-     * @var string
-     */
-    public $releaseDir = 'release';
-
-    /**
-     * @var string
-     */
-    public $releaseGitRemote = 'upstream';
-
-    /**
-     * @var string
-     */
-    public $releaseGitBranchRemote = 'production';
-
-    /**
-     * @var string
-     */
-    public $releaseGitBranchLocal = 'production';
-
     /**
      * @var \Cheppers\Robo\Drupal\Config\SiteConfig
      */
@@ -47,4 +28,22 @@ class ProjectConfig extends Base\ProjectConfig
      * @var \Cheppers\Robo\Drupal\Config\DrupalExtensionConfig[]
      */
     public $managedDrupalExtensions = [];
+
+    /**
+     * {@inheritdoc}
+     */
+    protected function initPropertyMapping()
+    {
+        $this->propertyMapping += [
+            'siteDefaults' => 'siteDefaults',
+            'compassEnvironment' => 'compassEnvironment',
+            'autodetectManagedDrupalExtensions' => 'autodetectManagedDrupalExtensions',
+            'managedDrupalExtensions' => [
+                'type' => 'subConfigs',
+                'class' => DrupalExtensionConfig::class,
+            ],
+        ];
+
+        return parent::initPropertyMapping();
+    }
 }

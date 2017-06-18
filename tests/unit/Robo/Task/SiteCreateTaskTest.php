@@ -39,6 +39,9 @@ class SiteCreateTaskTest extends Unit
             'projectConfig' => $this->getProjectConfig("$workspaceDir/actual"),
             'siteBranch' => $siteBranch,
             'projectRootDir' => "$workspaceDir/actual",
+            'installProfile' => 'development',
+            'machineNameLong' => 'my_project_01',
+            'machineNameShort' => 'my_p1',
         ];
 
         $task = new SiteCreateTask($options);
@@ -64,11 +67,16 @@ class SiteCreateTaskTest extends Unit
         }
 
         $expectedDirectories = [
-            "drupal_root/sites/$siteBranch.my56/files",
             'sites/all/translations',
-            "sites/$siteBranch.my56/config/sync",
-            "sites/$siteBranch.my56/private",
-            "sites/$siteBranch.my56/temporary",
+            "drupal_root/sites/$siteBranch.my/files",
+            "sites/$siteBranch.my/config/sync",
+            "sites/$siteBranch.my/private",
+            "sites/$siteBranch.my/temporary",
+            "drupal_root/sites/$siteBranch.sl/files",
+            "sites/$siteBranch.sl/config/sync",
+            "sites/$siteBranch.sl/private",
+            "sites/$siteBranch.sl/temporary",
+            "sites/$siteBranch.sl/db",
         ];
         foreach ($expectedDirectories as $expectedDirectory) {
             $this->tester->assertTrue(
@@ -77,9 +85,9 @@ class SiteCreateTaskTest extends Unit
             );
         }
 
-        $filePath = "sites/$siteBranch.my56/hash_salt.txt";
-        $this->tester->assertTrue(
-            is_file("$workspaceDir/actual/$filePath"),
+        $filePath = "sites/$siteBranch.my/hash_salt.txt";
+        $this->tester->assertFileExists(
+            "$workspaceDir/actual/$filePath",
             "File exists: '$filePath'"
         );
         $this->tester->assertGreaterThan(

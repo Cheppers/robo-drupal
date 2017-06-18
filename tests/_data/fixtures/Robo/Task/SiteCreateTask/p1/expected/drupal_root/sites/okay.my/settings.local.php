@@ -14,8 +14,8 @@
  * at the bottom of 'sites/example.com/settings.php'.
  */
 
-$databases['default']['default']['username'] = 'my56_user';
-$databases['default']['default']['password'] = 'my56_pass';
+$databases['default']['default']['username'] = 'my_user';
+$databases['default']['default']['password'] = 'my_pass';
 $databases['default']['default']['port'] = 3311;
 
 /**
@@ -125,5 +125,6 @@ $config['views.settings']['ui']['show']['advanced_column'] = TRUE;
 $config['views.settings']['ui']['show']['sql_query']['enabled'] = TRUE;
 
 $settings['trusted_host_patterns'] = [
-  '^709\\-dev\\.my56\\.okay\\.test\\.localhost\\:1080$',
+  '^70106\\-dev\\.my\\.okay\\.test\\.localhost\\:1080$',
+  '^50630\\-dev\\.my\\.okay\\.test\\.localhost\\:1080$',
 ];

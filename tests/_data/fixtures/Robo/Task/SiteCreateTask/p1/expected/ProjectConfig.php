@@ -14,21 +14,26 @@ return call_user_func(function () {
   $projectConfig->drupalRootDir = 'drupal_root';
   $projectConfig->phpVariants = [];
 
-  $projectConfig->phpVariants['709-dev'] = new PhpVariantConfig();
-  $projectConfig->phpVariants['709-dev']->id = '709-dev';
-  $projectConfig->phpVariants['709-dev']->version = '7.0.9';
-  $projectConfig->phpVariants['709-dev']->binDir = '/foo/php/709/bin';
+  $projectConfig->phpVariants['70106-dev'] = new PhpVariantConfig();
+  $projectConfig->phpVariants['70106-dev']->binDir = '/foo/php/70106/bin';
+
+  $projectConfig->phpVariants['50630-dev'] = new PhpVariantConfig();
+  $projectConfig->phpVariants['50630-dev']->binDir = '/foo/php/50630/bin';
 
   $projectConfig->databaseServers = [];
-  $projectConfig->databaseServers['my56'] = new DatabaseServerConfig();
+  $projectConfig->databaseServers['my'] = new DatabaseServerConfig(['driver' => 'mysql']);
+  $projectConfig->databaseServers['sl'] = new DatabaseServerConfig(['driver' => 'sqlite']);
 
   $projectConfig->sites = [];
 
   $projectConfig->sites['okay'] = new SiteConfig();
   $projectConfig->sites['okay']->id = 'okay';
-  $projectConfig->sites['okay']->installProfileName = 'standard';
+  $projectConfig->sites['okay']->installProfileName = 'development';
   $projectConfig->sites['okay']->urls = [
-    '709-dev.my56.okay.test.localhost:1080' => 'okay.my56',
+    '70106-dev.my.okay.test.localhost:1080' => 'okay.my',
+    '50630-dev.my.okay.test.localhost:1080' => 'okay.my',
+    '70106-dev.sl.okay.test.localhost:1080' => 'okay.sl',
+    '50630-dev.sl.okay.test.localhost:1080' => 'okay.sl',
   ];
 
   $projectConfig->populateDefaultValues();

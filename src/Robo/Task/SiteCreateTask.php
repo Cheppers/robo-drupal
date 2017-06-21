@@ -378,10 +378,61 @@ class SiteCreateTask extends BaseTask implements ContainerAwareInterface
         $pc = $this->getProjectConfig();
         $sitesDir = Path::join($this->projectRootDir, $pc->drupalRootDir, 'sites');
 
-        $this->settingsPhp = file_get_contents("{$sitesDir}/default/default.settings.php");
-        $this->localSettingsPhp = file_get_contents("{$sitesDir}/example.settings.local.php");
+        $fileName = "{$sitesDir}/default/default.settings.php";
+        $this->settingsPhp = $this->fs->exists($fileName) ?
+            file_get_contents($fileName)
+            : $this->getDefaultSettingsPhpContent();
+
+        $fileName = "{$sitesDir}/example.settings.local.php";
+        $this->localSettingsPhp = $this->fs->exists($fileName) ?
+            file_get_contents($fileName)
+            : $this->getExampleSettingsLocalPhpContent();
 
         return $this;
+    }
+
+    protected function getDefaultSettingsPhpContent(): string
+    {
+        return <<<'PHP'
+<?php
+
+ $databases = array();
+ 
+$settings['hash_salt'] = '';
+
+$config_directories = array();
+
+# $settings['install_profile'] = '';
+
+# $settings['file_public_path'] = 'sites/default/files';
+
+# $settings['file_private_path'] = '';
+
+/**
+ * Session write interval:
+ */
+
+/**
+ * Fast 404 pages:
+ */
+
+# if (file_exists($app_root . '/' . $site_path . '/settings.local.php')) {
+#   include $app_root . '/' . $site_path . '/settings.local.php';
+# }
+
+PHP;
+    }
+
+    protected function getExampleSettingsLocalPhpContent(): string
+    {
+        return <<<'PHP'
+<?php
+
+$settings['extension_discovery_scan_tests'] = TRUE;
+
+$config['system.performance']['js']['preprocess'] = FALSE;
+
+PHP;
     }
 
     /**

@@ -21,7 +21,12 @@ class AcceptanceTester extends \Codeception\Actor
 {
     use _generated\AcceptanceTesterActions;
 
-   /**
-    * Define custom actions here
-    */
+    public function assertDirectoryExists(string $path, string $message = null)
+    {
+        if (!$message) {
+            $message = "Directory is exists: '$path'";
+        }
+
+        $this->assertTrue(\is_dir($path), $message);
+    }
 }

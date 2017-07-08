@@ -570,7 +570,10 @@ PHP;
         $pc = $this->getProjectConfig();
 
         $filePath = "{$pc->outerSitesSubDir}/all/translations";
-        $filePathSafe = VarExport::string("../{$filePath}");
+        $filePathSafe = VarExport::string(Path::join(
+            $this->backToProjectRootDir($pc->drupalRootDir),
+            $filePath
+        ));
         $filePathFull = "{$this->projectRootDir}/$filePath";
 
         $search = "\n/**\n * Fast 404 pages:\n";
@@ -592,7 +595,10 @@ PHP;
         $pc = $this->getProjectConfig();
 
         $filePath = "{$pc->outerSitesSubDir}/$siteDir/temporary";
-        $filePathSafe = VarExport::string("../{$filePath}");
+        $filePathSafe = VarExport::string(Path::join(
+            $this->backToProjectRootDir($pc->drupalRootDir),
+            $filePath
+        ));
         $filePathFull = "{$this->projectRootDir}/$filePath";
 
         $search = <<< PHP
@@ -618,7 +624,10 @@ PHP;
         $pc = $this->getProjectConfig();
 
         $filePath = "{$pc->outerSitesSubDir}/$siteDir/private";
-        $filePathSafe = VarExport::string("../{$filePath}");
+        $filePathSafe = VarExport::string(Path::join(
+            $this->backToProjectRootDir($pc->drupalRootDir),
+            $filePath
+        ));
         $filePathFull = "{$this->projectRootDir}/$filePath";
 
         $search = "\n# \$settings['file_private_path'] = '';\n";
@@ -705,7 +714,10 @@ PHP;
         $search = "\n\$config_directories = array();\n";
 
         $configSyncDir = "{$pc->outerSitesSubDir}/$siteDir/config/sync";
-        $configSyncDirSafe = VarExport::string("../$configSyncDir");
+        $configSyncDirSafe = VarExport::string(Path::join(
+            $this->backToProjectRootDir($pc->drupalRootDir),
+            $configSyncDir
+        ));
         $configSyncDirFull = "{$this->projectRootDir}/$configSyncDir";
 
         $replace = <<< PHP
@@ -747,7 +759,13 @@ PHP;
         $pc = $this->getProjectConfig();
 
         $hashSaltFileName = "{$pc->outerSitesSubDir}/$siteDir/hash_salt.txt";
-        $hashSaltFileNameSafe = VarExport::string("../{$hashSaltFileName}");
+
+        $this->getProjectRootDir();
+
+        $hashSaltFileNameSafe = VarExport::string(Path::join(
+            $this->backToProjectRootDir($pc->drupalRootDir),
+            $hashSaltFileName
+        ));
         $hashSaltFileNameFull = "{$this->projectRootDir}/$hashSaltFileName";
 
         Utils::manipulateString(
@@ -884,10 +902,15 @@ PHP;
     protected function getSqliteDbDir(string $siteDir): string
     {
         return Path::join(
-            Path::makeRelative('.', $this->projectConfig->drupalRootDir) ?: '.',
+            $this->backToProjectRootDir($this->projectConfig->drupalRootDir),
             $this->projectConfig->outerSitesSubDir,
             $siteDir,
             'db'
         );
+    }
+
+    protected function backToProjectRootDir(string $from): string
+    {
+        return Path::makeRelative('.', $from) ?: '.';
     }
 }

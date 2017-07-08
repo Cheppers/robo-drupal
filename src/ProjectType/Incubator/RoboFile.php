@@ -240,8 +240,8 @@ class RoboFile extends Base\RoboFile
     ): CollectionBuilder {
         $pc = $this->projectConfig;
         if (!$sitesSubDir) {
-            $defaultSettingsPhp = "{$pc->drupalRootDir}/sites/default/settings.php";
-            $sitesSubDir = (!$this->fs->exists($defaultSettingsPhp) ? 'default' : $options['profile']);
+            $defaultSettingsPhpFilePath = "{$pc->drupalRootDir}/sites/default/settings.php";
+            $sitesSubDir = (!$this->fs->exists($defaultSettingsPhpFilePath) ? 'default' : $options['profile']);
         }
 
         $o = array_filter([

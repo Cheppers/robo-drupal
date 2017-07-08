@@ -29,13 +29,13 @@ class RoboFileCest
         $this->fs = new Filesystem();
 
         register_shutdown_function(function () {
-            //$tmpDirs = array_filter($this->tmpDirs, 'file_exists');
-            //$this->fs->chmod($tmpDirs, 0700, 0, true);
-            //$this->fs->remove($tmpDirs);
+            $tmpDirs = array_filter($this->tmpDirs, 'file_exists');
+            $this->fs->chmod($tmpDirs, 0700, 0, true);
+            $this->fs->remove($tmpDirs);
         });
     }
 
-    public function listTest(AcceptanceTester $i)
+    public function listTest(AcceptanceTester $i): void
     {
         $projectName = 'siteCreate.01';
         $workingDirectory = $this->prepareProject($projectName);
@@ -67,7 +67,7 @@ class RoboFileCest
         );
     }
 
-    public function siteCreateTest(AcceptanceTester $i)
+    public function siteCreateBasicTest(AcceptanceTester $i): void
     {
         $projectName = 'siteCreate.01';
         $expectedDir = $this->fixturesRoot($projectName) . '/expected';
@@ -117,9 +117,81 @@ class RoboFileCest
         }
     }
 
-    protected function fixturesRoot(string $projectName): string
+    public function siteCreateAdvancedTest(AcceptanceTester $i): void
     {
-        return codecept_data_dir("fixtures/ProjectType/Incubator/$projectName");
+        $projectName = 'siteCreate.02';
+        $expectedDir = $this->fixturesRoot($projectName) . '/expected';
+        $workingDir = $this->prepareProject($projectName);
+        $id = __METHOD__;
+        $description = implode(' ', [
+            'create a new site where the "drupalRootDir" and the "outerSitesSubDir" configurations are different than',
+            'the default ones.',
+        ]);
+        $i->wantTo($description);
+        $i->runRoboTask(
+            $id,
+            $workingDir,
+            $this->class,
+            'site:create',
+            'commerce',
+            '--profile=minimal',
+            '--long=shop',
+            '--short=my'
+        );
+
+        $i->assertEquals(0, $i->getRoboTaskExitCode($id), 'Exit code');
+
+        $dirs = [
+            'project/specific/all/translations',
+            'web/public_html/sites/commerce.my/files',
+            'project/specific/commerce.my/config/sync',
+            'project/specific/commerce.my/private',
+            'project/specific/commerce.my/temporary',
+            'web/public_html/sites/commerce.sl/files',
+            'project/specific/commerce.sl/config/sync',
+            'project/specific/commerce.sl/db',
+            'project/specific/commerce.sl/private',
+            'project/specific/commerce.sl/temporary',
+        ];
+        foreach ($dirs as $dir) {
+            $i->assertDirectoryExists("$workingDir/$dir");
+        }
+
+        /** @var \Symfony\Component\Finder\Finder $files */
+        $files = (new Finder())
+            ->in($expectedDir)
+            ->files();
+        foreach ($files as $file) {
+            $filePath = "$workingDir/" . $file->getRelativePathname();
+            $i->openFile($filePath);
+            $i->canSeeFileContentsEqual($file->getContents());
+        }
+
+        $files = [
+            "$workingDir/project/specific/commerce.my/hash_salt.txt",
+            "$workingDir/project/specific/commerce.sl/hash_salt.txt",
+        ];
+        foreach ($files as $file) {
+            $i->assertGreaterThan(0, filesize($file), "File has any content: '$file'");
+        }
+    }
+
+    protected function siteDeleteTest(AcceptanceTester $i): void
+    {
+        $projectName = 'siteDelete.01';
+        $workingDir = $this->prepareProject($projectName);
+        $id = __METHOD__;
+        $i->runRoboTask(
+            $id,
+            $workingDir,
+            $this->class,
+            'site:delete'
+        );
+
+        codecept_debug($i->getRoboTaskStdOutput($id));
+        codecept_debug($i->getRoboTaskStdError($id));
+
+        $i->assertEquals(0, $i->getRoboTaskExitCode($id), 'Exit code');
     }
 
     protected function prepareProject(string $projectName): string
@@ -129,6 +201,11 @@ class RoboFileCest
         $this->fs->mirror($templateDir, $tmpDir);
 
         return $tmpDir;
+    }
+
+    protected function fixturesRoot(string $projectName): string
+    {
+        return codecept_data_dir("fixtures/ProjectType/Incubator/$projectName");
     }
 
     protected function createTmpDir(): string

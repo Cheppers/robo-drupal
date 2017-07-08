@@ -10,7 +10,7 @@ class ComposerPackagePathsTaskCest
 
     protected function id(string $suffix): string
     {
-        return __CLASS__ . ":$suffix";
+        return static::class . ":$suffix";
     }
 
     public function runBasicSuccess(AcceptanceTester $I)

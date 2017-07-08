@@ -3,37 +3,19 @@
 namespace Cheppers\Robo\Drupal\Tests\Acceptance\Robo\Task;
 
 use Cheppers\Robo\Drupal\Test\AcceptanceTester;
+use Cheppers\Robo\Drupal\Tests\Acceptance\Base as BaseCest;
 use Symfony\Component\Filesystem\Filesystem;
 
-class RebuildSitesPhpTaskCest
+class RebuildSitesPhpTaskCest extends BaseCest
 {
-    protected $tmpDirs = [];
-
-    protected $tmpDir = '';
-
     protected $class = \RebuildSitesPhpTaskRoboFile::class;
-
-    public function __construct()
-    {
-        register_shutdown_function(function () {
-            $fs = new Filesystem();
-            $tmpDirs = array_filter($this->tmpDirs, 'file_exists');
-            $fs->chmod($tmpDirs, 0700, 0, true);
-            $fs->remove($tmpDirs);
-        });
-    }
-
-    // @codingStandardsIgnoreStart
-    public function _before()
-    {
-        // @codingStandardsIgnoreEnd
-        $this->createTmpDir();
-    }
 
     public function runWithoutExampleSitesPhp(AcceptanceTester $I): void
     {
+        $tmpDir = $this->createTmpDir();
+
         $id = __METHOD__;
-        $I->runRoboTask($id, $this->tmpDir, $this->class, 'basic');
+        $I->runRoboTask($id, $tmpDir, $this->class, 'basic');
         $I->assertEquals(0, $I->getRoboTaskExitCode($id));
         $I->assertEquals("Success\n", $I->getRoboTaskStdOutput($id));
 
@@ -43,11 +25,12 @@ class RebuildSitesPhpTaskCest
             $this->expectedSitesPhpContent(),
             '',
         ]);
-        $I->assertEquals($expected, file_get_contents("{$this->tmpDir}/drupal_root/sites/sites.php"));
+        $I->assertEquals($expected, file_get_contents("$tmpDir/drupal_root/sites/sites.php"));
     }
 
     public function runWithExampleSitesPhp(AcceptanceTester $I): void
     {
+        $tmpDir = $this->createTmpDir();
         $id = __METHOD__;
         $exampleSitesPhp = implode("\n", [
             '<?php',
@@ -56,9 +39,9 @@ class RebuildSitesPhpTaskCest
             '',
         ]);
         $fs = new Filesystem();
-        $fs->dumpFile("{$this->tmpDir}/drupal_root/sites/example.sites.php", $exampleSitesPhp);
+        $fs->dumpFile("$tmpDir/drupal_root/sites/example.sites.php", $exampleSitesPhp);
 
-        $I->runRoboTask($id, $this->tmpDir, $this->class, 'basic');
+        $I->runRoboTask($id, $tmpDir, $this->class, 'basic');
         $I->assertEquals(0, $I->getRoboTaskExitCode($id));
         $I->assertEquals("Success\n", $I->getRoboTaskStdOutput($id));
 
@@ -69,19 +52,20 @@ class RebuildSitesPhpTaskCest
             $this->expectedSitesPhpContent(),
             '',
         ]);
-        $I->assertEquals($expected, file_get_contents("{$this->tmpDir}/drupal_root/sites/sites.php"));
+        $I->assertEquals($expected, file_get_contents("$tmpDir/drupal_root/sites/sites.php"));
     }
 
     public function runFail(AcceptanceTester $I): void
     {
+        $tmpDir = $this->createTmpDir();
         $id = __METHOD__;
-        $fileName = "{$this->tmpDir}/drupal_root/sites/sites.php";
+        $fileName = "$tmpDir/drupal_root/sites/sites.php";
         $fs = new Filesystem();
         $fs->dumpFile($fileName, '');
         $fs->chmod($fileName, 0);
         $fs->chmod(dirname($fileName), 0);
 
-        $I->runRoboTask($id, $this->tmpDir, $this->class, 'basic');
+        $I->runRoboTask($id, $tmpDir, $this->class, 'basic');
         $I->assertEquals(1, $I->getRoboTaskExitCode($id));
         $I->assertContains("Fail\n", $I->getRoboTaskStdError($id));
 
@@ -103,19 +87,5 @@ class RebuildSitesPhpTaskCest
             "  '50623.pg.foo.localhost' => 'foo.pg',",
             '];',
         ]);
-    }
-
-    protected function createTmpDir(): void
-    {
-        $class = explode('\\', __CLASS__);
-        $tmpDir = tempnam(sys_get_temp_dir(), 'robo-drupal-' . end($class));
-        if (!$tmpDir) {
-            throw new \Exception();
-        }
-
-        unlink($tmpDir);
-        mkdir($tmpDir);
-        $this->tmpDirs[] = $tmpDir;
-        $this->tmpDir = $tmpDir;
     }
 }

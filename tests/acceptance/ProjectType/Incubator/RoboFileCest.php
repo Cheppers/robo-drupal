@@ -5,6 +5,7 @@ namespace Cheppers\Robo\Drupal\Tests\Acceptance\ProjectType\Incubator;
 use Cheppers\Robo\Drupal\Test\AcceptanceTester;
 use Symfony\Component\Filesystem\Filesystem;
 use Symfony\Component\Finder\Finder;
+use Webmozart\PathUtil\Path;
 
 class RoboFileCest
 {
@@ -28,11 +29,11 @@ class RoboFileCest
     {
         $this->fs = new Filesystem();
 
-        register_shutdown_function(function () {
-            $tmpDirs = array_filter($this->tmpDirs, 'file_exists');
-            $this->fs->chmod($tmpDirs, 0700, 0, true);
-            $this->fs->remove($tmpDirs);
-        });
+        //register_shutdown_function(function () {
+        //    $tmpDirs = array_filter($this->tmpDirs, 'file_exists');
+        //    $this->fs->chmod($tmpDirs, 0700, 0, true);
+        //    $this->fs->remove($tmpDirs);
+        //});
     }
 
     public function listTest(AcceptanceTester $i): void
@@ -176,22 +177,45 @@ class RoboFileCest
         }
     }
 
-    protected function siteDeleteTest(AcceptanceTester $i): void
+    public function siteDeleteBasicTest(AcceptanceTester $i): void
     {
         $projectName = 'siteDelete.01';
         $workingDir = $this->prepareProject($projectName);
+        $expectedDir = $this->fixturesRoot($projectName) . '/expected';
         $id = __METHOD__;
         $i->runRoboTask(
             $id,
             $workingDir,
             $this->class,
-            'site:delete'
+            'site:delete',
+            '--yes',
+            'default'
         );
 
-        codecept_debug($i->getRoboTaskStdOutput($id));
-        codecept_debug($i->getRoboTaskStdError($id));
-
         $i->assertEquals(0, $i->getRoboTaskExitCode($id), 'Exit code');
+
+        $dirs = [
+            'sites/all/translations' => true,
+            'sites/default.my' => false,
+            'sites/default.sl' => false,
+        ];
+        foreach ($dirs as $dir => $shouldBeExists) {
+            if ($shouldBeExists) {
+                $i->assertDirectoryExists("$workingDir/$dir");
+            } else {
+                $i->assertFileNotExists("$workingDir/$dir");
+            }
+        }
+
+        /** @var \Symfony\Component\Finder\Finder $files */
+        $files = (new Finder())
+            ->in($expectedDir)
+            ->files();
+        foreach ($files as $file) {
+            $filePath = Path::join($workingDir, $file->getRelativePathname());
+            $i->openFile($filePath);
+            $i->canSeeFileContentsEqual($file->getContents());
+        }
     }
 
     protected function prepareProject(string $projectName): string

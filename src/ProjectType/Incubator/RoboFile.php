@@ -659,7 +659,7 @@ class RoboFile extends Base\RoboFile
                 $lines = file($projectConfigFileName);
                 $lineIndex = 0;
 
-                $siteIdSafe = var_export($siteConfig, true);
+                $siteIdSafe = var_export($siteConfig->id, true);
                 $first = "  \$projectConfig->sites[$siteIdSafe] = new SiteConfig();\n";
                 while ($lineIndex < count($lines) && $lines[$lineIndex] !== $first) {
                     $lineIndex++;

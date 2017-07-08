@@ -3,16 +3,15 @@
 namespace Cheppers\Robo\Drupal\Tests\Unit;
 
 use Cheppers\Robo\Drupal\VarExport;
+use Codeception\Test\Unit;
 
 /**
- * Class VarExportTest.
- *
  * @covers \Cheppers\Robo\Drupal\VarExport
  */
-class VarExportTest extends \Codeception\Test\Unit
+class VarExportTest extends Unit
 {
     /**
-     * @var \UnitTester
+     * @var \Cheppers\Robo\Drupal\Test\UnitTester
      */
     protected $tester;
 
@@ -34,9 +33,6 @@ class VarExportTest extends \Codeception\Test\Unit
         $this->tester->assertEquals($expected, VarExport::any($value, $depth, $indent));
     }
 
-    /**
-     * @return array
-     */
     public function casesString(): array
     {
         return [
@@ -51,9 +47,6 @@ class VarExportTest extends \Codeception\Test\Unit
 
     /**
      * @dataProvider casesString
-     *
-     * @param string $string
-     * @param string $expected
      */
     public function testString(string $string, string $expected)
     {

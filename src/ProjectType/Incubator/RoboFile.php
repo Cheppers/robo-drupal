@@ -267,12 +267,6 @@ class RoboFile extends Base\RoboFile
     ): ?CollectionBuilder {
         $siteConfig = $this->validateInputSiteId($siteConfig, true);
 
-        // @todo Better description.
-        $is_sure = $options['yes'] || $this->io()->confirm('Are you sure?', false);
-        if (!$is_sure) {
-            return null;
-        }
-
         return $this
             ->collectionBuilder()
             ->addCode($this->getTaskDrupalSiteDelete($siteConfig))

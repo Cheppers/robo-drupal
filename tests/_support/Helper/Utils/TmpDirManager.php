@@ -18,7 +18,7 @@ class TmpDirManager
      */
     protected static $fs;
 
-    protected function initialize()
+    protected static function initialize()
     {
         if (static::$initialized) {
             return;
@@ -37,6 +37,8 @@ class TmpDirManager
 
     public static function create(string $parent = '', $prefix = ''): string
     {
+        static::initialize();
+
         if (!$parent) {
             $parent = sys_get_temp_dir();
         }

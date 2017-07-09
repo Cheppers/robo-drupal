@@ -3,6 +3,7 @@
 namespace Cheppers\Robo\Drupal\Tests\Acceptance\Robo\Task;
 
 use Cheppers\Robo\Drupal\Test\AcceptanceTester;
+use Cheppers\Robo\Drupal\Test\Helper\Utils\TmpDirManager;
 use Cheppers\Robo\Drupal\Tests\Acceptance\Base as BaseCest;
 use Symfony\Component\Filesystem\Filesystem;
 
@@ -12,7 +13,7 @@ class RebuildSitesPhpTaskCest extends BaseCest
 
     public function runWithoutExampleSitesPhp(AcceptanceTester $I): void
     {
-        $tmpDir = $this->createTmpDir();
+        $tmpDir = TmpDirManager::create();
 
         $id = __METHOD__;
         $I->runRoboTask($id, $tmpDir, $this->class, 'basic');
@@ -30,7 +31,7 @@ class RebuildSitesPhpTaskCest extends BaseCest
 
     public function runWithExampleSitesPhp(AcceptanceTester $I): void
     {
-        $tmpDir = $this->createTmpDir();
+        $tmpDir = TmpDirManager::create();
         $id = __METHOD__;
         $exampleSitesPhp = implode("\n", [
             '<?php',
@@ -57,7 +58,7 @@ class RebuildSitesPhpTaskCest extends BaseCest
 
     public function runFail(AcceptanceTester $I): void
     {
-        $tmpDir = $this->createTmpDir();
+        $tmpDir = TmpDirManager::create();
         $id = __METHOD__;
         $fileName = "$tmpDir/drupal_root/sites/sites.php";
         $fs = new Filesystem();

@@ -3,6 +3,7 @@
 namespace Cheppers\Robo\Drupal\Tests\Acceptance\ProjectType\Incubator;
 
 use Cheppers\Robo\Drupal\Test\AcceptanceTester;
+use Cheppers\Robo\Drupal\Test\Helper\Utils\TmpDirManager;
 use Cheppers\Robo\Drupal\Tests\Acceptance\Base as BaseCest;
 use Symfony\Component\Finder\Finder;
 use Webmozart\PathUtil\Path;
@@ -195,5 +196,67 @@ class RoboFileCest extends BaseCest
             $i->openFile($filePath);
             $i->canSeeFileContentsEqual($file->getContents());
         }
+    }
+
+    public function rebuildSitesPhpTest(AcceptanceTester $i): void
+    {
+        $projectName = 'siteDelete.01';
+        $workingDir = $this->prepareProject($projectName);
+        $id = __METHOD__;
+
+        $expected = <<< 'PHP'
+<?php
+
+$sites = [
+  '70106-dev.my.default.test.localhost' => 'default.my',
+  '50630-dev.my.default.test.localhost' => 'default.my',
+  '70106-dev.sl.default.test.localhost' => 'default.sl',
+  '50630-dev.sl.default.test.localhost' => 'default.sl',
+];
+
+PHP;
+
+        $i->runRoboTask(
+            $id,
+            $workingDir,
+            $this->class,
+            'rebuild:sites-php'
+        );
+
+        $i->assertEquals(0, $i->getRoboTaskExitCode($id), 'Exit code');
+
+        $filePath = Path::join($workingDir, 'drupal_root', 'sites', 'sites.php');
+        $i->openFile($filePath);
+        $i->canSeeFileContentsEqual($expected);
+    }
+
+    public function siteInstallTest(AcceptanceTester $i): void
+    {
+        $tmpDir = TmpDirManager::create();
+        $id = __METHOD__;
+
+        $i->createNewDrupalProject($tmpDir, '01');
+        $i->runRoboTask(
+            "$id:create",
+            "$tmpDir/root",
+            $this->class,
+            'site:create',
+            '--profile=minimal',
+            '--long=shop',
+            '--short=mys',
+            'commerce'
+        );
+        $i->assertEquals(0, $i->getRoboTaskExitCode("$id:create"));
+
+        $i->runRoboTask(
+            "$id:install",
+            "$tmpDir/root",
+            $this->class,
+            'site:install',
+            'commerce'
+        );
+        $i->assertEquals(0, $i->getRoboTaskExitCode("$id:install"));
+
+        $i->seeDrupalSiteIsInstalled("$tmpDir/root", 'commerce.sl');
     }
 }

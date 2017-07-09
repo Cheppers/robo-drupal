@@ -1,0 +1,6 @@
+{
+    "name": "drupal/m01",
+    "type": "drupal-module",
+    "description": "A Drupal 8 module",
+    "license": "proprietary"
+}

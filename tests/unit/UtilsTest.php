@@ -2,14 +2,19 @@
 
 namespace Cheppers\Robo\Drupal\Tests\Unit;
 
-use Cheppers\Robo\Drupal\Tests\Unit\Base as BaseTest;
+use Cheppers\Robo\Drupal\Test\Helper\Utils\TmpDirManager;
 use Cheppers\Robo\Drupal\Utils;
+use Codeception\Test\Unit;
 
 /**
  * @coversDefaultClass \Cheppers\Robo\Drupal\Utils
  */
-class UtilsTest extends BaseTest
+class UtilsTest extends Unit
 {
+    /**
+     * @var \Cheppers\Robo\Drupal\Test\UnitTester
+     */
+    protected $tester;
 
     public function casesPhpFileExtensionPatterns(): array
     {
@@ -607,7 +612,7 @@ class UtilsTest extends BaseTest
 
     public function casesCleanDirectory(): array
     {
-        $tmpDir = $this->createTmpDir();
+        $tmpDir = TmpDirManager::create();
         tempnam($tmpDir, 'cleanDirectory');
 
         return [
@@ -633,8 +638,8 @@ class UtilsTest extends BaseTest
 
     public function casesDirectDirectoryDescendants(): array
     {
-        $tmpDir = $this->createTmpDir();
-        $childDir = $this->createTmpDir($tmpDir, 'a-');
+        $tmpDir = TmpDirManager::create();
+        $childDir = TmpDirManager::create($tmpDir, 'a-');
         tempnam($childDir, 'b-');
 
         $children = [

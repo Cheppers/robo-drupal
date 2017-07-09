@@ -34,6 +34,7 @@
         "webmozart/path-util": "^2.3"
     },
     "require-dev": {
+        "ext-pdo_sqlite": "*",
         "codeception/codeception": "^2.2"
     },
     "autoload": {

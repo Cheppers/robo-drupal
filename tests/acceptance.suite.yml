@@ -6,4 +6,5 @@ modules:
         - Asserts
         - Filesystem
         - \Cheppers\Robo\Drupal\Test\Helper\Acceptance
+        - \Cheppers\Robo\Drupal\Test\Helper\Module\DrupalProject
         - \Cheppers\Robo\Drupal\Test\Helper\Module\RoboTaskRunner

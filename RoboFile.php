@@ -330,7 +330,7 @@ class RoboFile extends \Robo\Tasks
                         '{command}' => $command,
                     ]
                 ));
-                $process = new Process($command);
+                $process = new Process($command, null, null, null, 120);
                 $exitCode = $process->run(function ($type, $data) {
                     switch ($type) {
                         case Process::OUT:

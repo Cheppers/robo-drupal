@@ -2,18 +2,14 @@
 
 namespace Cheppers\Robo\Drupal\Tests\Unit;
 
+use Cheppers\Robo\Drupal\Tests\Unit\Base as BaseTest;
 use Cheppers\Robo\Drupal\Utils;
-use Codeception\Test\Unit;
 
 /**
- * @covers \Cheppers\Robo\Drupal\Utils
+ * @coversDefaultClass \Cheppers\Robo\Drupal\Utils
  */
-class UtilsTest extends Unit
+class UtilsTest extends BaseTest
 {
-    /**
-     * @var \Cheppers\Robo\Drupal\Test\UnitTester
-     */
-    protected $tester;
 
     public function casesPhpFileExtensionPatterns(): array
     {
@@ -607,5 +603,66 @@ class UtilsTest extends Unit
     public function testExcludeFileNames($expected, array $args): void
     {
         $this->tester->assertEquals($expected, Utils::excludeFileNames(...$args));
+    }
+
+    public function casesCleanDirectory(): array
+    {
+        $tmpDir = $this->createTmpDir();
+        tempnam($tmpDir, 'cleanDirectory');
+
+        return [
+            'basic' => [
+                $tmpDir,
+            ],
+        ];
+    }
+
+    /**
+     * @dataProvider casesCleanDirectory
+     *
+     * @covers ::cleanDirectory()
+     */
+    public function testCleanDirectory(string $dir): void
+    {
+        $expected = fileinode($dir);
+        Utils::cleanDirectory($dir);
+        $this->tester->assertFileExists($dir);
+        $this->tester->assertEquals($expected, fileinode($dir));
+        $this->tester->assertEquals(['.', '..'], scandir($dir));
+    }
+
+    public function casesDirectDirectoryDescendants(): array
+    {
+        $tmpDir = $this->createTmpDir();
+        $childDir = $this->createTmpDir($tmpDir, 'a-');
+        tempnam($childDir, 'b-');
+
+        $children = [
+            $childDir,
+            tempnam($tmpDir, 'c-'),
+            tempnam($tmpDir, 'd-'),
+        ];
+
+        return [
+            'basic' => [
+                $children,
+                $tmpDir,
+            ],
+        ];
+    }
+
+    /**
+     * @dataProvider casesDirectDirectoryDescendants
+     */
+    public function testDirectDirectoryDescendants(array $expected, string $dir): void
+    {
+        $files = Utils::directDirectoryDescendants($dir);
+        $actual = [];
+        foreach ($files as $file) {
+            $actual[] = $file->getPathname();
+        }
+        sort($actual);
+
+        $this->tester->assertEquals($expected, $actual);
     }
 }

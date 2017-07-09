@@ -506,6 +506,12 @@ class UtilsTest extends Unit
                 ],
                 "$fixturesDir/drupal_root/01",
             ],
+            'no-custom' => [
+                [
+                    'a' => "$fixturesDir/drupal_root/02/profiles/a",
+                ],
+                "$fixturesDir/drupal_root/02",
+            ],
         ];
     }
 

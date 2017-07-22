@@ -271,4 +271,56 @@ PHP;
 
         $i->seeDrupalSiteIsInstalled("$tmpDir/root", 'commerce.sl');
     }
+
+    public function lintPhpcsTest(AcceptanceTester $i): void
+    {
+        $tmpDir = TmpDirManager::create();
+        $idPrefix = __METHOD__;
+
+        $i->createNewDrupalProject($tmpDir, '01');
+
+        $id = "$idPrefix:lint:phpcs:all";
+        $i->runRoboTask(
+            $id,
+            "$tmpDir/root",
+            $this->class,
+            'lint:phpcs',
+            '-vvv'
+        );
+
+        $stdOutput = $i->getRoboTaskStdOutput($id);
+        $expected = implode(PHP_EOL, [
+            "$tmpDir/extensions/m02/src/Form/M02DummyForm.php",
+            '+----------+------+-------------------------------------------------------------+',
+            '| Severity | Line | Message                                                     |',
+            '+----------+------+-------------------------------------------------------------+',
+            '| error    |    5 | Missing class doc comment                                   |',
+            '| error    |    6 | Opening brace should be on the same line as the declaration |',
+            '+----------+------+-------------------------------------------------------------+',
+            '',
+        ]);
+
+        $i->assertEquals($expected, $stdOutput);
+        $i->assertEquals(2, $i->getRoboTaskExitCode($id), 'robo lint all ExitCode === 2');
+
+        $id = "$idPrefix:lint:m01";
+        $i->runRoboTask(
+            $id,
+            "$tmpDir/root",
+            $this->class,
+            'lint:phpcs',
+            'm01'
+        );
+        $i->assertEquals(0, $i->getRoboTaskExitCode($id), 'robo lint m01 ExitCode === 0');
+
+        $id = "$idPrefix:lint:m02";
+        $i->runRoboTask(
+            $id,
+            "$tmpDir/root",
+            $this->class,
+            'lint:phpcs',
+            'm02'
+        );
+        $i->assertEquals(2, $i->getRoboTaskExitCode($id), 'robo lint m02 ExitCode === 2');
+    }
 }

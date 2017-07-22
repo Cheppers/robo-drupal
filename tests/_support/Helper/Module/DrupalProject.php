@@ -39,6 +39,7 @@ class DrupalProject extends CodeceptionModule
         $this->fs->mirror($srcDir, $dstDir);
 
         $this
+            ->gitInit("$dstDir/root")
             ->addRoboDrupalToProject($dstDir)
             ->initExtensions($dstDir);
 

@@ -12,6 +12,10 @@
             "type": "path",
             "url": "../extensions/m01"
         },
+        "local:drupal/m02": {
+            "type": "path",
+            "url": "../extensions/m02"
+        },
         "drupal-8": {
             "type": "composer",
             "url": "https://packages.drupal.org/8"
@@ -24,6 +28,22 @@
         "drupal/core": "^8.3",
         "mikey179/vfsStream": "^1.6",
         "phpunit/phpunit": "^5.7"
+    },
+    "autoload": {
+        "psr-4": {
+            "Cheppers\\RoboDrupalTestProject01\\": "src/"
+        }
+    },
+    "scripts": {
+        "post-install-cmd": [
+            "Cheppers\\RoboDrupalTestProject01\\Composer\\Scripts::postInstallCmd"
+        ],
+        "post-update-cmd": [
+            "Cheppers\\RoboDrupalTestProject01\\Composer\\Scripts::postUpdateCmd"
+        ],
+        "post-create-project-cmd": [
+            "Cheppers\\RoboDrupalTestProject01\\Composer\\Scripts::postCreateProjectCmd"
+        ]
     },
     "extra": {
         "drupal-scaffold": {

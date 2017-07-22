@@ -246,7 +246,11 @@ PHP;
             '--short=mys',
             'commerce'
         );
-        $i->assertEquals(0, $i->getRoboTaskExitCode("$id:create"));
+        $i->assertEquals(
+            0,
+            $i->getRoboTaskExitCode("$id:create"),
+            'robo site:create ExitCode === 0'
+        );
 
         $i->runRoboTask(
             "$id:install",
@@ -255,7 +259,15 @@ PHP;
             'site:install',
             'commerce'
         );
-        $i->assertEquals(0, $i->getRoboTaskExitCode("$id:install"));
+
+        codecept_debug($i->getRoboTaskStdOutput("$id:install"));
+        codecept_debug($i->getRoboTaskStdError("$id:install"));
+
+        $i->assertEquals(
+            0,
+            $i->getRoboTaskExitCode("$id:install"),
+            'robo site:install ExitCode === 0'
+        );
 
         $i->seeDrupalSiteIsInstalled("$tmpDir/root", 'commerce.sl');
     }

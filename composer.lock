@@ -205,12 +205,12 @@
             "source": {
                 "type": "git",
                 "url": "https://github.com/Cheppers/robo-drush.git",
-                "reference": "141dd2336823fe7d9625d7596558151db3b86519"
+                "reference": "a73c9fc7abf96e49eb0ad3ca61ee858095e7d115"
             },
             "dist": {
                 "type": "zip",
-                "url": "https://api.github.com/repos/Cheppers/robo-drush/zipball/141dd2336823fe7d9625d7596558151db3b86519",
-                "reference": "141dd2336823fe7d9625d7596558151db3b86519",
+                "url": "https://api.github.com/repos/Cheppers/robo-drush/zipball/a73c9fc7abf96e49eb0ad3ca61ee858095e7d115",
+                "reference": "a73c9fc7abf96e49eb0ad3ca61ee858095e7d115",
                 "shasum": ""
             },
             "require": {
@@ -237,7 +237,7 @@
                 "GPL-2.0+"
             ],
             "description": "Drush related Robo tasks",
-            "time": "2017-06-11 11:32:32"
+            "time": "2017-07-21 23:39:08"
         },
         {
             "name": "cheppers/robo-eslint",

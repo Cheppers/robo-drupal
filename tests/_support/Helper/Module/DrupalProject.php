@@ -146,7 +146,7 @@ class DrupalProject extends CodeceptionModule
 
     protected function execute(string $cmd, ?int $expectedExitCode = 0): array
     {
-        $process = new Process($cmd, null, null, null, 120);
+        $process = new Process($cmd, null, null, null, 240);
 
         codecept_debug("\$cmd = $cmd");
         $result = [

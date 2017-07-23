@@ -48,6 +48,58 @@ class RoboFileCest extends BaseCest
         );
     }
 
+    public function selfManagedExtensionsTest(AcceptanceTester $i): void
+    {
+        $tmpDir = TmpDirManager::create();
+        $idPrefix = __METHOD__;
+
+        $i->createNewDrupalProject($tmpDir, '01');
+
+        $id = "$idPrefix:self:managed-extensions:table";
+        $i->runRoboTask(
+            $id,
+            "$tmpDir/root",
+            $this->class,
+            'self:managed-extensions'
+        );
+
+        $pathLength = mb_strlen("$tmpDir/extensions/m01");
+
+        $expected = implode(PHP_EOL, [
+            '+--------+------+-' . str_pad('-', $pathLength, '-', STR_PAD_RIGHT) . '-+',
+            '| Vendor | Name | ' . str_pad('Path', $pathLength, ' ', STR_PAD_RIGHT) . ' |',
+            '+--------+------+-' . str_pad('-', $pathLength, '-', STR_PAD_RIGHT) . '-+',
+            "| drupal | m01  | $tmpDir/extensions/m01 |",
+            "| drupal | m02  | $tmpDir/extensions/m02 |",
+            '+--------+------+-' . str_pad('-', $pathLength, '-', STR_PAD_RIGHT) . '-+',
+            '',
+        ]);
+        $i->assertEquals($expected, $i->getRoboTaskStdOutput($id), 'StdOutput');
+        $i->assertEquals(0, $i->getRoboTaskExitCode($id), 'ExitCode === 0');
+
+        $id = "$idPrefix:self:managed-extensions:yaml";
+        $expected = implode(PHP_EOL, [
+            'm01:',
+            '    vendor: drupal',
+            '    name: m01',
+            "    path: $tmpDir/extensions/m01",
+            'm02:',
+            '    vendor: drupal',
+            '    name: m02',
+            "    path: $tmpDir/extensions/m02",
+            '',
+        ]);
+        $i->runRoboTask(
+            $id,
+            "$tmpDir/root",
+            $this->class,
+            'self:managed-extensions',
+            '--format=yaml'
+        );
+        $i->assertEquals($expected, $i->getRoboTaskStdOutput($id), 'StdOutput');
+        $i->assertEquals(0, $i->getRoboTaskExitCode($id), 'ExitCode === 0');
+    }
+
     public function siteCreateBasicTest(AcceptanceTester $i): void
     {
         $projectName = 'siteCreate.01';

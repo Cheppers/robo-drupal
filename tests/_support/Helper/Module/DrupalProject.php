@@ -8,6 +8,7 @@ use Codeception\Lib\ModuleContainer;
 use Codeception\Module as CodeceptionModule;
 use Symfony\Component\Filesystem\Filesystem;
 use Symfony\Component\Process\Process;
+use Webmozart\PathUtil\Path;
 
 class DrupalProject extends CodeceptionModule
 {
@@ -29,22 +30,32 @@ class DrupalProject extends CodeceptionModule
 
     public function createNewDrupalProject(string $dstDir, string $templateName)
     {
-        if (isset(static::$projectCache[$templateName])) {
-            $this->fs->mirror(static::$projectCache[$templateName], $dstDir);
+        if (!isset(static::$projectCache[$templateName])) {
+            static::$projectCache[$templateName] = TmpDirManager::create();
 
-            return;
+            codecept_debug(sprintf(
+                'Create a new "%s" Drupal project from scratch. Cache dir: "%s"',
+                $templateName,
+                static::$projectCache[$templateName]
+            ));
+
+            $srcDir = $this->getProjectTemplateDir($templateName);
+            $this->fs->mirror($srcDir, static::$projectCache[$templateName]);
+
+            $this
+                ->gitInit(Path::join(static::$projectCache[$templateName], 'root'))
+                ->addRoboDrupalToProject(static::$projectCache[$templateName])
+                ->initExtensions(static::$projectCache[$templateName]);
         }
 
-        $srcDir = $this->getProjectTemplateDir($templateName);
-        $this->fs->mirror($srcDir, $dstDir);
+        codecept_debug(sprintf(
+            'Create a new "%s" Drupal project from cache "%s" into "%s"',
+            $templateName,
+            static::$projectCache[$templateName],
+            $dstDir
+        ));
 
-        $this
-            ->gitInit("$dstDir/root")
-            ->addRoboDrupalToProject($dstDir)
-            ->initExtensions($dstDir);
-
-        static::$projectCache[$templateName] = TmpDirManager::create();
-        $this->fs->mirror($dstDir, static::$projectCache[$templateName]);
+        $this->fs->mirror(static::$projectCache[$templateName], $dstDir);
     }
 
     public function seeDrupalSiteIsInstalled(string $projectRootDir, string $siteDubDir)

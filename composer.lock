@@ -322,12 +322,12 @@
             "source": {
                 "type": "git",
                 "url": "https://github.com/Cheppers/robo-phpcs.git",
-                "reference": "a51afcac51bbea71906980390b958507ec76798a"
+                "reference": "53ff854d3297531e16763b0341e42bb7dd8520dc"
             },
             "dist": {
                 "type": "zip",
-                "url": "https://api.github.com/repos/Cheppers/robo-phpcs/zipball/a51afcac51bbea71906980390b958507ec76798a",
-                "reference": "a51afcac51bbea71906980390b958507ec76798a",
+                "url": "https://api.github.com/repos/Cheppers/robo-phpcs/zipball/53ff854d3297531e16763b0341e42bb7dd8520dc",
+                "reference": "53ff854d3297531e16763b0341e42bb7dd8520dc",
                 "shasum": ""
             },
             "require": {
@@ -354,7 +354,7 @@
                 "GPL-2.0+"
             ],
             "description": "Robo task wrapper for PHPCS",
-            "time": "2017-06-15 21:08:20"
+            "time": "2017-07-22 14:13:31"
         },
         {
             "name": "cheppers/robo-sass",

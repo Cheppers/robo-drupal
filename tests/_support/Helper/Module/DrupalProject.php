@@ -6,6 +6,8 @@ use Cheppers\Robo\Drupal\Test\Helper\Utils\TmpDirManager;
 use Cheppers\Robo\Drupal\Utils;
 use Codeception\Lib\ModuleContainer;
 use Codeception\Module as CodeceptionModule;
+use Symfony\Component\Console\Helper\Table;
+use Symfony\Component\Console\Output\BufferedOutput;
 use Symfony\Component\Filesystem\Filesystem;
 use Symfony\Component\Process\Process;
 use Webmozart\PathUtil\Path;
@@ -69,6 +71,35 @@ class DrupalProject extends CodeceptionModule
             ->fetchAll();
 
         $this->assertEquals(2, count($accounts), 'Number of users');
+    }
+
+    public function seeManagedExtensionsTable(array $extensions, string $text)
+    {
+        $rows = [];
+        foreach ($extensions as $name => $path) {
+            $rows[] = ['drupal', $name, $path];
+        }
+
+        $output = new BufferedOutput();
+        (new Table($output))
+            ->setHeaders(['Vendor', 'Name', 'Path'])
+            ->addRows($rows)
+            ->render();
+
+        $this->assertContains($output->fetch(), $text);
+    }
+
+    public function seeManagedExtensionsYaml(array $extensions, string $text)
+    {
+        $expected = [];
+        foreach ($extensions as $name => $path) {
+            $expected[] = "$name:";
+            $expected[] = '    vendor: drupal';
+            $expected[] = "    name: $name";
+            $expected[] = "    path: $path";
+        }
+
+        $this->assertContains(implode(PHP_EOL, $expected), $text);
     }
 
     /**

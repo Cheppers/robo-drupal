@@ -63,32 +63,16 @@ class RoboFileCest extends BaseCest
             'self:managed-extensions'
         );
 
-        $pathLength = mb_strlen("$tmpDir/extensions/m01");
-
-        $expected = implode(PHP_EOL, [
-            '+--------+------+-' . str_pad('-', $pathLength, '-', STR_PAD_RIGHT) . '-+',
-            '| Vendor | Name | ' . str_pad('Path', $pathLength, ' ', STR_PAD_RIGHT) . ' |',
-            '+--------+------+-' . str_pad('-', $pathLength, '-', STR_PAD_RIGHT) . '-+',
-            "| drupal | m01  | $tmpDir/extensions/m01 |",
-            "| drupal | m02  | $tmpDir/extensions/m02 |",
-            '+--------+------+-' . str_pad('-', $pathLength, '-', STR_PAD_RIGHT) . '-+',
-            '',
-        ]);
-        $i->assertEquals($expected, $i->getRoboTaskStdOutput($id), 'StdOutput');
+        $i->canSeeManagedExtensionsTable(
+            [
+                'm01' => "$tmpDir/extensions/m01",
+                'm02' => "$tmpDir/extensions/m02",
+            ],
+            $i->getRoboTaskStdOutput($id)
+        );
         $i->assertEquals(0, $i->getRoboTaskExitCode($id), 'ExitCode === 0');
 
         $id = "$idPrefix:self:managed-extensions:yaml";
-        $expected = implode(PHP_EOL, [
-            'm01:',
-            '    vendor: drupal',
-            '    name: m01',
-            "    path: $tmpDir/extensions/m01",
-            'm02:',
-            '    vendor: drupal',
-            '    name: m02',
-            "    path: $tmpDir/extensions/m02",
-            '',
-        ]);
         $i->runRoboTask(
             $id,
             "$tmpDir/root",
@@ -96,7 +80,14 @@ class RoboFileCest extends BaseCest
             'self:managed-extensions',
             '--format=yaml'
         );
-        $i->assertEquals($expected, $i->getRoboTaskStdOutput($id), 'StdOutput');
+        $i->seeManagedExtensionsYaml(
+            [
+                'm01' => "$tmpDir/extensions/m01",
+                'm02' => "$tmpDir/extensions/m02",
+            ],
+            $i->getRoboTaskStdOutput($id),
+            'StdOutput'
+        );
         $i->assertEquals(0, $i->getRoboTaskExitCode($id), 'ExitCode === 0');
     }
 
@@ -340,6 +331,7 @@ PHP;
             '-vvv'
         );
 
+        $exitCode = $i->getRoboTaskExitCode($id);
         $stdOutput = $i->getRoboTaskStdOutput($id);
         $expected = implode(PHP_EOL, [
             "$tmpDir/extensions/m02/src/Form/M02DummyForm.php",
@@ -353,7 +345,7 @@ PHP;
         ]);
 
         $i->assertEquals($expected, $stdOutput);
-        $i->assertEquals(2, $i->getRoboTaskExitCode($id), 'robo lint all ExitCode === 2');
+        $i->assertEquals(2, $exitCode, 'robo lint all ExitCode === 2');
 
         $id = "$idPrefix:lint:m01";
         $i->runRoboTask(

@@ -1,8 +1,8 @@
 <?php
 
-namespace Cheppers\Robo\Drupal\Robo\Task\CoreTests;
+namespace Sweetchuck\Robo\Drupal\Robo\Task\CoreTests;
 
-use Cheppers\Robo\Drush\Utils;
+use Sweetchuck\Robo\Drush\Utils;
 use Symfony\Component\Filesystem\Filesystem;
 use Webmozart\PathUtil\Path;
 

@@ -1,6 +1,6 @@
 <?php
 
-namespace Cheppers\Robo\Drupal\Robo\Task;
+namespace Sweetchuck\Robo\Drupal\Robo\Task;
 
 use Robo\Contract\CommandInterface;
 use Robo\Result;

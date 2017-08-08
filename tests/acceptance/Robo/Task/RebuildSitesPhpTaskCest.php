@@ -1,10 +1,10 @@
 <?php
 
-namespace Cheppers\Robo\Drupal\Tests\Acceptance\Robo\Task;
+namespace Sweetchuck\Robo\Drupal\Tests\Acceptance\Robo\Task;
 
-use Cheppers\Robo\Drupal\Test\AcceptanceTester;
-use Cheppers\Robo\Drupal\Test\Helper\Utils\TmpDirManager;
-use Cheppers\Robo\Drupal\Tests\Acceptance\Base as BaseCest;
+use Sweetchuck\Robo\Drupal\Test\AcceptanceTester;
+use Sweetchuck\Robo\Drupal\Test\Helper\Utils\TmpDirManager;
+use Sweetchuck\Robo\Drupal\Tests\Acceptance\Base as BaseCest;
 use Symfony\Component\Filesystem\Filesystem;
 
 class RebuildSitesPhpTaskCest extends BaseCest

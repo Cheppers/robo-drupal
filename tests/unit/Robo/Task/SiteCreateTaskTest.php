@@ -1,22 +1,22 @@
 <?php
 
-namespace Cheppers\Robo\Drupal\Tests\Unit\Robo\Task;
+namespace Sweetchuck\Robo\Drupal\Tests\Unit\Robo\Task;
 
-use Cheppers\Robo\Drupal\ProjectType\Incubator\ProjectConfig;
-use Cheppers\Robo\Drupal\Robo\Task\SiteCreateTask;
-use Cheppers\Robo\Drupal\Utils;
+use Sweetchuck\Robo\Drupal\ProjectType\Incubator\ProjectConfig;
+use Sweetchuck\Robo\Drupal\Robo\Task\SiteCreateTask;
+use Sweetchuck\Robo\Drupal\Utils;
 use Codeception\Test\Unit;
 use Robo\Robo;
 use Symfony\Component\Filesystem\Filesystem;
 use Symfony\Component\Finder\Finder;
 
 /**
- * @covers \Cheppers\Robo\Drupal\Robo\Task\SiteCreateTask
+ * @covers \Sweetchuck\Robo\Drupal\Robo\Task\SiteCreateTask
  */
 class SiteCreateTaskTest extends Unit
 {
     /**
-     * @var \Cheppers\Robo\Drupal\Test\UnitTester
+     * @var \Sweetchuck\Robo\Drupal\Test\UnitTester
      */
     protected $tester;
 
@@ -104,7 +104,7 @@ class SiteCreateTaskTest extends Unit
 
     protected function getProjectConfig(string $projectRootDir): ProjectConfig
     {
-        /** @var \Cheppers\Robo\Drupal\ProjectType\Incubator\ProjectConfig $projectConfig */
+        /** @var \Sweetchuck\Robo\Drupal\ProjectType\Incubator\ProjectConfig $projectConfig */
         $projectConfig = include $projectRootDir . '/' . Utils::$projectConfigFileName;
 
         return $projectConfig;

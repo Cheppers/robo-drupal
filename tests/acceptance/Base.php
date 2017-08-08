@@ -1,8 +1,8 @@
 <?php
 
-namespace Cheppers\Robo\Drupal\Tests\Acceptance;
+namespace Sweetchuck\Robo\Drupal\Tests\Acceptance;
 
-use Cheppers\Robo\Drupal\Test\Helper\Utils\TmpDirManager;
+use Sweetchuck\Robo\Drupal\Test\Helper\Utils\TmpDirManager;
 use Symfony\Component\Filesystem\Filesystem;
 
 class Base

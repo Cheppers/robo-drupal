@@ -1,9 +1,9 @@
 <?php
 
-namespace Cheppers\Robo\Drupal\Tests\Unit\ProjectType\Base;
+namespace Sweetchuck\Robo\Drupal\Tests\Unit\ProjectType\Base;
 
-use Cheppers\Robo\Drupal\ProjectType\Base\ProjectConfig;
-use Cheppers\Robo\Drupal\Tests\Unit\Config\BaseConfigTest;
+use Sweetchuck\Robo\Drupal\ProjectType\Base\ProjectConfig;
+use Sweetchuck\Robo\Drupal\Tests\Unit\Config\BaseConfigTest;
 
 class ProjectConfigTest extends BaseConfigTest
 {
@@ -20,7 +20,7 @@ class ProjectConfigTest extends BaseConfigTest
             ],
         ];
 
-        /** @var \Cheppers\Robo\Drupal\ProjectType\Base\ProjectConfig $config */
+        /** @var \Sweetchuck\Robo\Drupal\ProjectType\Base\ProjectConfig $config */
         $config = new $this->className($data);
         $config->populateDefaultValues();
 

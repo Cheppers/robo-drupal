@@ -1,9 +1,9 @@
 <?php
 
-namespace Cheppers\Robo\Drupal\Robo\Task;
+namespace Sweetchuck\Robo\Drupal\Robo\Task;
 
-use Cheppers\Robo\Drupal\ProjectType\Base\ProjectConfig;
-use Cheppers\Robo\Drupal\VarExport;
+use Sweetchuck\Robo\Drupal\ProjectType\Base\ProjectConfig;
+use Sweetchuck\Robo\Drupal\VarExport;
 use Robo\Result;
 use Symfony\Component\Filesystem\Exception\IOException;
 use Symfony\Component\Filesystem\Filesystem;
@@ -27,7 +27,7 @@ class RebuildSitesPhpTask extends BaseTask
     protected $fs;
 
     /**
-     * @var \Cheppers\Robo\Drupal\ProjectType\Base\ProjectConfig
+     * @var \Sweetchuck\Robo\Drupal\ProjectType\Base\ProjectConfig
      */
     protected $projectConfig;
 

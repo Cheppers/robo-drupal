@@ -1,8 +1,8 @@
 <?php
 
-namespace Cheppers\Robo\Drupal\Tests\Unit\Config;
+namespace Sweetchuck\Robo\Drupal\Tests\Unit\Config;
 
-use Cheppers\Robo\Drupal\Config\SassRootConfig;
+use Sweetchuck\Robo\Drupal\Config\SassRootConfig;
 
 class SassRootConfigTest extends BaseConfigTest
 {

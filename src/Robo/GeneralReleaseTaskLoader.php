@@ -1,13 +1,13 @@
 <?php
 
-namespace Cheppers\Robo\Drupal\Robo;
+namespace Sweetchuck\Robo\Drupal\Robo;
 
 use Robo\Collection\CollectionBuilder;
 
 trait GeneralReleaseTaskLoader
 {
     /**
-     * @return \Cheppers\Robo\Drupal\Robo\Task\Release\GeneralReleaseTask|\Robo\Collection\CollectionBuilder
+     * @return \Sweetchuck\Robo\Drupal\Robo\Task\Release\GeneralReleaseTask|\Robo\Collection\CollectionBuilder
      */
     protected function taskGeneralRelease(array $options = []): CollectionBuilder
     {

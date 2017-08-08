@@ -1,6 +1,6 @@
 <?php
 
-namespace Cheppers\Robo\Drupal\Robo\Task\CoreTests;
+namespace Sweetchuck\Robo\Drupal\Robo\Task\CoreTests;
 
 class CleanTask extends BaseTask
 {

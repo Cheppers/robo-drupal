@@ -1,8 +1,8 @@
 <?php
 
-namespace Cheppers\Robo\Drupal\Tests\Unit\Config;
+namespace Sweetchuck\Robo\Drupal\Tests\Unit\Config;
 
-use Cheppers\Robo\Drupal\Config\PhpcsConfig;
+use Sweetchuck\Robo\Drupal\Config\PhpcsConfig;
 
 class PhpcsConfigTest extends BaseConfigTest
 {

@@ -1,6 +1,6 @@
 <?php
 
-namespace Cheppers\Robo\Drupal\Robo;
+namespace Sweetchuck\Robo\Drupal\Robo;
 
 use Robo\Collection\CollectionBuilder;
 
@@ -8,7 +8,7 @@ trait DrupalCoreTestsTaskLoader
 {
 
     /**
-     * @return \Cheppers\Robo\Drupal\Robo\Task\CoreTests\CleanTask|\Robo\Collection\CollectionBuilder
+     * @return \Sweetchuck\Robo\Drupal\Robo\Task\CoreTests\CleanTask|\Robo\Collection\CollectionBuilder
      */
     protected function taskDrupalCoreTestsClean(array $options = []): CollectionBuilder
     {
@@ -16,7 +16,7 @@ trait DrupalCoreTestsTaskLoader
     }
 
     /**
-     * @return \Cheppers\Robo\Drupal\Robo\Task\CoreTests\ListTask|\Robo\Collection\CollectionBuilder
+     * @return \Sweetchuck\Robo\Drupal\Robo\Task\CoreTests\ListTask|\Robo\Collection\CollectionBuilder
      */
     protected function taskDrupalCoreTestsList(array $options = []): CollectionBuilder
     {
@@ -24,7 +24,7 @@ trait DrupalCoreTestsTaskLoader
     }
 
     /**
-     * @return \Cheppers\Robo\Drupal\Robo\Task\CoreTests\RunTask|\Robo\Collection\CollectionBuilder
+     * @return \Sweetchuck\Robo\Drupal\Robo\Task\CoreTests\RunTask|\Robo\Collection\CollectionBuilder
      */
     protected function taskDrupalCoreTestsRun(array $options = []): CollectionBuilder
     {

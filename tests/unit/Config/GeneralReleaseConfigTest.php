@@ -1,8 +1,8 @@
 <?php
 
-namespace Cheppers\Robo\Drupal\Tests\Unit\Config;
+namespace Sweetchuck\Robo\Drupal\Tests\Unit\Config;
 
-use Cheppers\Robo\Drupal\Config\GeneralReleaseConfig;
+use Sweetchuck\Robo\Drupal\Config\GeneralReleaseConfig;
 
 class GeneralReleaseConfigTest extends BaseConfigTest
 {

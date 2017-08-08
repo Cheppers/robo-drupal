@@ -1,11 +1,11 @@
 <?php
 
-namespace Cheppers\Robo\Drupal\ProjectType\Customer;
+namespace Sweetchuck\Robo\Drupal\ProjectType\Customer;
 
-use Cheppers\Robo\Drupal\ProjectType\Base as Base;
-use Cheppers\Robo\Drupal\ProjectType\Incubator as Incubator;
-use Cheppers\Robo\Drupal\Utils;
-use Cheppers\Robo\Drupal\VarExport;
+use Sweetchuck\Robo\Drupal\ProjectType\Base as Base;
+use Sweetchuck\Robo\Drupal\ProjectType\Incubator as Incubator;
+use Sweetchuck\Robo\Drupal\Utils;
+use Sweetchuck\Robo\Drupal\VarExport;
 use Robo\Robo;
 use Stringy\StaticStringy;
 use Symfony\Component\Finder\Finder;
@@ -20,7 +20,7 @@ class Scripts extends Base\Scripts
     protected static $projectConfigClass = ProjectConfig::class;
 
     /**
-     * @var \Cheppers\Robo\Drupal\ProjectType\Customer\ProjectConfig
+     * @var \Sweetchuck\Robo\Drupal\ProjectType\Customer\ProjectConfig
      */
     protected static $projectConfig = null;
 

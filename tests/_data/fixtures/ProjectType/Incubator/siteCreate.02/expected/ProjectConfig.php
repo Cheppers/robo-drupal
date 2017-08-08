@@ -1,10 +1,10 @@
 <?php
 
-use Cheppers\Robo\Drupal\Config\DatabaseServerConfig;
-use Cheppers\Robo\Drupal\Config\PhpVariantConfig;
-use Cheppers\Robo\Drupal\Config\SiteConfig;
-use Cheppers\Robo\Drupal\ProjectType\Incubator\ProjectConfig;
-use Cheppers\Robo\Drupal\Utils;
+use Sweetchuck\Robo\Drupal\Config\DatabaseServerConfig;
+use Sweetchuck\Robo\Drupal\Config\PhpVariantConfig;
+use Sweetchuck\Robo\Drupal\Config\SiteConfig;
+use Sweetchuck\Robo\Drupal\ProjectType\Incubator\ProjectConfig;
+use Sweetchuck\Robo\Drupal\Utils;
 
 return call_user_func(function () {
   $projectConfig = new ProjectConfig();

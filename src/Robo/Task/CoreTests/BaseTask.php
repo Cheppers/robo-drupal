@@ -1,15 +1,15 @@
 <?php
 
-namespace Cheppers\Robo\Drupal\Robo\Task\CoreTests;
+namespace Sweetchuck\Robo\Drupal\Robo\Task\CoreTests;
 
-use Cheppers\Robo\Drush\Utils;
+use Sweetchuck\Robo\Drush\Utils;
 use League\Container\ContainerAwareInterface;
 use League\Container\ContainerAwareTrait;
 use Robo\Common\OutputAwareTrait;
 use Robo\Contract\CommandInterface;
 use Robo\Contract\OutputAwareInterface;
 use Robo\Result;
-use Cheppers\Robo\Drupal\Robo\Task\BaseTask as RoboBaseTask;
+use Sweetchuck\Robo\Drupal\Robo\Task\BaseTask as RoboBaseTask;
 use Symfony\Component\Process\Process;
 
 abstract class BaseTask extends RoboBaseTask implements

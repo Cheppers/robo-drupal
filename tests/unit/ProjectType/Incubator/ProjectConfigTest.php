@@ -1,16 +1,16 @@
 <?php
 
-namespace Cheppers\Robo\Drupal\Tests\Unit\ProjectType\Incubator;
+namespace Sweetchuck\Robo\Drupal\Tests\Unit\ProjectType\Incubator;
 
-use Cheppers\Robo\Drupal\Config\DatabaseServerConfig;
-use Cheppers\Robo\Drupal\Config\PhpVariantConfig;
-use Cheppers\Robo\Drupal\ProjectType\Incubator\ProjectConfig;
-use Cheppers\Robo\Drupal\Config\SiteConfig;
-use Cheppers\Robo\Drupal\Tests\Unit\Config\BaseConfigTest;
+use Sweetchuck\Robo\Drupal\Config\DatabaseServerConfig;
+use Sweetchuck\Robo\Drupal\Config\PhpVariantConfig;
+use Sweetchuck\Robo\Drupal\ProjectType\Incubator\ProjectConfig;
+use Sweetchuck\Robo\Drupal\Config\SiteConfig;
+use Sweetchuck\Robo\Drupal\Tests\Unit\Config\BaseConfigTest;
 use ReflectionClass;
 
 /**
- * @coversDefaultClass \Cheppers\Robo\Drupal\ProjectType\Incubator\ProjectConfig
+ * @coversDefaultClass \Sweetchuck\Robo\Drupal\ProjectType\Incubator\ProjectConfig
  */
 class ProjectConfigTest extends BaseConfigTest
 {
@@ -24,7 +24,7 @@ class ProjectConfigTest extends BaseConfigTest
     }
 
     /**
-     * @var \Cheppers\Robo\Drupal\Test\UnitTester
+     * @var \Sweetchuck\Robo\Drupal\Test\UnitTester
      */
     protected $tester;
 
@@ -86,7 +86,7 @@ class ProjectConfigTest extends BaseConfigTest
         string $baseHostName,
         int $baseHostPort
     ) {
-        /** @var \Cheppers\Robo\Drupal\ProjectType\Incubator\ProjectConfig $pc */
+        /** @var \Sweetchuck\Robo\Drupal\ProjectType\Incubator\ProjectConfig $pc */
         $pc = new $this->className();
         $pc->id = $id;
         $pc->baseHostName = $baseHostName;
@@ -111,7 +111,7 @@ class ProjectConfigTest extends BaseConfigTest
      */
     public function testGetBaseHostName(string $expected, string $name, string $baseHostName)
     {
-        /** @var \Cheppers\Robo\Drupal\ProjectType\Incubator\ProjectConfig $pc */
+        /** @var \Sweetchuck\Robo\Drupal\ProjectType\Incubator\ProjectConfig $pc */
         $pc = new $this->className();
         $pc->id = $name;
         $pc->baseHostName = $baseHostName;
@@ -147,7 +147,7 @@ class ProjectConfigTest extends BaseConfigTest
      */
     public function testGetProjectUrls(array $expected, array $phpIds, array $dbIds)
     {
-        /** @var \Cheppers\Robo\Drupal\ProjectType\Incubator\ProjectConfig $pc */
+        /** @var \Sweetchuck\Robo\Drupal\ProjectType\Incubator\ProjectConfig $pc */
         $pc = new $this->className();
         $pc->baseHostName = 'b.c';
         foreach ($phpIds as $phpId) {
@@ -190,7 +190,7 @@ class ProjectConfigTest extends BaseConfigTest
      */
     public function testGetSiteBranchUrls(array $expected, array $phpIds, array $dbIds, string $siteBranch)
     {
-        /** @var \Cheppers\Robo\Drupal\ProjectType\Incubator\ProjectConfig $pc */
+        /** @var \Sweetchuck\Robo\Drupal\ProjectType\Incubator\ProjectConfig $pc */
         $pc = new $this->className();
         $pc->baseHostName = 'b.c';
         foreach ($phpIds as $phpId) {
@@ -223,7 +223,7 @@ class ProjectConfigTest extends BaseConfigTest
      */
     public function testGetSiteVariantUrl(string $expected, string $siteVariantUrlPattern, array $placeholders)
     {
-        /** @var \Cheppers\Robo\Drupal\ProjectType\Incubator\ProjectConfig $pc */
+        /** @var \Sweetchuck\Robo\Drupal\ProjectType\Incubator\ProjectConfig $pc */
         $pc = new $this->className();
         $pc->id = 'my_name_01';
         $pc->siteVariantUrlPattern = $siteVariantUrlPattern;
@@ -247,7 +247,7 @@ class ProjectConfigTest extends BaseConfigTest
      */
     public function testGetSiteVariantDir(string $expected, string $siteVariantDirPattern, array $placeholders)
     {
-        /** @var \Cheppers\Robo\Drupal\ProjectType\Incubator\ProjectConfig $pc */
+        /** @var \Sweetchuck\Robo\Drupal\ProjectType\Incubator\ProjectConfig $pc */
         $pc = new $this->className();
         $pc->id = 'my_name_01';
         $pc->siteVariantDirPattern = $siteVariantDirPattern;
@@ -259,7 +259,7 @@ class ProjectConfigTest extends BaseConfigTest
      */
     public function testPopulateDefaultValues()
     {
-        /** @var \Cheppers\Robo\Drupal\ProjectType\Incubator\ProjectConfig $pc */
+        /** @var \Sweetchuck\Robo\Drupal\ProjectType\Incubator\ProjectConfig $pc */
         $pc = new $this->className();
         $pc->phpVariants['a'] = new PhpVariantConfig();
         $pc->databaseServers['b'] = new DatabaseServerConfig();
@@ -320,7 +320,7 @@ class ProjectConfigTest extends BaseConfigTest
      */
     public function testGetDefaultSiteId($expected, string $defaultSiteId, array $sites)
     {
-        /** @var \Cheppers\Robo\Drupal\ProjectType\Incubator\ProjectConfig $pc */
+        /** @var \Sweetchuck\Robo\Drupal\ProjectType\Incubator\ProjectConfig $pc */
         $pc = new $this->className();
         $pc->defaultSiteId = $defaultSiteId;
         $pc->sites = $sites;
@@ -352,7 +352,7 @@ class ProjectConfigTest extends BaseConfigTest
     public function testProcessPattern(string $expected, string $pattern, array $placeholders)
     {
         $method = static::getMethod('processPattern');
-        /** @var \Cheppers\Robo\Drupal\ProjectType\Incubator\ProjectConfig $pc */
+        /** @var \Sweetchuck\Robo\Drupal\ProjectType\Incubator\ProjectConfig $pc */
         $pc = new $this->className();
         $pc->id = 'p1';
         $pc->baseHostName = 'p1.loc';

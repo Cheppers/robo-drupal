@@ -1,8 +1,8 @@
 <?php
 
-use Cheppers\AssetJar\AssetJar;
-use Cheppers\Robo\Drupal\Robo\ComposerTaskLoader;
-use Cheppers\Robo\Drupal\Utils;
+use Sweetchuck\AssetJar\AssetJar;
+use Sweetchuck\Robo\Drupal\Robo\ComposerTaskLoader;
+use Sweetchuck\Robo\Drupal\Utils;
 use Symfony\Component\Console\Output\ConsoleOutputInterface;
 
 class ComposerPackagePathsTaskRoboFile extends Robo\Tasks
@@ -24,7 +24,7 @@ class ComposerPackagePathsTaskRoboFile extends Robo\Tasks
             ->run();
 
         $stdOutput = $this->output();
-        if ($result->wasSuccessful() && isset($result['packagePaths']['cheppers/asset-jar'])) {
+        if ($result->wasSuccessful() && isset($result['packagePaths']['sweetchuck/asset-jar'])) {
             $stdOutput->writeln('Success');
         } else {
             $stdError = ($stdOutput instanceof ConsoleOutputInterface) ? $stdOutput->getErrorOutput() : $stdOutput;

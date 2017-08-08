@@ -1,20 +1,20 @@
 <?php
 
-namespace Cheppers\Robo\Drupal\ProjectType\Incubator;
+namespace Sweetchuck\Robo\Drupal\ProjectType\Incubator;
 
-use Cheppers\AssetJar\AssetJar;
-use Cheppers\LintReport\Reporter\CheckstyleReporter;
-use Cheppers\Robo\Drupal\Config\DrupalExtensionConfig;
-use Cheppers\Robo\Drupal\Config\SiteConfig;
-use Cheppers\Robo\Drupal\ProjectType\Base as Base;
-use Cheppers\Robo\Drupal\Robo\ComposerTaskLoader;
-use Cheppers\Robo\Drupal\Robo\DrupalCoreTestsTaskLoader;
-use Cheppers\Robo\Drupal\Robo\DrupalTaskLoader;
-use Cheppers\Robo\Drupal\Utils;
-use Cheppers\Robo\ESLint\ESLintTaskLoader;
-use Cheppers\Robo\Phpcs\PhpcsTaskLoader;
-use Cheppers\Robo\ScssLint\ScssLintTaskLoader;
-use Cheppers\Robo\TsLint\TsLintTaskLoader;
+use Sweetchuck\AssetJar\AssetJar;
+use Sweetchuck\LintReport\Reporter\CheckstyleReporter;
+use Sweetchuck\Robo\Drupal\Config\DrupalExtensionConfig;
+use Sweetchuck\Robo\Drupal\Config\SiteConfig;
+use Sweetchuck\Robo\Drupal\ProjectType\Base as Base;
+use Sweetchuck\Robo\Drupal\Robo\ComposerTaskLoader;
+use Sweetchuck\Robo\Drupal\Robo\DrupalCoreTestsTaskLoader;
+use Sweetchuck\Robo\Drupal\Robo\DrupalTaskLoader;
+use Sweetchuck\Robo\Drupal\Utils;
+use Sweetchuck\Robo\ESLint\ESLintTaskLoader;
+use Sweetchuck\Robo\Phpcs\PhpcsTaskLoader;
+use Sweetchuck\Robo\ScssLint\ScssLintTaskLoader;
+use Sweetchuck\Robo\TsLint\TsLintTaskLoader;
 use Robo\Collection\CollectionBuilder;
 use Robo\Contract\TaskInterface;
 use Robo\Task\Filesystem\loadShortcuts as FilesystemShortcuts;
@@ -43,7 +43,7 @@ class RoboFile extends Base\RoboFile
     protected $projectConfigClass = ProjectConfig::class;
 
     /**
-     * @var \Cheppers\Robo\Drupal\ProjectType\Incubator\ProjectConfig
+     * @var \Sweetchuck\Robo\Drupal\ProjectType\Incubator\ProjectConfig
      */
     protected $projectConfig;
 
@@ -88,7 +88,7 @@ class RoboFile extends Base\RoboFile
 
         return $this->collectionBuilder()->addCode(function () use ($oldRef, $newRef, $isBranch) {
             $pc  = $this->projectConfig;
-            // @todo Create dedicated Robo task. Maybe in the cheppers/robo-git package.
+            // @todo Create dedicated Robo task. Maybe in the sweetchuck/robo-git package.
             $command = sprintf(
                 '%s diff --exit-code --name-only %s..%s -- %s %s',
                 escapeshellcmd($pc->gitExecutable),
@@ -693,7 +693,7 @@ class RoboFile extends Base\RoboFile
 
             $mask = umask();
             $hostDir = getcwd();
-            $srcDirUpstream = $this->getPackagePath('cheppers/git-hooks') . '/git-hooks';
+            $srcDirUpstream = $this->getPackagePath('sweetchuck/git-hooks') . '/git-hooks';
             $srcDirCustom = "{$this->roboDrupalRoot}/src/GitHooks";
             // @todo Support .git pointers.
             $dstDir = "{$extension->path}/.git/hooks";
@@ -764,7 +764,7 @@ class RoboFile extends Base\RoboFile
     }
 
     /**
-     * @return \Cheppers\Robo\Drupal\Config\DrupalExtensionConfig[]
+     * @return \Sweetchuck\Robo\Drupal\Config\DrupalExtensionConfig[]
      */
     protected function getManagedDrupalExtensions(): array
     {

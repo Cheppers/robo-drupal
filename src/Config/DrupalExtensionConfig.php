@@ -1,6 +1,6 @@
 <?php
 
-namespace Cheppers\Robo\Drupal\Config;
+namespace Sweetchuck\Robo\Drupal\Config;
 
 /**
  * @todo Add ::$phpcsConfig property.
@@ -40,7 +40,7 @@ class DrupalExtensionConfig extends BaseConfig
     public $hasGit = false;
 
     /**
-     * @var null|\Cheppers\Robo\Drupal\Config\PhpcsConfig
+     * @var null|\Sweetchuck\Robo\Drupal\Config\PhpcsConfig
      */
     public $phpcs = null;
 

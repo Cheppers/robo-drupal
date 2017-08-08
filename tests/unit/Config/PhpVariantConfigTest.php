@@ -1,8 +1,8 @@
 <?php
 
-namespace Cheppers\Robo\Drupal\Tests\Unit\Config;
+namespace Sweetchuck\Robo\Drupal\Tests\Unit\Config;
 
-use Cheppers\Robo\Drupal\Config\PhpVariantConfig;
+use Sweetchuck\Robo\Drupal\Config\PhpVariantConfig;
 
 class PhpVariantConfigTest extends BaseConfigTest
 {

@@ -1,21 +1,21 @@
 <?php
 
-namespace Cheppers\Robo\Drupal\Tests\Unit\Robo\Task;
+namespace Sweetchuck\Robo\Drupal\Tests\Unit\Robo\Task;
 
-use Cheppers\AssetJar\AssetJar;
-use Cheppers\Robo\Drupal\Robo\Task\ComposerPackagePathsTask;
-use Cheppers\Robo\Drupal\Test\Helper\Dummy\Process as DummyProcess;
+use Sweetchuck\AssetJar\AssetJar;
+use Sweetchuck\Robo\Drupal\Robo\Task\ComposerPackagePathsTask;
+use Sweetchuck\Robo\Drupal\Test\Helper\Dummy\Process as DummyProcess;
 use Codeception\Test\Unit;
 use Codeception\Util\Stub;
 use Robo\Robo;
 
 /**
- * @covers \Cheppers\Robo\Drupal\Robo\Task\ComposerPackagePathsTask
+ * @covers \Sweetchuck\Robo\Drupal\Robo\Task\ComposerPackagePathsTask
  */
 class ComposerPackagePathsTaskTest extends Unit
 {
     /**
-     * @var \Cheppers\Robo\Drupal\Test\UnitTester
+     * @var \Sweetchuck\Robo\Drupal\Test\UnitTester
      */
     protected $tester;
 
@@ -146,7 +146,7 @@ class ComposerPackagePathsTaskTest extends Unit
         $container = Robo::createDefaultContainer();
         Robo::setContainer($container);
 
-        /** @var \Cheppers\Robo\Drupal\Robo\Task\ComposerPackagePathsTask $task */
+        /** @var \Sweetchuck\Robo\Drupal\Robo\Task\ComposerPackagePathsTask $task */
         $task = Stub::construct(
             ComposerPackagePathsTask::class,
             [
@@ -196,7 +196,7 @@ class ComposerPackagePathsTaskTest extends Unit
         $container = Robo::createDefaultContainer();
         Robo::setContainer($container);
 
-        /** @var \Cheppers\Robo\Drupal\Robo\Task\ComposerPackagePathsTask $task */
+        /** @var \Sweetchuck\Robo\Drupal\Robo\Task\ComposerPackagePathsTask $task */
         $task = Stub::construct(
             ComposerPackagePathsTask::class,
             [],

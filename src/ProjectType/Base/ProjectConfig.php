@@ -1,12 +1,12 @@
 <?php
 
-namespace Cheppers\Robo\Drupal\ProjectType\Base;
+namespace Sweetchuck\Robo\Drupal\ProjectType\Base;
 
-use Cheppers\Robo\Drupal\Config\BaseConfig;
-use Cheppers\Robo\Drupal\Config\DatabaseServerConfig;
-use Cheppers\Robo\Drupal\Config\PhpVariantConfig;
-use Cheppers\Robo\Drupal\Config\SiteConfig;
-use Cheppers\Robo\Drupal\Utils;
+use Sweetchuck\Robo\Drupal\Config\BaseConfig;
+use Sweetchuck\Robo\Drupal\Config\DatabaseServerConfig;
+use Sweetchuck\Robo\Drupal\Config\PhpVariantConfig;
+use Sweetchuck\Robo\Drupal\Config\SiteConfig;
+use Sweetchuck\Robo\Drupal\Utils;
 
 use Stringy\StaticStringy;
 
@@ -63,12 +63,12 @@ class ProjectConfig extends BaseConfig
     public $defaultDrupalTestSubjects = [];
 
     /**
-     * @var \Cheppers\Robo\Drupal\Config\PhpVariantConfig[]
+     * @var \Sweetchuck\Robo\Drupal\Config\PhpVariantConfig[]
      */
     public $phpVariants = [];
 
     /**
-     * @var \Cheppers\Robo\Drupal\Config\DatabaseServerConfig[]
+     * @var \Sweetchuck\Robo\Drupal\Config\DatabaseServerConfig[]
      */
     public $databaseServers = [];
 
@@ -115,7 +115,7 @@ class ProjectConfig extends BaseConfig
     public $composerExecutable = 'composer';
 
     /**
-     * @var \Cheppers\Robo\Drupal\Config\SiteConfig[]
+     * @var \Sweetchuck\Robo\Drupal\Config\SiteConfig[]
      */
     public $sites = [];
 
@@ -265,8 +265,8 @@ class ProjectConfig extends BaseConfig
 
     /**
      * @param SiteConfig $siteId
-     * @param \Cheppers\Robo\Drupal\Config\DatabaseServerConfig[] $dbConfigs
-     * @param \Cheppers\Robo\Drupal\Config\PhpVariantConfig[] $phpVariants
+     * @param \Sweetchuck\Robo\Drupal\Config\DatabaseServerConfig[] $dbConfigs
+     * @param \Sweetchuck\Robo\Drupal\Config\PhpVariantConfig[] $phpVariants
      *
      * @return string[]
      */

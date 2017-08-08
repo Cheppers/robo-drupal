@@ -1,9 +1,9 @@
 <?php
 
-namespace Cheppers\Robo\Drupal\Tests\Unit\Robo\Task;
+namespace Sweetchuck\Robo\Drupal\Tests\Unit\Robo\Task;
 
-use Cheppers\Robo\Drupal\ProjectType\Incubator\ProjectConfig;
-use Cheppers\Robo\Drupal\Robo\Task\RebuildSitesPhpTask;
+use Sweetchuck\Robo\Drupal\ProjectType\Incubator\ProjectConfig;
+use Sweetchuck\Robo\Drupal\Robo\Task\RebuildSitesPhpTask;
 use Codeception\Test\Unit;
 use Codeception\Util\Stub;
 use Robo\Robo;
@@ -11,12 +11,12 @@ use Robo\Task\Filesystem\FilesystemStack;
 use Symfony\Component\Filesystem\Filesystem;
 
 /**
- * @covers \Cheppers\Robo\Drupal\Robo\Task\RebuildSitesPhpTask
+ * @covers \Sweetchuck\Robo\Drupal\Robo\Task\RebuildSitesPhpTask
  */
 class RebuildSitesPhpTaskTest extends Unit
 {
     /**
-     * @var \Cheppers\Robo\Drupal\Test\UnitTester
+     * @var \Sweetchuck\Robo\Drupal\Test\UnitTester
      */
     protected $tester;
 
@@ -180,7 +180,7 @@ class RebuildSitesPhpTaskTest extends Unit
             'projectConfig' => $pc,
         ];
 
-        /** @var \Cheppers\Robo\Drupal\Robo\Task\RebuildSitesPhpTask $task */
+        /** @var \Sweetchuck\Robo\Drupal\Robo\Task\RebuildSitesPhpTask $task */
         $task = Stub::construct(
             RebuildSitesPhpTask::class,
             [$options],

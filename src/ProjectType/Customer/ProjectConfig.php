@@ -1,8 +1,8 @@
 <?php
 
-namespace Cheppers\Robo\Drupal\ProjectType\Customer;
+namespace Sweetchuck\Robo\Drupal\ProjectType\Customer;
 
-use Cheppers\Robo\Drupal\ProjectType\Base;
+use Sweetchuck\Robo\Drupal\ProjectType\Base;
 
 class ProjectConfig extends Base\ProjectConfig
 {
@@ -27,7 +27,7 @@ class ProjectConfig extends Base\ProjectConfig
     public $releaseDir = 'release';
 
     /**
-     * @var \Cheppers\Robo\Drupal\Config\SassRootConfig[]
+     * @var \Sweetchuck\Robo\Drupal\Config\SassRootConfig[]
      */
     public $sassRoots = [];
 

@@ -1,14 +1,14 @@
 <?php
 
-namespace Cheppers\Robo\Drupal\ProjectType\Incubator;
+namespace Sweetchuck\Robo\Drupal\ProjectType\Incubator;
 
-use Cheppers\Robo\Drupal\Config\DrupalExtensionConfig;
-use Cheppers\Robo\Drupal\ProjectType\Base;
+use Sweetchuck\Robo\Drupal\Config\DrupalExtensionConfig;
+use Sweetchuck\Robo\Drupal\ProjectType\Base;
 
 class ProjectConfig extends Base\ProjectConfig
 {
     /**
-     * @var \Cheppers\Robo\Drupal\Config\SiteConfig
+     * @var \Sweetchuck\Robo\Drupal\Config\SiteConfig
      */
     public $siteDefaults = [];
 
@@ -25,7 +25,7 @@ class ProjectConfig extends Base\ProjectConfig
     public $autodetectManagedDrupalExtensions = true;
 
     /**
-     * @var \Cheppers\Robo\Drupal\Config\DrupalExtensionConfig[]
+     * @var \Sweetchuck\Robo\Drupal\Config\DrupalExtensionConfig[]
      */
     public $managedDrupalExtensions = [];
 

@@ -1,6 +1,6 @@
 <?php
 
-namespace Cheppers\Robo\Drupal;
+namespace Sweetchuck\Robo\Drupal;
 
 use Symfony\Component\Filesystem\Filesystem;
 use Symfony\Component\Finder\Finder;
@@ -63,7 +63,7 @@ class Utils
     }
 
     /**
-     * Get the root directory of the "cheppers/robo-drupal" package.
+     * Get the root directory of the "sweetchuck/robo-drupal" package.
      *
      * @todo The "composer/installers" can broke this.
      */

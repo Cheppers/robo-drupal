@@ -1,7 +1,7 @@
 <?php
 
 /**
- * @var \Cheppers\Robo\Drupal\ProjectType\Incubator\ProjectConfig $projectConfig
+ * @var \Sweetchuck\Robo\Drupal\ProjectType\Incubator\ProjectConfig $projectConfig
  */
 
 $projectConfig->baseHostPort = 1080;

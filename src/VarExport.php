@@ -1,6 +1,6 @@
 <?php
 
-namespace Cheppers\Robo\Drupal;
+namespace Sweetchuck\Robo\Drupal;
 
 class VarExport
 {

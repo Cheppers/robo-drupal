@@ -1,6 +1,6 @@
 <?php
 
-namespace Cheppers\Robo\Drupal\Config;
+namespace Sweetchuck\Robo\Drupal\Config;
 
 class SiteConfig extends BaseConfig
 {

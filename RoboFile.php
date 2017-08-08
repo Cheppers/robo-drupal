@@ -1,11 +1,12 @@
 <?php
 
-// @codingStandardsIgnoreStart
-use Cheppers\AssetJar\AssetJar;
-use Cheppers\LintReport\Reporter\BaseReporter;
-use Cheppers\LintReport\Reporter\CheckstyleReporter;
+use Robo\Tasks;
+use Sweetchuck\LintReport\Reporter\BaseReporter;
+use Sweetchuck\LintReport\Reporter\CheckstyleReporter;
 use League\Container\ContainerInterface;
 use Robo\Collection\CollectionBuilder;
+use Sweetchuck\Robo\Git\GitTaskLoader;
+use Sweetchuck\Robo\Phpcs\PhpcsTaskLoader;
 use Symfony\Component\Console\Output\ConsoleOutputInterface;
 use Symfony\Component\Console\Output\OutputInterface;
 use Symfony\Component\Finder\Finder;
@@ -13,11 +14,10 @@ use Symfony\Component\Process\Process;
 use Symfony\Component\Yaml\Yaml;
 use Webmozart\PathUtil\Path;
 
-class RoboFile extends \Robo\Tasks
-    // @codingStandardsIgnoreEnd
+class RoboFile extends Tasks
 {
-    use \Cheppers\Robo\Git\GitTaskLoader;
-    use \Cheppers\Robo\Phpcs\PhpcsTaskLoader;
+    use GitTaskLoader;
+    use PhpcsTaskLoader;
 
     /**
      * @var array
@@ -78,7 +78,8 @@ class RoboFile extends \Robo\Tasks
         putenv('COMPOSER_DISABLE_XDEBUG_WARN=1');
         $this
             ->initComposerInfo()
-            ->initEnvVarNamePrefix();
+            ->initEnvVarNamePrefix()
+            ->initEnvironmentTypeAndName();
     }
 
     /**
@@ -100,11 +101,9 @@ class RoboFile extends \Robo\Tasks
 
         return $this
             ->collectionBuilder()
-            ->addTaskList([
-                'lint.composer.lock' => $this->taskComposerValidate(),
-                'lint.phpcs.psr2' => $this->getTaskPhpcsLint(),
-                'codecept' => $this->getTaskCodeceptRunSuites(),
-            ]);
+            ->addTask($this->taskComposerValidate())
+            ->addTask($this->getTaskPhpcsLint())
+            ->addTask($this->getTaskCodeceptRunSuites());
     }
 
     /**
@@ -124,10 +123,8 @@ class RoboFile extends \Robo\Tasks
     {
         return $this
             ->collectionBuilder()
-            ->addTaskList([
-                'lint.composer.lock' => $this->taskComposerValidate(),
-                'lint.phpcs.psr2' => $this->getTaskPhpcsLint(),
-            ]);
+            ->addTask($this->taskComposerValidate())
+            ->addTask($this->getTaskPhpcsLint());
     }
 
     protected function errorOutput(): ?OutputInterface
@@ -147,27 +144,48 @@ class RoboFile extends \Robo\Tasks
         return $this;
     }
 
+    /**
+     * @return $this
+     */
+    protected function initEnvironmentTypeAndName()
+    {
+        $this->environmentType = getenv($this->getEnvVarName('environment_type'));
+        $this->environmentName = getenv($this->getEnvVarName('environment_name'));
+
+        if (!$this->environmentType) {
+            if (getenv('CI') === 'true') {
+                // Travis and GitLab.
+                $this->environmentType = 'ci';
+            } elseif (getenv('JENKINS_HOME')) {
+                $this->environmentType = 'ci';
+                if (!$this->environmentName) {
+                    $this->environmentName = 'jenkins';
+                }
+            }
+        }
+
+        if (!$this->environmentName && $this->environmentType === 'ci') {
+            if (getenv('GITLAB_CI') === 'true') {
+                $this->environmentName = 'gitlab';
+            } elseif (getenv('TRAVIS') === 'true') {
+                $this->environmentName = 'travis';
+            }
+        }
+
+        if (!$this->environmentType) {
+            $this->environmentType = 'dev';
+        }
+
+        if (!$this->environmentName) {
+            $this->environmentName = 'local';
+        }
+
+        return $this;
+    }
+
     protected function getEnvVarName(string $name): string
     {
         return "{$this->envVarNamePrefix}_" . strtoupper($name);
-    }
-
-    protected function getEnvironmentType(): string
-    {
-        if ($this->environmentType) {
-            return $this->environmentType;
-        }
-
-        return getenv($this->getEnvVarName('environment_type')) ?: 'dev';
-    }
-
-    protected function getEnvironmentName(): string
-    {
-        if ($this->environmentName) {
-            return $this->environmentName;
-        }
-
-        return getenv($this->getEnvVarName('environment_name')) ?: 'local';
     }
 
     protected function getPhpExecutable(): string
@@ -239,13 +257,12 @@ class RoboFile extends \Robo\Tasks
     protected function getTaskCodeceptRunSuite(string $suite): CollectionBuilder
     {
         $this->initCodeceptionInfo();
-        $environmentType = $this->getEnvironmentType();
 
-        $withCoverageHtml = in_array($environmentType, ['dev', 'git-hook']);
-        $withCoverageXml = in_array($environmentType, ['ci']);
+        $withCoverageHtml = in_array($this->environmentType, ['dev']);
+        $withCoverageXml = in_array($this->environmentType, ['ci']);
 
-        $withUnitReportHtml = in_array($environmentType, ['dev', 'git-hook']);
-        $withUnitReportXml = in_array($environmentType, ['ci']);
+        $withUnitReportHtml = in_array($this->environmentType, ['dev']);
+        $withUnitReportXml = in_array($this->environmentType, ['ci']);
 
         $logDir = $this->getLogDir();
 
@@ -264,14 +281,16 @@ class RoboFile extends \Robo\Tasks
         $cmdPattern .= ' --ansi';
         $cmdPattern .= ' --verbose';
 
-        $tasks = [];
+        $cb = $this->collectionBuilder();
         if ($withCoverageHtml) {
             $cmdPattern .= ' --coverage-html=%s';
             $cmdArgs[] = escapeshellarg("human/coverage/$suite/html");
 
-            $tasks['prepareCoverageDir'] = $this
-                ->taskFilesystemStack()
-                ->mkdir("$logDir/human/coverage/$suite");
+            $cb->addTask(
+                $this
+                    ->taskFilesystemStack()
+                    ->mkdir("$logDir/human/coverage/$suite")
+            );
         }
 
         if ($withCoverageXml) {
@@ -283,27 +302,33 @@ class RoboFile extends \Robo\Tasks
             $cmdPattern .= ' --coverage=%s';
             $cmdArgs[] = escapeshellarg("machine/coverage/$suite/coverage.serialized");
 
-            $tasks['prepareCoverageDir'] = $this
-                ->taskFilesystemStack()
-                ->mkdir("$logDir/machine/coverage/$suite");
+            $cb->addTask(
+                $this
+                    ->taskFilesystemStack()
+                    ->mkdir("$logDir/machine/coverage/$suite")
+            );
         }
 
         if ($withUnitReportHtml) {
             $cmdPattern .= ' --html=%s';
             $cmdArgs[] = escapeshellarg("human/junit/junit.$suite.html");
 
-            $tasks['prepareJUnitDir'] = $this
-                ->taskFilesystemStack()
-                ->mkdir("$logDir/human/junit");
+            $cb->addTask(
+                $this
+                    ->taskFilesystemStack()
+                    ->mkdir("$logDir/human/junit")
+            );
         }
 
         if ($withUnitReportXml) {
             $cmdPattern .= ' --xml=%s';
             $cmdArgs[] = escapeshellarg("machine/junit/junit.$suite.xml");
 
-            $tasks['prepareJUnitDir'] = $this
-                ->taskFilesystemStack()
-                ->mkdir("$logDir/machine/junit");
+            $cb->addTask(
+                $this
+                    ->taskFilesystemStack()
+                    ->mkdir("$logDir/machine/junit")
+            );
         }
 
         $cmdPattern .= ' run';
@@ -312,16 +337,14 @@ class RoboFile extends \Robo\Tasks
             $cmdArgs[] = escapeshellarg($suite);
         }
 
-        if ($environmentType === 'ci') {
+        if ($this->environmentType === 'ci' && $this->environmentName === 'jenkins') {
             // Jenkins has to use a post-build action to mark the build "unstable".
             $cmdPattern .= ' || [[ "${?}" == "1" ]]';
         }
 
         $command = vsprintf($cmdPattern, $cmdArgs);
 
-        return $this
-            ->collectionBuilder()
-            ->addTaskList($tasks)
+        return $cb
             ->addCode(function () use ($command) {
                 $this->output()->writeln(strtr(
                     '<question>[{name}]</question> runs <info>{command}</info>',
@@ -348,36 +371,21 @@ class RoboFile extends \Robo\Tasks
     }
 
     /**
-     * @return \Cheppers\Robo\Phpcs\Task\PhpcsLintFiles|\Robo\Collection\CollectionBuilder
+     * @return \Sweetchuck\Robo\Phpcs\Task\PhpcsLintFiles|\Robo\Collection\CollectionBuilder
      */
     protected function getTaskPhpcsLint()
     {
-        $environmentType = $this->getEnvironmentType();
-        $environmentName = $this->getEnvironmentName();
-
-        $files = [
-            'src/',
-            'tests/_support/Helper/',
-            'tests/acceptance/',
-            'tests/unit/',
-            'RoboFile.php',
-        ];
-
         $options = [
             'failOn' => 'warning',
-            'standards' => ['PSR2'],
             'lintReporters' => [
                 'lintVerboseReporter' => null,
             ],
-            'ignore' => [
-                'src/GitHooks/',
-            ],
         ];
 
-        if ($environmentType === 'ci') {
+        if ($this->environmentType === 'ci') {
             $logDir = $this->getLogDir();
 
-            if ($environmentName === 'jenkins') {
+            if ($this->environmentName === 'jenkins') {
                 $options['failOn'] = 'never';
             }
 
@@ -386,34 +394,36 @@ class RoboFile extends \Robo\Tasks
         }
 
         if ($this->gitHook !== 'pre-commit') {
-            return $this->taskPhpcsLintFiles($options + ['files' => $files]);
+            return $this->taskPhpcsLintFiles($options);
         }
 
-        $assetJar = new AssetJar();
+        $files = [
+            'src/',
+            'src-dev/Composer/',
+            'tests/_support/',
+            'tests/acceptance/',
+            'tests/unit/',
+            'RoboFile.php',
+        ];
+
+        $options['ignore'] = [
+            'src/GitHooks',
+            '*/.gitignore',
+            '*.rb',
+            '*.scss',
+            '*.txt',
+            '*.yml',
+        ];
 
         return $this
             ->collectionBuilder()
-            ->addTaskList([
-                'git.readStagedFiles' => $this
-                    ->taskGitReadStagedFiles()
-                    ->setCommandOnly(true)
-                    ->setAssetJar($assetJar)
-                    ->setAssetJarMap('files', ['files'])
-                    ->setPaths($files),
-                'lint.phpcs.psr2' => $this
-                    ->taskPhpcsLintInput($options)
-                    ->setIgnore([
-                        'src/GitHooks/',
-                        '*/composer.json',
-                        '*/.gitignore',
-                        '*.rb',
-                        '*.scss',
-                        '*.txt',
-                        '*.yml',
-                    ])
-                    ->setAssetJar($assetJar)
-                    ->setAssetJarMap('files', ['files']),
-            ]);
+            ->addTask($this
+                ->taskGitReadStagedFiles()
+                ->setCommandOnly(true)
+                ->setPaths($files))
+            ->addTask($this
+                ->taskPhpcsLintInput($options)
+                ->deferTaskConfiguration('setFiles', 'files'));
     }
 
     protected function isPhpExtensionAvailable(string $extension): bool

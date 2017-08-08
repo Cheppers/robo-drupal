@@ -1,20 +1,20 @@
 <?php
 
-namespace Cheppers\Robo\Drupal\ProjectType\Customer;
+namespace Sweetchuck\Robo\Drupal\ProjectType\Customer;
 
-use Cheppers\AssetJar\AssetJar;
-use Cheppers\LintReport\Reporter\CheckstyleReporter;
-use Cheppers\Robo\Bundler\BundlerTaskLoader;
-use Cheppers\Robo\Compass\CompassTaskLoader;
-use Cheppers\Robo\Drupal\Config\PhpcsConfig;
-use Cheppers\Robo\Drupal\Config\ScssLintConfig;
-use Cheppers\Robo\Drupal\ProjectType\Base as Base;
-use Cheppers\Robo\Drupal\Robo\GeneralReleaseTaskLoader;
-use Cheppers\Robo\Drupal\Utils;
-use Cheppers\Robo\Phpcs\PhpcsTaskLoader;
-use Cheppers\Robo\Sass\SassTaskLoader;
-use Cheppers\Robo\ScssLint\ScssLintTaskLoader;
-use Cheppers\Robo\Yarn\YarnTaskLoader;
+use Sweetchuck\AssetJar\AssetJar;
+use Sweetchuck\LintReport\Reporter\CheckstyleReporter;
+use Sweetchuck\Robo\Bundler\BundlerTaskLoader;
+use Sweetchuck\Robo\Compass\CompassTaskLoader;
+use Sweetchuck\Robo\Drupal\Config\PhpcsConfig;
+use Sweetchuck\Robo\Drupal\Config\ScssLintConfig;
+use Sweetchuck\Robo\Drupal\ProjectType\Base as Base;
+use Sweetchuck\Robo\Drupal\Robo\GeneralReleaseTaskLoader;
+use Sweetchuck\Robo\Drupal\Utils;
+use Sweetchuck\Robo\Phpcs\PhpcsTaskLoader;
+use Sweetchuck\Robo\Sass\SassTaskLoader;
+use Sweetchuck\Robo\ScssLint\ScssLintTaskLoader;
+use Sweetchuck\Robo\Yarn\YarnTaskLoader;
 use Robo\Collection\CollectionBuilder;
 use Robo\Contract\TaskInterface;
 use Webmozart\PathUtil\Path;
@@ -35,7 +35,7 @@ class RoboFile extends Base\RoboFile
     protected $projectConfigClass = ProjectConfig::class;
 
     /**
-     * @var \Cheppers\Robo\Drupal\ProjectType\Customer\ProjectConfig
+     * @var \Sweetchuck\Robo\Drupal\ProjectType\Customer\ProjectConfig
      */
     protected $projectConfig = null;
 

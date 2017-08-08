@@ -1,8 +1,8 @@
 <?php
 
-namespace Cheppers\Robo\Drupal\Tests\Unit\Config;
+namespace Sweetchuck\Robo\Drupal\Tests\Unit\Config;
 
-use Cheppers\Robo\Drupal\Config\DatabaseServerConfig;
+use Sweetchuck\Robo\Drupal\Config\DatabaseServerConfig;
 
 class DatabaseServerConfigTest extends BaseConfigTest
 {
@@ -107,7 +107,7 @@ class DatabaseServerConfigTest extends BaseConfigTest
      */
     public function testGetConnection(array $expected, array $data): void
     {
-        /** @var \Cheppers\Robo\Drupal\Config\DatabaseServerConfig $db */
+        /** @var \Sweetchuck\Robo\Drupal\Config\DatabaseServerConfig $db */
         $db = new $this->className($data);
         $this->tester->assertEquals($expected, $db->getConnection());
     }

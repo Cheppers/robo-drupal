@@ -1,11 +1,11 @@
 <?php
 
-namespace Cheppers\Robo\Drupal\Robo\Task\Release;
+namespace Sweetchuck\Robo\Drupal\Robo\Task\Release;
 
-use Cheppers\Robo\Drupal\ProjectType\Base\ProjectConfig;
-use Cheppers\Robo\Drupal\Robo\Task\BaseTask;
-use Cheppers\Robo\Drupal\Utils;
-use Cheppers\Robo\Git\Task\GitListFilesTask;
+use Sweetchuck\Robo\Drupal\ProjectType\Base\ProjectConfig;
+use Sweetchuck\Robo\Drupal\Robo\Task\BaseTask;
+use Sweetchuck\Robo\Drupal\Utils;
+use Sweetchuck\Robo\Git\Task\GitListFilesTask;
 use League\Container\ContainerAwareInterface;
 use League\Container\ContainerAwareTrait;
 use Robo\Exception\TaskExitException;
@@ -28,7 +28,7 @@ class GeneralReleaseTask extends BaseTask implements ContainerAwareInterface
     //region Options.
     //region Option - projectConfig.
     /**
-     * @var null|\Cheppers\Robo\Drupal\ProjectType\Base\ProjectConfig
+     * @var null|\Sweetchuck\Robo\Drupal\ProjectType\Base\ProjectConfig
      */
     protected $projectConfig = null;
 

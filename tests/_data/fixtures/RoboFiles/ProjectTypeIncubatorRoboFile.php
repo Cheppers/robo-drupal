@@ -1,6 +1,6 @@
 <?php
 
-use Cheppers\Robo\Drupal\ProjectType\Incubator\RoboFile;
+use Sweetchuck\Robo\Drupal\ProjectType\Incubator\RoboFile;
 
 class ProjectTypeIncubatorRoboFile extends RoboFile
 {

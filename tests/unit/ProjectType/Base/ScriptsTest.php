@@ -1,14 +1,14 @@
 <?php
 
-namespace Cheppers\Robo\Drupal\Tests\Unit\ProjectType\Base;
+namespace Sweetchuck\Robo\Drupal\Tests\Unit\ProjectType\Base;
 
-use Cheppers\Robo\Drupal\ProjectType\Base\Scripts;
+use Sweetchuck\Robo\Drupal\ProjectType\Base\Scripts;
 use Codeception\Test\Unit;
 
 class ScriptsTest extends Unit
 {
     /**
-     * @var \Cheppers\Robo\Drupal\Test\UnitTester
+     * @var \Sweetchuck\Robo\Drupal\Test\UnitTester
      */
     protected $tester;
 

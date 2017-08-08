@@ -1,6 +1,6 @@
 <?php
 
-namespace Cheppers\Robo\Drupal\Test\Helper\Utils;
+namespace Sweetchuck\Robo\Drupal\Test\Helper\Utils;
 
 use Symfony\Component\Filesystem\Filesystem;
 

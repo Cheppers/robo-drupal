@@ -5,6 +5,6 @@ modules:
     enabled:
         - Asserts
         - Filesystem
-        - \Cheppers\Robo\Drupal\Test\Helper\Acceptance
-        - \Cheppers\Robo\Drupal\Test\Helper\Module\DrupalProject
-        - \Cheppers\Robo\Drupal\Test\Helper\Module\RoboTaskRunner
+        - \Sweetchuck\Robo\Drupal\Test\Helper\Acceptance
+        - \Sweetchuck\Robo\Drupal\Test\Helper\Module\DrupalProject
+        - \Sweetchuck\Robo\Drupal\Test\Helper\Module\RoboTaskRunner

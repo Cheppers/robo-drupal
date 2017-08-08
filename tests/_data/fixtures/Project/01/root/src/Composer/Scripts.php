@@ -1,8 +1,8 @@
 <?php
 
-namespace Cheppers\RoboDrupalTestProject01\Composer;
+namespace Sweetchuck\RoboDrupalTestProject01\Composer;
 
-use Cheppers\Robo\Drupal\ProjectType\Incubator as Base;
+use Sweetchuck\Robo\Drupal\ProjectType\Incubator as Base;
 
 class Scripts extends Base\Scripts
 {

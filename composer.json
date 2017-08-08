@@ -1,5 +1,5 @@
 {
-    "name": "cheppers/robo-drupal",
+    "name": "sweetchuck/robo-drupal",
     "description": "Drupal related Robo tasks",
     "license": "GPL-2.0+",
     "config": {
@@ -10,20 +10,20 @@
     "prefer-stable": true,
     "require": {
         "php": ">=7.1",
-        "cheppers/asset-jar": "^0.0",
-        "cheppers/git-hooks": "dev-master",
-        "cheppers/lint-report": "^0.0",
-        "cheppers/robo-bundler": "dev-master",
-        "cheppers/robo-compass": "dev-master",
-        "cheppers/robo-drush": "dev-master",
-        "cheppers/robo-eslint": "dev-master",
-        "cheppers/robo-git": "dev-master",
-        "cheppers/robo-phpcs": "dev-master",
-        "cheppers/robo-sass": "dev-master",
-        "cheppers/robo-scss-lint": "dev-master",
-        "cheppers/robo-serialize": "dev-master",
-        "cheppers/robo-tslint": "dev-master",
-        "cheppers/robo-yarn": "*",
+        "sweetchuck/asset-jar": "^0.0",
+        "sweetchuck/git-hooks": "^0.0",
+        "sweetchuck/lint-report": "^0.0",
+        "sweetchuck/robo-bundler": "^0.0",
+        "sweetchuck/robo-compass": "^0.0",
+        "sweetchuck/robo-drush": "^0.0",
+        "sweetchuck/robo-eslint": "^0.0",
+        "sweetchuck/robo-git": "^0.0",
+        "sweetchuck/robo-phpcs": "^0.0",
+        "sweetchuck/robo-sass": "^0.1",
+        "sweetchuck/robo-scss-lint": "^0.0",
+        "sweetchuck/robo-serialize": "^0.0",
+        "sweetchuck/robo-tslint": "^0.0",
+        "sweetchuck/robo-yarn": "^0.0",
         "consolidation/robo": "^1.0",
         "danielstjules/stringy": "^3.0",
         "drupal-composer/drupal-scaffold": "^2.2",
@@ -39,22 +39,22 @@
     },
     "autoload": {
         "psr-4": {
-            "Cheppers\\Robo\\Drupal\\": "src/"
+            "Sweetchuck\\Robo\\Drupal\\": "src/"
         }
     },
     "autoload-dev": {
         "psr-4": {
-            "Cheppers\\Robo\\Drupal\\Composer\\": "src-dev/Composer/",
-            "Cheppers\\Robo\\Drupal\\Test\\Helper\\": "tests/_support/Helper/",
-            "Cheppers\\Robo\\Drupal\\Tests\\Acceptance\\": "tests/acceptance/",
-            "Cheppers\\Robo\\Drupal\\Tests\\Unit\\": "tests/unit/"
+            "Sweetchuck\\Robo\\Drupal\\Composer\\": "src-dev/Composer/",
+            "Sweetchuck\\Robo\\Drupal\\Test\\Helper\\": "tests/_support/Helper/",
+            "Sweetchuck\\Robo\\Drupal\\Tests\\Acceptance\\": "tests/acceptance/",
+            "Sweetchuck\\Robo\\Drupal\\Tests\\Unit\\": "tests/unit/"
         },
         "classmap": [
             "tests/_data/fixtures/RoboFiles/"
         ]
     },
     "scripts": {
-        "post-install-cmd": "\\Cheppers\\Robo\\Drupal\\Composer\\Scripts::postInstallCmd",
-        "post-update-cmd": "\\Cheppers\\Robo\\Drupal\\Composer\\Scripts::postUpdateCmd"
+        "post-install-cmd": "\\Sweetchuck\\Robo\\Drupal\\Composer\\Scripts::postInstallCmd",
+        "post-update-cmd": "\\Sweetchuck\\Robo\\Drupal\\Composer\\Scripts::postUpdateCmd"
     }
 }

@@ -1,9 +1,9 @@
 <?php
 
-namespace Cheppers\Robo\Drupal\Tests\Unit\ProjectType\Customer;
+namespace Sweetchuck\Robo\Drupal\Tests\Unit\ProjectType\Customer;
 
-use Cheppers\Robo\Drupal\ProjectType\Customer\ProjectConfig;
-use Cheppers\Robo\Drupal\Tests\Unit\Config\BaseConfigTest;
+use Sweetchuck\Robo\Drupal\ProjectType\Customer\ProjectConfig;
+use Sweetchuck\Robo\Drupal\Tests\Unit\Config\BaseConfigTest;
 
 class ProjectConfigTest extends BaseConfigTest
 {

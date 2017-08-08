@@ -6,4 +6,4 @@ class_name: UnitTester
 modules:
     enabled:
         - Asserts
-        - \Cheppers\Robo\Drupal\Test\Helper\Unit
+        - \Sweetchuck\Robo\Drupal\Test\Helper\Unit

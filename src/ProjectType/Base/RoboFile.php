@@ -1,20 +1,20 @@
 <?php
 
-namespace Cheppers\Robo\Drupal\ProjectType\Base;
+namespace Sweetchuck\Robo\Drupal\ProjectType\Base;
 
-use Cheppers\AssetJar\AssetJar;
-use Cheppers\LintReport\Reporter\BaseReporter;
-use Cheppers\Robo\Bundler\BundlerTaskLoader;
-use Cheppers\Robo\Drupal\Config\DatabaseServerConfig;
-use Cheppers\Robo\Drupal\Config\PhpVariantConfig;
-use Cheppers\Robo\Drupal\Config\SassRootConfig;
-use Cheppers\Robo\Drupal\Config\SiteConfig;
-use Cheppers\Robo\Drupal\Robo\DrupalCoreTestsTaskLoader;
-use Cheppers\Robo\Drupal\Utils;
-use Cheppers\Robo\Drush\DrushTaskLoader;
-use Cheppers\Robo\Git\GitTaskLoader;
-use Cheppers\Robo\Sass\SassTaskLoader;
-use Cheppers\Robo\Serialize\SerializeTaskLoader;
+use Sweetchuck\AssetJar\AssetJar;
+use Sweetchuck\LintReport\Reporter\BaseReporter;
+use Sweetchuck\Robo\Bundler\BundlerTaskLoader;
+use Sweetchuck\Robo\Drupal\Config\DatabaseServerConfig;
+use Sweetchuck\Robo\Drupal\Config\PhpVariantConfig;
+use Sweetchuck\Robo\Drupal\Config\SassRootConfig;
+use Sweetchuck\Robo\Drupal\Config\SiteConfig;
+use Sweetchuck\Robo\Drupal\Robo\DrupalCoreTestsTaskLoader;
+use Sweetchuck\Robo\Drupal\Utils;
+use Sweetchuck\Robo\Drush\DrushTaskLoader;
+use Sweetchuck\Robo\Git\GitTaskLoader;
+use Sweetchuck\Robo\Sass\SassTaskLoader;
+use Sweetchuck\Robo\Serialize\SerializeTaskLoader;
 use League\Container\ContainerInterface;
 use Robo\Collection\CollectionBuilder;
 use Robo\Contract\TaskInterface;
@@ -73,7 +73,7 @@ class RoboFile extends Tasks
     protected $projectConfigClass = ProjectConfig::class;
 
     /**
-     * @var \Cheppers\Robo\Drupal\ProjectType\Base\ProjectConfig
+     * @var \Sweetchuck\Robo\Drupal\ProjectType\Base\ProjectConfig
      */
     protected $projectConfig;
 
@@ -87,7 +87,7 @@ class RoboFile extends Tasks
     protected $environment = 'dev';
 
     /**
-     * Root directory of the "cheppers/robo-drupal" package.
+     * Root directory of the "sweetchuck/robo-drupal" package.
      *
      * @var string
      */
@@ -374,7 +374,7 @@ class RoboFile extends Tasks
     }
 
     /**
-     * @return \Cheppers\Robo\Drupal\Robo\Task\CoreTests\ListTask|\Robo\Collection\CollectionBuilder
+     * @return \Sweetchuck\Robo\Drupal\Robo\Task\CoreTests\ListTask|\Robo\Collection\CollectionBuilder
      */
     protected function getTaskDrupalCoreTestsList(): CollectionBuilder
     {
@@ -385,7 +385,7 @@ class RoboFile extends Tasks
     }
 
     /**
-     * @return \Cheppers\Robo\Drupal\Robo\Task\CoreTests\RunTask|\Robo\Collection\CollectionBuilder
+     * @return \Sweetchuck\Robo\Drupal\Robo\Task\CoreTests\RunTask|\Robo\Collection\CollectionBuilder
      */
     protected function getTaskDrupalCoreTestsRun(
         array $subjects,
@@ -415,7 +415,7 @@ class RoboFile extends Tasks
     }
 
     /**
-     * @return \Cheppers\Robo\Drupal\Robo\Task\CoreTests\CleanTask|\Robo\Collection\CollectionBuilder
+     * @return \Sweetchuck\Robo\Drupal\Robo\Task\CoreTests\CleanTask|\Robo\Collection\CollectionBuilder
      */
     protected function getTaskDrupalCoreTestsClean(): CollectionBuilder
     {

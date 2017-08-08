@@ -1,9 +1,9 @@
 <?php
 
-namespace Cheppers\Robo\Drupal\Test\Helper\Module;
+namespace Sweetchuck\Robo\Drupal\Test\Helper\Module;
 
-use Cheppers\Robo\Drupal\Test\Helper\Utils\TmpDirManager;
-use Cheppers\Robo\Drupal\Utils;
+use Sweetchuck\Robo\Drupal\Test\Helper\Utils\TmpDirManager;
+use Sweetchuck\Robo\Drupal\Utils;
 use Codeception\Lib\ModuleContainer;
 use Codeception\Module as CodeceptionModule;
 use Symfony\Component\Console\Helper\Table;
@@ -110,13 +110,13 @@ class DrupalProject extends CodeceptionModule
         $cmdPattern = 'cd %s && composer config %s %s %s';
         $cmdArgs = [
             escapeshellarg("$dstDir/root"),
-            'repositories.local:cheppers/robo-drupal',
+            'repositories.local:sweetchuck/robo-drupal',
             'path',
             escapeshellarg(getcwd()),
         ];
         $this->execute(vsprintf($cmdPattern, $cmdArgs));
 
-        $this->composerRequire($dstDir, ['cheppers/robo-drupal:*']);
+        $this->composerRequire($dstDir, ['sweetchuck/robo-drupal:*']);
 
         return $this;
     }
@@ -201,7 +201,10 @@ class DrupalProject extends CodeceptionModule
         ];
 
         if ($expectedExitCode !== null && $result['exitCode'] !== $expectedExitCode) {
-            throw new \Exception('@todo');
+            codecept_debug($result['stdOutput']);
+            codecept_debug($result['stdError']);
+
+            $this->assertEquals($expectedExitCode, $result['exitCode'], '::execute() exit code');
         }
 
         return $result;

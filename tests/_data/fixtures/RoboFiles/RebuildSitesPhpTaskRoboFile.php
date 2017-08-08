@@ -1,10 +1,10 @@
 <?php
 
-use Cheppers\Robo\Drupal\Config\DatabaseServerConfig;
-use Cheppers\Robo\Drupal\Config\PhpVariantConfig;
-use Cheppers\Robo\Drupal\Config\SiteConfig;
-use Cheppers\Robo\Drupal\ProjectType\Base\ProjectConfig;
-use Cheppers\Robo\Drupal\Robo\DrupalTaskLoader;
+use Sweetchuck\Robo\Drupal\Config\DatabaseServerConfig;
+use Sweetchuck\Robo\Drupal\Config\PhpVariantConfig;
+use Sweetchuck\Robo\Drupal\Config\SiteConfig;
+use Sweetchuck\Robo\Drupal\ProjectType\Base\ProjectConfig;
+use Sweetchuck\Robo\Drupal\Robo\DrupalTaskLoader;
 use Symfony\Component\Console\Output\ConsoleOutputInterface;
 
 class RebuildSitesPhpTaskRoboFile extends Robo\Tasks

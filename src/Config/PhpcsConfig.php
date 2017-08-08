@@ -1,6 +1,6 @@
 <?php
 
-namespace Cheppers\Robo\Drupal\Config;
+namespace Sweetchuck\Robo\Drupal\Config;
 
 class PhpcsConfig extends BaseConfig
 {
@@ -23,7 +23,7 @@ class PhpcsConfig extends BaseConfig
     public $lintReporters = [];
 
     /**
-     * @todo Use \Cheppers\Robo\Drupal\Utils::phpFileExtensionPatterns().
+     * @todo Use \Sweetchuck\Robo\Drupal\Utils::phpFileExtensionPatterns().
      */
     public $extensions = [
         'php/PHP' => true,

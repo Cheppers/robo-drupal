@@ -1,17 +1,17 @@
 <?php
 
-namespace Cheppers\Robo\Drupal\Tests\Unit;
+namespace Sweetchuck\Robo\Drupal\Tests\Unit;
 
-use Cheppers\Robo\Drupal\VarExport;
+use Sweetchuck\Robo\Drupal\VarExport;
 use Codeception\Test\Unit;
 
 /**
- * @covers \Cheppers\Robo\Drupal\VarExport
+ * @covers \Sweetchuck\Robo\Drupal\VarExport
  */
 class VarExportTest extends Unit
 {
     /**
-     * @var \Cheppers\Robo\Drupal\Test\UnitTester
+     * @var \Sweetchuck\Robo\Drupal\Test\UnitTester
      */
     protected $tester;
 

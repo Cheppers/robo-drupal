@@ -1,8 +1,8 @@
 <?php
 
-namespace Cheppers\Robo\Drupal\Tests\Acceptance\Robo\Task;
+namespace Sweetchuck\Robo\Drupal\Tests\Acceptance\Robo\Task;
 
-use Cheppers\Robo\Drupal\Test\AcceptanceTester;
+use Sweetchuck\Robo\Drupal\Test\AcceptanceTester;
 
 class ComposerPackagePathsTaskCest
 {

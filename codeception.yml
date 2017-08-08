@@ -1,5 +1,5 @@
 
-namespace: Cheppers\Robo\Drupal\Test
+namespace: Sweetchuck\Robo\Drupal\Test
 
 actor: 'Tester'
 

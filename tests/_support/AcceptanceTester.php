@@ -1,6 +1,6 @@
 <?php
 
-namespace Cheppers\Robo\Drupal\Test;
+namespace Sweetchuck\Robo\Drupal\Test;
 
 /**
  * Inherited Methods

@@ -1,9 +1,9 @@
 <?php
 
-namespace Cheppers\Robo\Drupal\ProjectType\Base;
+namespace Sweetchuck\Robo\Drupal\ProjectType\Base;
 
-use Cheppers\GitHooks\Main as GitHooksComposerScripts;
-use Cheppers\Robo\Drupal\Utils;
+use Sweetchuck\GitHooks\Composer\Scripts as GitHooks;
+use Sweetchuck\Robo\Drupal\Utils;
 use Composer\Script\Event;
 use DrupalComposer\DrupalScaffold\Plugin;
 use Stringy\StaticStringy;
@@ -30,14 +30,14 @@ class Scripts
     protected static $projectConfigClass = ProjectConfig::class;
 
     /**
-     * @var \Cheppers\Robo\Drupal\ProjectType\Base\ProjectConfig
+     * @var \Sweetchuck\Robo\Drupal\ProjectType\Base\ProjectConfig
      */
     protected static $projectConfig = null;
 
     /**
      * @var string
      */
-    protected static $baseNamespace = '\Cheppers\Robo\Drupal\ProjectType\Base';
+    protected static $baseNamespace = '\Sweetchuck\Robo\Drupal\ProjectType\Base';
 
     /**
      * @var string
@@ -138,7 +138,7 @@ class Scripts
         static::buildScaffold();
         static::createRequiredFiles();
         static::phpcsConfigSet();
-        GitHooksComposerScripts::deploy($event);
+        GitHooks::deploy($event);
 
         return true;
     }
@@ -155,7 +155,7 @@ class Scripts
         static::buildScaffold();
         static::createRequiredFiles();
         static::phpcsConfigSet();
-        GitHooksComposerScripts::deploy($event);
+        GitHooks::deploy($event);
 
         return true;
     }
@@ -708,12 +708,12 @@ class Scripts
     }
 
     /**
-     * Get the root directory of the "cheppers/robo-drupal" package.
+     * Get the root directory of the "sweetchuck/robo-drupal" package.
      *
      * @todo The "composer/installers" can broke this.
      *
      * @deprecated
-     *   See \Cheppers\Robo\Drupal\Utils::getRoboDrupalRoot().
+     *   See \Sweetchuck\Robo\Drupal\Utils::getRoboDrupalRoot().
      */
     protected static function getRoboDrupalRoot(): string
     {
@@ -722,7 +722,7 @@ class Scripts
         /** @var \Composer\Config $config */
         $config = $composer->getConfig();
 
-        return $config->get('vendor-dir') . '/cheppers/robo-drupal';
+        return $config->get('vendor-dir') . '/sweetchuck/robo-drupal';
     }
 
     protected static function ioAskQuestion(

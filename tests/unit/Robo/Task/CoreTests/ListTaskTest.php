@@ -1,13 +1,13 @@
 <?php
 
-namespace Cheppers\Robo\Drupal\Tests\Unit\Robo\Task\CoreTests;
+namespace Sweetchuck\Robo\Drupal\Tests\Unit\Robo\Task\CoreTests;
 
-use Cheppers\Robo\Drupal\Robo\Task\CoreTests\ListTask;
+use Sweetchuck\Robo\Drupal\Robo\Task\CoreTests\ListTask;
 
 class ListTaskTest extends \Codeception\Test\Unit
 {
     /**
-     * @var \Cheppers\Robo\Drupal\Test\UnitTester
+     * @var \Sweetchuck\Robo\Drupal\Test\UnitTester
      */
     protected $tester;
 

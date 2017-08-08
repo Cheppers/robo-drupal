@@ -1,8 +1,8 @@
 <?php
 
-namespace Cheppers\Robo\Drupal\ProjectType\Incubator;
+namespace Sweetchuck\Robo\Drupal\ProjectType\Incubator;
 
-use Cheppers\Robo\Drupal\ProjectType\Base as Base;
+use Sweetchuck\Robo\Drupal\ProjectType\Base as Base;
 
 class Scripts extends Base\Scripts
 {
@@ -12,7 +12,7 @@ class Scripts extends Base\Scripts
     protected static $projectConfigClass = ProjectConfig::class;
 
     /**
-     * @var \Cheppers\Robo\Drupal\ProjectType\Incubator\ProjectConfig
+     * @var \Sweetchuck\Robo\Drupal\ProjectType\Incubator\ProjectConfig
      */
     protected static $projectConfig = null;
 }

@@ -1,18 +1,18 @@
 <?php
 
-namespace Cheppers\Robo\Drupal\Tests\Unit;
+namespace Sweetchuck\Robo\Drupal\Tests\Unit;
 
-use Cheppers\Robo\Drupal\Test\Helper\Utils\TmpDirManager;
-use Cheppers\Robo\Drupal\Utils;
+use Sweetchuck\Robo\Drupal\Test\Helper\Utils\TmpDirManager;
+use Sweetchuck\Robo\Drupal\Utils;
 use Codeception\Test\Unit;
 
 /**
- * @coversDefaultClass \Cheppers\Robo\Drupal\Utils
+ * @coversDefaultClass \Sweetchuck\Robo\Drupal\Utils
  */
 class UtilsTest extends Unit
 {
     /**
-     * @var \Cheppers\Robo\Drupal\Test\UnitTester
+     * @var \Sweetchuck\Robo\Drupal\Test\UnitTester
      */
     protected $tester;
 

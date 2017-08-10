@@ -111,9 +111,9 @@ class RoboFile extends Tasks
      */
     public function test(array $suiteNames): CollectionBuilder
     {
-        $this->validateArgCodeceptionSuiteNames($suiteNames);
-
-        return $this->getTaskCodeceptRunSuites($suiteNames);
+        return $this
+            ->validateArgCodeceptionSuiteNames($suiteNames)
+            ->getTaskCodeceptRunSuites($suiteNames);
     }
 
     /**
@@ -475,12 +475,11 @@ class RoboFile extends Tasks
         return $this->codeceptionSuiteNames;
     }
 
-    protected function validateArgCodeceptionSuiteNames(array $suiteNames): void
+    /**
+     * @return $this
+     */
+    protected function validateArgCodeceptionSuiteNames(array $suiteNames)
     {
-        if (!$suiteNames) {
-            return;
-        }
-
         $invalidSuiteNames = array_diff($suiteNames, $this->getCodeceptionSuiteNames());
         if ($invalidSuiteNames) {
             throw new \InvalidArgumentException(
@@ -488,5 +487,7 @@ class RoboFile extends Tasks
                 1
             );
         }
+
+        return $this;
     }
 }

@@ -2,8 +2,8 @@
 
 namespace Sweetchuck\Robo\Drupal\ProjectType\Incubator;
 
-use Sweetchuck\AssetJar\AssetJar;
 use Sweetchuck\LintReport\Reporter\CheckstyleReporter;
+use Sweetchuck\LintReport\Reporter\VerboseReporter;
 use Sweetchuck\Robo\Drupal\Config\DrupalExtensionConfig;
 use Sweetchuck\Robo\Drupal\Config\SiteConfig;
 use Sweetchuck\Robo\Drupal\ProjectType\Base as Base;
@@ -59,13 +59,16 @@ class RoboFile extends Base\RoboFile
 
         return $this
             ->collectionBuilder()
-            ->addTaskList([
-                'lint.composer.lock' => $this->taskComposerValidate(),
-                'lint.phpcs.psr2' => $this->getTaskPhpcsLint([
-                    'standards' => ['PSR2'],
-                    'files' => $this->selfPhpcsFiles,
-                ]),
-            ]);
+            ->addTask($this->taskComposerValidate())
+            ->addTask(
+                $this->getTaskPhpcsLint(
+                    'self.psr2',
+                    [
+                        'standards' => ['PSR2'],
+                        'files' => $this->selfPhpcsFiles,
+                    ]
+                )
+            );
     }
 
     /**
@@ -124,25 +127,31 @@ class RoboFile extends Base\RoboFile
     {
         return $this
             ->collectionBuilder()
-            ->addTaskList([
-                'lint:phpcs' => $this->getTaskPhpcsLint([
-                    'standards' => ['PSR2'],
-                    'files' => $this->selfPhpcsFiles,
-                ]),
-            ]);
+            ->addTask($this->taskComposerValidate())
+            ->addTask(
+                $this->getTaskPhpcsLint(
+                    'self.psr2',
+                    [
+                        'standards' => ['PSR2'],
+                        'files' => $this->selfPhpcsFiles,
+                    ]
+                )
+            );
     }
 
     public function selfLintPhpcs(): CollectionBuilder
     {
         return $this
             ->collectionBuilder()
-            ->addTaskList([
-                'lint:phpcs' => $this->getTaskPhpcsLint([
-                    'standards' => ['PSR2'],
-                    'files' => $this->selfPhpcsFiles,
-                ]),
-                'composer:validate' => $this->taskComposerValidate(),
-            ]);
+            ->addTask(
+                $this->getTaskPhpcsLint(
+                    'self.psr2',
+                    [
+                        'standards' => ['PSR2'],
+                        'files' => $this->selfPhpcsFiles,
+                    ]
+                )
+            );
     }
     //endregion
 
@@ -430,68 +439,74 @@ class RoboFile extends Base\RoboFile
     {
         $options = [
             'workingDirectory' => $extension->path,
-            'files' => [
-                '.' => true,
-            ],
         ];
 
-        $options['files']['**/*.css'] = $extension->hasCSS;
-        $options['ignore']['*.css'] = !$extension->hasCSS;
+        $hasPhpcsConfigFile = false;
+        foreach (['phpcs.xml.dist', 'phpcs.xml'] as $phpcsConfigFileName) {
+            if (file_exists("{$extension->path}/$phpcsConfigFileName")) {
+                $hasPhpcsConfigFile = true;
 
-        $options['files']['**/*.js'] = $extension->hasJavaScript;
-        $options['ignore']['*.js'] = !$extension->hasJavaScript;
+                break;
+            }
+        }
 
-        return $this->getTaskPhpcsLint($options);
+        if (!$hasPhpcsConfigFile) {
+            $options += [
+                'standards' => [
+                    'Drupal' => true,
+                    'DrupalPractice' => true,
+                ],
+                'files' => [
+                    '.' => true,
+                    '**/*.css' => $extension->hasCSS,
+                    '**/*.js' => $extension->hasJavaScript,
+                ],
+                'ignore' => [
+                    '*.css' => !$extension->hasCSS,
+                    '*.js' => !$extension->hasJavaScript,
+                ],
+                'extensions' => [
+                    'php/PHP' => true,
+                    'inc/PHP' => true,
+                    'engine/PHP' => true,
+                    'install/PHP' => true,
+                    'module/PHP' => true,
+                    'profile/PHP' => true,
+                    'theme/PHP' => true,
+                    'js/JS' => true,
+                    'css/CSS' => true,
+                ],
+            ];
+        }
+
+        return $this->getTaskPhpcsLint("extension.{$extension->packageName}", $options);
     }
 
-    protected function getTaskPhpcsLint(array $options = []): TaskInterface
+    protected function getTaskPhpcsLint(string $outputFileNamePrefix, array $options = []): TaskInterface
     {
         $environment = $this->getEnvironment();
 
-        $options += [
+        $defaultOptions = [
             'workingDirectory' => '',
-            'standards' => ['Drupal', 'DrupalPractice'],
             'failOn' => 'warning',
-            'lintReporters' => [
-                'lintVerboseReporter' => null,
+            'ignore' => [
+                'node_modules/' => true,
+                '.nvmrc' => true,
+                '.gitignore' => true,
+                '*.json' => true,
+                '*.scss' => true,
+                '*.png' => true,
+                '*.jpeg' => true,
+                '*.jpg' => true,
+                '*.svg' => true,
+                '*.txt' => true,
+                '*.md' => true,
             ],
-            'ignore' => [],
-            'extensions' => [],
-            'files' => [
-              '.',
-            ],
         ];
-
-        $standardLower = strtolower(implode('-', $options['standards']));
-
-        $options['ignore'] += [
-            'node_modules/' => true,
-            '.nvmrc' => true,
-            '.gitignore' => true,
-            '*.json' => true,
-            '*.scss' => true,
-            '*.png' => true,
-            '*.jpeg' => true,
-            '*.jpg' => true,
-            '*.svg' => true,
-        ];
-        $options['extensions'] += [
-            'php/PHP' => true,
-            'inc/PHP' => true,
-        ];
-
-        if (in_array('Drupal', $options['standards'])
-            || in_array('DrupalPractice', $options['standards'])
-        ) {
-            $options['extensions'] += [
-                'engine/PHP' => true,
-                'install/PHP' => true,
-                'module/PHP' => true,
-                'profile/PHP' => true,
-                'theme/PHP' => true,
-                'js/JS' => true,
-                'css/CSS' => true,
-            ];
+        $options = array_replace_recursive($defaultOptions, $options);
+        if (empty($options['lintReporters'])) {
+            $options['lintReporters']['lintVerboseReporter'] = (new VerboseReporter())
+                ->setDestination($this->output());
         }
 
         if (!empty($options['workingDirectory'])) {
@@ -502,7 +517,7 @@ class RoboFile extends Base\RoboFile
             $options['failOn'] = 'never';
 
             $options['lintReporters']['lintCheckstyleReporter'] = (new CheckstyleReporter())
-                ->setDestination("reports/checkstyle/phpcs.{$standardLower}.xml");
+                ->setDestination("reports/checkstyle/phpcs.{$outputFileNamePrefix}.xml");
         }
 
         if ($environment !== 'git-hook') {
@@ -517,23 +532,16 @@ class RoboFile extends Base\RoboFile
             '*.rb' => true,
         ];
 
-        $assetJar = new AssetJar();
-
         return $this
             ->collectionBuilder()
-            ->addTaskList([
-                'git.readStagedFiles' => $this
-                    ->taskGitReadStagedFiles()
-                    ->setWorkingDirectory($options['workingDirectory'])
-                    ->setCommandOnly(true)
-                    ->setAssetJar($assetJar)
-                    ->setAssetJarMap('files', ['files'])
-                    ->setPaths($files),
-                "lint.phpcs.{$standardLower}" => $this
-                    ->taskPhpcsLintInput($options)
-                    ->setAssetJar($assetJar)
-                    ->setAssetJarMap('files', ['files']),
-            ]);
+            ->addTask($this
+                ->taskGitReadStagedFiles()
+                ->setWorkingDirectory($options['workingDirectory'])
+                ->setCommandOnly(true)
+                ->setPaths($files))
+            ->addTask($this
+                ->taskPhpcsLintInput($options)
+                ->deferTaskConfiguration('setFiles', 'files'));
     }
 
     protected function getTaskScssLintDrupalExtension(DrupalExtensionConfig $extension): TaskInterface

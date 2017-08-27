@@ -225,7 +225,7 @@ class RoboFile extends Base\RoboFile
         $extensions = $this->getManagedDrupalExtensions();
         $extension = $extensions[$extensionName];
 
-        $this->environment = 'git-hook';
+        $this->gitHook = 'pre-commit';
 
         return $this
             ->collectionBuilder()
@@ -501,6 +501,8 @@ class RoboFile extends Base\RoboFile
                 '*.svg' => true,
                 '*.txt' => true,
                 '*.md' => true,
+                '*.xml' => true,
+                '*.xml.dist' => true,
             ],
         ];
         $options = array_replace_recursive($defaultOptions, $options);
@@ -520,11 +522,11 @@ class RoboFile extends Base\RoboFile
                 ->setDestination("reports/checkstyle/phpcs.{$outputFileNamePrefix}.xml");
         }
 
-        if ($environment !== 'git-hook') {
+        if ($this->gitHook !== 'pre-commit') {
             return $this->taskPhpcsLintFiles($options);
         }
 
-        $files = $options['files'];
+        $files = $options['files'] ?? ['.' => true];
         unset($options['files']);
 
         $options['ignore'] += [

@@ -83,8 +83,15 @@ class RoboFile extends Tasks
      * @todo The "git-hook" isn't an environment.
      *
      * @var string
+     *
+     * @deprecated
      */
     protected $environment = 'dev';
+
+    /**
+     * @var string
+     */
+    protected $gitHook = '';
 
     /**
      * Root directory of the "sweetchuck/robo-drupal" package.

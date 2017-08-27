@@ -1701,16 +1701,16 @@
         },
         {
             "name": "sweetchuck/robo-phpcs",
-            "version": "v0.0.15",
+            "version": "v0.0.16",
             "source": {
                 "type": "git",
                 "url": "https://github.com/Sweetchuck/robo-phpcs.git",
-                "reference": "8bf185f3d3a1402bb9425b412867456fedc452d1"
+                "reference": "10125244f92f2c1a480ef7cd074ea171ddcc1685"
             },
             "dist": {
                 "type": "zip",
-                "url": "https://api.github.com/repos/Sweetchuck/robo-phpcs/zipball/8bf185f3d3a1402bb9425b412867456fedc452d1",
-                "reference": "8bf185f3d3a1402bb9425b412867456fedc452d1",
+                "url": "https://api.github.com/repos/Sweetchuck/robo-phpcs/zipball/10125244f92f2c1a480ef7cd074ea171ddcc1685",
+                "reference": "10125244f92f2c1a480ef7cd074ea171ddcc1685",
                 "shasum": ""
             },
             "require": {
@@ -1738,7 +1738,7 @@
                 "GPL-2.0+"
             ],
             "description": "Robo task wrapper for PHPCS",
-            "time": "2017-07-29T19:20:40+00:00"
+            "time": "2017-08-26T14:42:32+00:00"
         },
         {
             "name": "sweetchuck/robo-sass",

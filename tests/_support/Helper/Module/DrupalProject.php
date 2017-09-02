@@ -24,6 +24,27 @@ class DrupalProject extends CodeceptionModule
      */
     protected $fs;
 
+    protected $gitHookNames = [
+        'applypatch-msg',
+        'commit-msg',
+        'post-applypatch',
+        'post-checkout',
+        'post-commit',
+        'post-merge',
+        'post-receive',
+        'post-rewrite',
+        'post-update',
+        'pre-applypatch',
+        'pre-auto-gc',
+        'pre-commit',
+        'pre-push',
+        'pre-rebase',
+        'pre-receive',
+        'prepare-commit-msg',
+        'push-to-checkout',
+        'update',
+    ];
+
     public function __construct(ModuleContainer $moduleContainer, $config = null)
     {
         $this->fs = new Filesystem();
@@ -46,8 +67,7 @@ class DrupalProject extends CodeceptionModule
 
             $this
                 ->gitInit(Path::join(static::$projectCache[$templateName], 'root'))
-                ->addRoboDrupalToProject(static::$projectCache[$templateName])
-                ->initExtensions(static::$projectCache[$templateName]);
+                ->addRoboDrupalToProject(static::$projectCache[$templateName]);
         }
 
         codecept_debug(sprintf(
@@ -58,6 +78,28 @@ class DrupalProject extends CodeceptionModule
         ));
 
         $this->fs->mirror(static::$projectCache[$templateName], $dstDir);
+    }
+
+    public function addExtensionsToDrupalProject(string $envRoot, array $extensions = [])
+    {
+        if (!$extensions) {
+            $extensions = Utils::directDirectoryDescendants("$envRoot/extensions");
+        }
+
+        $packages = [];
+        foreach ($extensions as $extension) {
+            if (is_string($extension)) {
+                $extension = new \SplFileInfo("$envRoot/extensions/$extension");
+            }
+
+            $extensionName = $extension->getBasename();
+            $packages[] = "drupal/$extensionName:*";
+            $this->gitInit($extension->getPathname());
+        }
+
+        $this->composerRequire($envRoot, $packages);
+
+        return $this;
     }
 
     public function seeDrupalSiteIsInstalled(string $projectRootDir, string $siteDubDir)
@@ -71,6 +113,33 @@ class DrupalProject extends CodeceptionModule
             ->fetchAll();
 
         $this->assertEquals(2, count($accounts), 'Number of users');
+    }
+
+    public function seeGitHooksAreInstalled(string $dir)
+    {
+        $this->assertFileExists("$dir/hooks/_common");
+        // @todo Content.
+
+        $this->assertFileExists("$dir/hooks/_config");
+        // @todo Content.
+
+        foreach ($this->gitHookNames as $gitHookName) {
+            $this->assertFileExists("$dir/hooks/$gitHookName");
+        }
+    }
+
+    public function seeGitHooksAreNotInstalled(string $dir)
+    {
+        $this->assertFileNotExists(("$dir/hooks/_common"));
+        // @todo Content.
+
+        $this->assertFileNotExists("$dir/hooks/_config");
+        // @todo Content.
+
+        foreach ($this->gitHookNames as $gitHookName) {
+            $this->assertFileNotExists("$dir/hooks/$gitHookName");
+            // @todo Executable.
+        }
     }
 
     public function seeManagedExtensionsTable(array $extensions, string $text)
@@ -117,24 +186,6 @@ class DrupalProject extends CodeceptionModule
         $this->execute(vsprintf($cmdPattern, $cmdArgs));
 
         $this->composerRequire($dstDir, ['sweetchuck/robo-drupal:*']);
-
-        return $this;
-    }
-
-    /**
-     * @return $this
-     */
-    protected function initExtensions(string $dstDir)
-    {
-        $extensions = Utils::directDirectoryDescendants("$dstDir/extensions");
-        $packages = [];
-        foreach ($extensions as $extension) {
-            $extensionName = $extension->getBasename();
-            $packages[] = "drupal/$extensionName:*";
-            $this->gitInit($extension->getPathname());
-        }
-
-        $this->composerRequire($dstDir, $packages);
 
         return $this;
     }

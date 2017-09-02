@@ -189,6 +189,10 @@ class RoboFile extends Base\RoboFile
     //endregion
 
     //region Git hooks.
+    /**
+     * @todo Install automatically on "composer post-package-install" event.
+     * @todo Add extension names as optional arguments.
+     */
     public function githooksInstall(): ?CollectionBuilder
     {
         $extensions = Utils::filterDisabled(
@@ -211,13 +215,27 @@ class RoboFile extends Base\RoboFile
     }
 
     /**
-     * @todo Implement.
+     * @todo Add extension names as optional arguments.
      */
     public function githooksUninstall(): ?CollectionBuilder
     {
-        $this->yell('@todo');
+        $extensions = Utils::filterDisabled(
+            $this->getManagedDrupalExtensions(),
+            'hasGit'
+        );
 
-        return null;
+        if (!$extensions) {
+            $this->say('There is no managed extension under Git VCS.');
+
+            return null;
+        }
+
+        $cb = $this->collectionBuilder();
+        foreach ($extensions as $extension) {
+            $cb->addCode($this->getTaskGitHookUninstall($extension));
+        }
+
+        return $cb;
     }
 
     public function githookPreCommit(string $extensionPath, string $extensionName): CollectionBuilder
@@ -740,6 +758,23 @@ class RoboFile extends Base\RoboFile
             return 0;
         };
     }
+
+    protected function getTaskGitHookUninstall(DrupalExtensionConfig $extension): \Closure
+    {
+        return function () use ($extension) {
+            $gitHookNames = $this->getGitHooksNames();
+            $gitHookNames[] = '_common';
+            $gitHookNames[] = '_config';
+            foreach ($gitHookNames as $gitHookName) {
+                $fileName = "{$extension->path}/.git/hooks/$gitHookName";
+                if ($this->fs->exists($fileName)) {
+                    $this->fs->remove($fileName);
+                }
+            }
+
+            return 0;
+        };
+    }
     //endregion
 
     /**
@@ -892,5 +927,30 @@ class RoboFile extends Base\RoboFile
             ->run();
 
         return !empty($result['files']);
+    }
+
+    /**
+     * @var string[]
+     */
+    protected $gitHookNames = [];
+
+    /**
+     * @return string[]
+     */
+    protected function getGitHooksNames(): array
+    {
+        if (!$this->gitHookNames) {
+            $hooksDir = $this->getPackagePath('sweetchuck/git-hooks') . '/git-hooks';
+            $file = new \DirectoryIterator($hooksDir);
+            while ($file->valid()) {
+                if ($file->isFile() && $file->isExecutable()) {
+                    $this->gitHookNames[] = $file->getBasename();
+                }
+
+                $file->next();
+            }
+        }
+
+        return $this->gitHookNames;
     }
 }

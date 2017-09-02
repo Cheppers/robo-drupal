@@ -50,23 +50,24 @@ class RoboFileCest extends BaseCest
 
     public function selfManagedExtensionsTest(AcceptanceTester $i): void
     {
-        $tmpDir = TmpDirManager::create();
+        $envRoot = TmpDirManager::create();
         $idPrefix = __METHOD__;
 
-        $i->createNewDrupalProject($tmpDir, '01');
+        $i->createNewDrupalProject($envRoot, '01');
+        $i->addExtensionsToDrupalProject($envRoot);
 
         $id = "$idPrefix:self:managed-extensions:table";
         $i->runRoboTask(
             $id,
-            "$tmpDir/root",
+            "$envRoot/root",
             $this->class,
             'self:managed-extensions'
         );
 
         $i->canSeeManagedExtensionsTable(
             [
-                'm01' => "$tmpDir/extensions/m01",
-                'm02' => "$tmpDir/extensions/m02",
+                'm01' => "$envRoot/extensions/m01",
+                'm02' => "$envRoot/extensions/m02",
             ],
             $i->getRoboTaskStdOutput($id)
         );
@@ -75,20 +76,76 @@ class RoboFileCest extends BaseCest
         $id = "$idPrefix:self:managed-extensions:yaml";
         $i->runRoboTask(
             $id,
-            "$tmpDir/root",
+            "$envRoot/root",
             $this->class,
             'self:managed-extensions',
             '--format=yaml'
         );
         $i->seeManagedExtensionsYaml(
             [
-                'm01' => "$tmpDir/extensions/m01",
-                'm02' => "$tmpDir/extensions/m02",
+                'm01' => "$envRoot/extensions/m01",
+                'm02' => "$envRoot/extensions/m02",
             ],
             $i->getRoboTaskStdOutput($id),
             'StdOutput'
         );
         $i->assertEquals(0, $i->getRoboTaskExitCode($id), 'ExitCode === 0');
+    }
+
+    public function gitHooksInstallAndUninstallTest(AcceptanceTester $i): void
+    {
+        $envRoot = TmpDirManager::create();
+        $idPrefix = __METHOD__;
+
+        $i->createNewDrupalProject($envRoot, '01');
+
+        $id = "$idPrefix:githooks:install:before";
+        $i->runRoboTask(
+            $id,
+            "$envRoot/root",
+            $this->class,
+            'githooks:install'
+        );
+        $i->assertContains(
+            'There is no managed extension under Git VCS.',
+            $i->getRoboTaskStdOutput($id)
+        );
+
+        $id = "$idPrefix:githooks:uninstall:before";
+        $i->runRoboTask(
+            $id,
+            "$envRoot/root",
+            $this->class,
+            'githooks:uninstall'
+        );
+        $i->assertContains(
+            'There is no managed extension under Git VCS.',
+            $i->getRoboTaskStdOutput($id)
+        );
+
+        $i->addExtensionsToDrupalProject($envRoot);
+
+        $id = "$idPrefix:githooks:install";
+        $i->runRoboTask(
+            $id,
+            "$envRoot/root",
+            $this->class,
+            'githooks:install'
+        );
+
+        $i->canSeeGitHooksAreInstalled("$envRoot/extensions/m01/.git");
+        $i->canSeeGitHooksAreInstalled("$envRoot/extensions/m02/.git");
+
+        $id = "$idPrefix:githooks:uninstall";
+        $i->runRoboTask(
+            $id,
+            "$envRoot/root",
+            $this->class,
+            'githooks:uninstall'
+        );
+
+        $i->canSeeGitHooksAreNotInstalled("$envRoot/extensions/m01/.git");
+        $i->canSeeGitHooksAreNotInstalled("$envRoot/extensions/m02/.git");
     }
 
     public function siteCreateBasicTest(AcceptanceTester $i): void
@@ -317,15 +374,16 @@ PHP;
 
     public function lintPhpcsTest(AcceptanceTester $i): void
     {
-        $tmpDir = TmpDirManager::create();
+        $envRoot = TmpDirManager::create();
         $idPrefix = __METHOD__;
 
-        $i->createNewDrupalProject($tmpDir, '01');
+        $i->createNewDrupalProject($envRoot, '01');
+        $i->addExtensionsToDrupalProject($envRoot);
 
         $id = "$idPrefix:lint:phpcs:all";
         $i->runRoboTask(
             $id,
-            "$tmpDir/root",
+            "$envRoot/root",
             $this->class,
             'lint:phpcs',
             '-vvv'
@@ -334,7 +392,7 @@ PHP;
         $exitCode = $i->getRoboTaskExitCode($id);
         $stdOutput = $i->getRoboTaskStdOutput($id);
         $expected = implode(PHP_EOL, [
-            "$tmpDir/extensions/m02/src/Form/M02DummyForm.php",
+            "$envRoot/extensions/m02/src/Form/M02DummyForm.php",
             '+----------+------+-------------------------------------------------------------+',
             '| Severity | Line | Message                                                     |',
             '+----------+------+-------------------------------------------------------------+',
@@ -350,7 +408,7 @@ PHP;
         $id = "$idPrefix:lint:m01";
         $i->runRoboTask(
             $id,
-            "$tmpDir/root",
+            "$envRoot/root",
             $this->class,
             'lint:phpcs',
             'm01'
@@ -360,7 +418,7 @@ PHP;
         $id = "$idPrefix:lint:m02";
         $i->runRoboTask(
             $id,
-            "$tmpDir/root",
+            "$envRoot/root",
             $this->class,
             'lint:phpcs',
             'm02'

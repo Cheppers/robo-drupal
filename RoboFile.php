@@ -109,11 +109,15 @@ class RoboFile extends Tasks
     /**
      * Run the Robo unit tests.
      */
-    public function test(array $suiteNames): CollectionBuilder
-    {
+    public function test(
+        array $suiteNames,
+        array $options = [
+            'debug' => false,
+        ]
+    ): CollectionBuilder {
         return $this
             ->validateArgCodeceptionSuiteNames($suiteNames)
-            ->getTaskCodeceptRunSuites($suiteNames);
+            ->getTaskCodeceptRunSuites($suiteNames, $options);
     }
 
     /**
@@ -240,7 +244,7 @@ class RoboFile extends Tasks
         return $this;
     }
 
-    protected function getTaskCodeceptRunSuites(array $suiteNames = []): CollectionBuilder
+    protected function getTaskCodeceptRunSuites(array $suiteNames = [], array $options = []): CollectionBuilder
     {
         if (!$suiteNames) {
             $suiteNames = ['all'];
@@ -248,13 +252,13 @@ class RoboFile extends Tasks
 
         $cb = $this->collectionBuilder();
         foreach ($suiteNames as $suiteName) {
-            $cb->addTask($this->getTaskCodeceptRunSuite($suiteName));
+            $cb->addTask($this->getTaskCodeceptRunSuite($suiteName, $options));
         }
 
         return $cb;
     }
 
-    protected function getTaskCodeceptRunSuite(string $suite): CollectionBuilder
+    protected function getTaskCodeceptRunSuite(string $suite, array $options = []): CollectionBuilder
     {
         $this->initCodeceptionInfo();
 
@@ -280,6 +284,9 @@ class RoboFile extends Tasks
 
         $cmdPattern .= ' --ansi';
         $cmdPattern .= ' --verbose';
+        if (!empty($options['debug'])) {
+            $cmdPattern .= ' --debug';
+        }
 
         $cb = $this->collectionBuilder();
         if ($withCoverageHtml) {

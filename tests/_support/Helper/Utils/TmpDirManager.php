@@ -6,6 +6,9 @@ use Symfony\Component\Filesystem\Filesystem;
 
 class TmpDirManager
 {
+    /**
+     * @var bool
+     */
     protected static $initialized = false;
 
     /**

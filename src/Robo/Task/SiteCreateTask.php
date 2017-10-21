@@ -396,7 +396,7 @@ class SiteCreateTask extends BaseTask implements ContainerAwareInterface
         return <<<'PHP'
 <?php
 
- $databases = array();
+$databases = array();
  
 $settings['hash_salt'] = '';
 
@@ -813,7 +813,7 @@ PHP;
 
         $connectionSafe = VarExport::map($connection, 2, '  ');
 
-        $search = "\n \$databases = array();\n";
+        $search = "\n\$databases = array();\n";
         $replace = <<< PHP
 
 \$databases = [
